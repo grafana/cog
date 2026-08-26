@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -35,7 +35,7 @@ func newJSONMarshalling(config Config, tmpl *template.Template, imports *common.
 	}
 }
 
-func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context languages.Context, object ast.Object) error {
+func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context languages.Context, object ir.Object) error {
 	if !jenny.config.GenerateJSONMarshaller {
 		return nil
 	}
@@ -61,14 +61,14 @@ func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context 
 	return nil
 }
 
-func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ast.Object) bool {
+func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ir.Object) bool {
 	// the only case for which we need a custom marshaller is for structs
 	// that are generated from a disjunction by the `DisjunctionToType` compiler pass.
 
 	return obj.Type.IsDisjunctionOfAnyKind()
 }
 
-func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error) {
+func (jenny JSONMarshalling) renderCustomMarshal(obj ir.Object) (string, error) {
 	jenny.apiRefCollector.ObjectMethod(obj, common.MethodReference{
 		Name: "MarshalJSON",
 		Comments: []string{
@@ -81,25 +81,25 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error)
 	//  * undiscriminated: string | bool | ..., where all the disjunction branches are scalars (or an array)
 	//  * discriminated: SomeStruct | SomeOtherStruct, where all the disjunction branches are references to
 	// 	  structs and these structs have a common "discriminator" field.
-	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ir.HintDisjunctionOfScalars) {
 		return jenny.tmpl.Render("types/disjunction_of_scalars.json_marshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
 
-	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ir.HintDiscriminatedDisjunctionOfRefs) {
 		return jenny.tmpl.Render("types/disjunction_of_refs.json_marshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
 
-	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalarsAndRefs) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ir.HintDisjunctionOfScalarsAndRefs) {
 		return jenny.tmpl.Render("types/disjunction_of_scalars_and_refs.json_marshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
 
-	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintUndiscriminatedDisjunctionOfRefs) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ir.HintUndiscriminatedDisjunctionOfRefs) {
 		return jenny.tmpl.Render("types/disjunction_of_refs_without_discriminator.json_marshal.tmpl", map[string]any{
 			"def": obj,
 		})
@@ -108,7 +108,7 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error)
 	return "", fmt.Errorf("could not determine how to render custom marshal")
 }
 
-func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Context, obj ast.Object) bool {
+func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Context, obj ir.Object) bool {
 	// an object needs a custom unmarshal if:
 	// - it is a struct that was generated from a disjunction by the `DisjunctionToType` compiler pass.
 	// - it is a struct and one or more of its fields is a KindComposableSlot, or an array of KindComposableSlot
@@ -137,7 +137,7 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 	return false
 }
 
-func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, obj ast.Object) (string, error) {
+func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, obj ir.Object) (string, error) {
 	jenny.apiRefCollector.ObjectMethod(obj, common.MethodReference{
 		Name: "UnmarshalJSON",
 		Arguments: []common.ArgumentReference{
@@ -156,26 +156,26 @@ func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, ob
 		})
 	}
 
-	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ir.HintDisjunctionOfScalars) {
 		return jenny.tmpl.Render("types/disjunction_of_scalars.json_unmarshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
 
-	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ir.HintDiscriminatedDisjunctionOfRefs) {
 		return jenny.tmpl.Render("types/disjunction_of_refs.json_unmarshal.tmpl", map[string]any{
 			"def":  obj,
-			"hint": obj.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs],
+			"hint": obj.Type.Hints[ir.HintDiscriminatedDisjunctionOfRefs],
 		})
 	}
 
-	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalarsAndRefs) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ir.HintDisjunctionOfScalarsAndRefs) {
 		return jenny.tmpl.Render("types/disjunction_of_scalars_and_refs.json_unmarshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
 
-	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintUndiscriminatedDisjunctionOfRefs) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ir.HintUndiscriminatedDisjunctionOfRefs) {
 		return jenny.tmpl.Render("types/disjunction_of_refs_without_discriminator.json_unmarshal.tmpl", map[string]any{
 			"def": obj,
 		})
@@ -184,7 +184,7 @@ func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, ob
 	return jenny.renderCustomComposableSlotUnmarshal(context, obj)
 }
 
-func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languages.Context, obj ast.Object) (string, error) {
+func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languages.Context, obj ir.Object) (string, error) {
 	var buffer strings.Builder
 	fields := obj.Type.AsStruct().Fields
 

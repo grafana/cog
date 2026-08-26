@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/languages"
 )
 
@@ -21,15 +21,15 @@ type scalarValidator struct {
 type validators struct {
 	context              languages.Context
 	packageMapper        func(pkg string) string
-	validatorDefinitions map[ast.ScalarKind]scalarValidator
+	validatorDefinitions map[ir.ScalarKind]scalarValidator
 }
 
 func newValidators(context languages.Context, packageMapper func(pkg string) string) *validators {
 	return &validators{
 		context:       context,
 		packageMapper: packageMapper,
-		validatorDefinitions: map[ast.ScalarKind]scalarValidator{
-			ast.KindString: {
+		validatorDefinitions: map[ir.ScalarKind]scalarValidator{
+			ir.KindString: {
 				importName: "stringvalidator",
 				name:       "String",
 				minFunc:    "LengthAtLeast",
@@ -38,7 +38,7 @@ func newValidators(context languages.Context, packageMapper func(pkg string) str
 				equalFunc:  "OneOf",
 				regexFunc:  "RegexMatches",
 			},
-			ast.KindInt64: {
+			ir.KindInt64: {
 				importName: "int64validator",
 				name:       "Int64",
 				minFunc:    "AtLeast",
@@ -46,7 +46,7 @@ func newValidators(context languages.Context, packageMapper func(pkg string) str
 				noneOfFunc: "NoneOf",
 				equalFunc:  "OneOf",
 			},
-			ast.KindUint64: {
+			ir.KindUint64: {
 				importName: "int64validator",
 				name:       "Int64",
 				minFunc:    "AtLeast",
@@ -54,7 +54,7 @@ func newValidators(context languages.Context, packageMapper func(pkg string) str
 				noneOfFunc: "NoneOf",
 				equalFunc:  "OneOf",
 			},
-			ast.KindInt32: {
+			ir.KindInt32: {
 				importName: "int32validator",
 				name:       "Int32",
 				minFunc:    "AtLeast",
@@ -62,7 +62,7 @@ func newValidators(context languages.Context, packageMapper func(pkg string) str
 				noneOfFunc: "NoneOf",
 				equalFunc:  "OneOf",
 			},
-			ast.KindUint32: {
+			ir.KindUint32: {
 				importName: "int32validator",
 				name:       "Int32",
 				minFunc:    "AtLeast",
@@ -70,7 +70,7 @@ func newValidators(context languages.Context, packageMapper func(pkg string) str
 				noneOfFunc: "NoneOf",
 				equalFunc:  "OneOf",
 			},
-			ast.KindFloat32: {
+			ir.KindFloat32: {
 				importName: "float32validator",
 				name:       "Float32",
 				minFunc:    "AtLeast",
@@ -78,7 +78,7 @@ func newValidators(context languages.Context, packageMapper func(pkg string) str
 				noneOfFunc: "NoneOf",
 				equalFunc:  "OneOf",
 			},
-			ast.KindFloat64: {
+			ir.KindFloat64: {
 				importName: "float64validator",
 				name:       "Float64",
 				minFunc:    "AtLeast",
@@ -86,33 +86,33 @@ func newValidators(context languages.Context, packageMapper func(pkg string) str
 				noneOfFunc: "NoneOf",
 				equalFunc:  "OneOf",
 			},
-			ast.KindBool: {
+			ir.KindBool: {
 				importName: "boolvalidator",
 				name:       "Bool",
 				equalFunc:  "Equal",
 			},
-			ast.KindInt8: {
+			ir.KindInt8: {
 				importName: "numbervalidator",
 				name:       "Number",
 				minFunc:    "AtLeastOneOf",
 				noneOfFunc: "NoneOf",
 				equalFunc:  "OneOf",
 			},
-			ast.KindUint8: {
+			ir.KindUint8: {
 				importName: "numbervalidator",
 				name:       "Number",
 				minFunc:    "AtLeastOneOf",
 				noneOfFunc: "NoneOf",
 				equalFunc:  "OneOf",
 			},
-			ast.KindInt16: {
+			ir.KindInt16: {
 				importName: "numbervalidator",
 				name:       "Number",
 				minFunc:    "AtLeastOneOf",
 				noneOfFunc: "NoneOf",
 				equalFunc:  "OneOf",
 			},
-			ast.KindUint16: {
+			ir.KindUint16: {
 				importName: "numbervalidator",
 				name:       "Number",
 				minFunc:    "AtLeastOneOf",
@@ -123,7 +123,7 @@ func newValidators(context languages.Context, packageMapper func(pkg string) str
 	}
 }
 
-func (v *validators) scalarValidator(kind ast.ScalarKind, constraints []ast.TypeConstraint) string {
+func (v *validators) scalarValidator(kind ir.ScalarKind, constraints []ir.TypeConstraint) string {
 	if len(constraints) == 0 {
 		return ""
 	}
@@ -144,7 +144,7 @@ func (v *validators) scalarValidator(kind ast.ScalarKind, constraints []ast.Type
 	return ""
 }
 
-func (v *validators) constraints(validator scalarValidator, constraints []ast.TypeConstraint) string {
+func (v *validators) constraints(validator scalarValidator, constraints []ir.TypeConstraint) string {
 	var buffer strings.Builder
 	for _, c := range constraints {
 		args := make([]string, len(c.Args))
@@ -153,15 +153,15 @@ func (v *validators) constraints(validator scalarValidator, constraints []ast.Ty
 		}
 
 		switch c.Op {
-		case ast.MinLengthOp, ast.GreaterThanEqualOp, ast.GreaterThanOp:
+		case ir.MinLengthOp, ir.GreaterThanEqualOp, ir.GreaterThanOp:
 			buffer.WriteString(fmt.Sprintf("%s.%s(%s),\n", validator.importName, validator.minFunc, v.calculateConstraint(c.Op, c.Args[0])))
-		case ast.MaxLengthOp, ast.LessThanEqualOp, ast.LessThanOp:
+		case ir.MaxLengthOp, ir.LessThanEqualOp, ir.LessThanOp:
 			buffer.WriteString(fmt.Sprintf("%s.%s(%s),\n", validator.importName, validator.maxFunc, v.calculateConstraint(c.Op, c.Args[0])))
-		case ast.NotEqualOp:
+		case ir.NotEqualOp:
 			buffer.WriteString(fmt.Sprintf("%s.%s(%+v),\n", validator.importName, validator.noneOfFunc, strings.Join(args, ", ")))
-		case ast.EqualOp:
+		case ir.EqualOp:
 			buffer.WriteString(fmt.Sprintf("%s.%s(%+v),\n", validator.importName, validator.equalFunc, strings.Join(args, ", ")))
-		case ast.RegexMatchOp:
+		case ir.RegexMatchOp:
 			if validator.regexFunc != "" {
 				v.packageMapper("regexp")
 				buffer.WriteString(fmt.Sprintf("%s.%s(regexp.MustCompile(`%s`), \"\"),\n", validator.importName, validator.regexFunc, c.Args[0]))
@@ -172,7 +172,7 @@ func (v *validators) constraints(validator scalarValidator, constraints []ast.Ty
 	return buffer.String()
 }
 
-func (v *validators) arrayConstraintValidator(constraints []ast.TypeConstraint) string {
+func (v *validators) arrayConstraintValidator(constraints []ir.TypeConstraint) string {
 	if len(constraints) == 0 {
 		return ""
 	}
@@ -183,11 +183,11 @@ func (v *validators) arrayConstraintValidator(constraints []ast.TypeConstraint) 
 	buffer.WriteString("[]validator.List{\n")
 	for _, c := range constraints {
 		switch c.Op {
-		case ast.MinItemsOp:
+		case ir.MinItemsOp:
 			buffer.WriteString(fmt.Sprintf("listvalidator.SizeAtLeast(%s),\n", formatScalar(c.Args[0])))
-		case ast.MaxItemsOp:
+		case ir.MaxItemsOp:
 			buffer.WriteString(fmt.Sprintf("listvalidator.SizeAtMost(%s),\n", formatScalar(c.Args[0])))
-		case ast.UniqueItemsOp:
+		case ir.UniqueItemsOp:
 			buffer.WriteString("listvalidator.UniqueValues(),\n")
 		}
 	}
@@ -195,22 +195,22 @@ func (v *validators) arrayConstraintValidator(constraints []ast.TypeConstraint) 
 	return buffer.String()
 }
 
-func (v *validators) validateList(def ast.Type) string {
+func (v *validators) validateList(def ir.Type) string {
 	var buffer strings.Builder
 	switch def.Kind {
-	case ast.KindRef:
+	case ir.KindRef:
 		obj, ok := v.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if !ok {
 			return "unknown validator"
 		}
 
 		return v.validateList(obj.Type)
-	case ast.KindEnum:
+	case ir.KindEnum:
 		v.packageMapper("github.com/hashicorp/terraform-plugin-framework-validators/listvalidator")
 		buffer.WriteString("[]validator.List{\n")
 		validatorType := "ValueStringsAre"
 		kind := def.AsEnum().Values[0].Type.AsScalar().ScalarKind
-		if kind == ast.KindInt64 {
+		if kind == ir.KindInt64 {
 			validatorType = "ValueInt64sAre"
 		}
 
@@ -223,7 +223,7 @@ func (v *validators) validateList(def ast.Type) string {
 	return buffer.String()
 }
 
-func (v *validators) calculateConstraint(op ast.Op, arg any) string {
+func (v *validators) calculateConstraint(op ir.Op, arg any) string {
 	var value int64
 	switch v := arg.(type) {
 	case int64:
@@ -236,9 +236,9 @@ func (v *validators) calculateConstraint(op ast.Op, arg any) string {
 		value = int64(v)
 	}
 	switch op {
-	case ast.GreaterThanOp:
+	case ir.GreaterThanOp:
 		return fmt.Sprintf("%d", value+1)
-	case ast.LessThanOp:
+	case ir.LessThanOp:
 		return fmt.Sprintf("%d", value-1)
 	default:
 		return formatScalar(arg)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -16,7 +16,7 @@ func newEqualityMethods() equalityMethods {
 
 // generateForObject generates Java equals() and hashCode() overrides for struct objects.
 // Uses Objects.equals() which handles null checks and delegates to each field's equals().
-func (jenny equalityMethods) generateForObject(object ast.Object) string {
+func (jenny equalityMethods) generateForObject(object ir.Object) string {
 	if !object.Type.IsStruct() {
 		return ""
 	}

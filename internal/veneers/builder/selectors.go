@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 )
 
 type Selector struct {
 	description string
-	matcher     func(schemas ast.Schemas, builder ast.Builder) bool
+	matcher     func(schemas ir.Schemas, builder ir.Builder) bool
 }
 
-func (selector Selector) Matches(schemas ast.Schemas, builder ast.Builder) bool {
+func (selector Selector) Matches(schemas ir.Schemas, builder ir.Builder) bool {
 	return selector.matcher(schemas, builder)
 }
 
@@ -24,7 +24,7 @@ func (selector Selector) String() string {
 func EveryBuilder() *Selector {
 	return &Selector{
 		description: "every_builder",
-		matcher: func(_ ast.Schemas, _ ast.Builder) bool {
+		matcher: func(_ ir.Schemas, _ ir.Builder) bool {
 			return true
 		},
 	}
@@ -36,7 +36,7 @@ func EveryBuilder() *Selector {
 func ByObjectName(pkg string, objectName string) *Selector {
 	return &Selector{
 		description: fmt.Sprintf("by_object_name[builder.for.pkg='%s', builder.for.obj='%s']", pkg, objectName),
-		matcher: func(_ ast.Schemas, builder ast.Builder) bool {
+		matcher: func(_ ir.Schemas, builder ir.Builder) bool {
 			return (strings.EqualFold(builder.For.SelfRef.ReferredPkg, pkg) || pkg == "*") &&
 				strings.EqualFold(builder.For.SelfRef.ReferredType, objectName)
 		},
@@ -48,7 +48,7 @@ func ByObjectName(pkg string, objectName string) *Selector {
 func ByName(pkg string, builderName string) *Selector {
 	return &Selector{
 		description: fmt.Sprintf("by_name[builder.pkg='%s', builder.name='%s']", pkg, builderName),
-		matcher: func(_ ast.Schemas, builder ast.Builder) bool {
+		matcher: func(_ ir.Schemas, builder ir.Builder) bool {
 			return (strings.EqualFold(builder.Package, pkg) || pkg == "*") &&
 				strings.EqualFold(builder.Name, builderName)
 		},
@@ -60,8 +60,8 @@ func ByName(pkg string, builderName string) *Selector {
 func StructGeneratedFromDisjunction() *Selector {
 	return &Selector{
 		description: "struct_generated_from_disjunction",
-		matcher: func(schemas ast.Schemas, builder ast.Builder) bool {
-			resolved := schemas.ResolveToType(builder.For.Type)
+		matcher: func(schemas ir.Schemas, builder ir.Builder) bool {
+			resolved := schemas.Resolve(builder.For.Type)
 			implementsVariant := builder.For.Type.ImplementsVariant()
 
 			return resolved.IsStructGeneratedFromDisjunction() && !implementsVariant
@@ -71,16 +71,16 @@ func StructGeneratedFromDisjunction() *Selector {
 
 // ByVariant matches builders defined within a schema marked as "composable"
 // and implementing the given variant.
-func ByVariant(variant ast.SchemaVariant) *Selector {
+func ByVariant(variant ir.SchemaVariant) *Selector {
 	return &Selector{
 		description: fmt.Sprintf("by_variant[kind='composable', identifier!='', variant='%s']", variant),
-		matcher: func(schemas ast.Schemas, builder ast.Builder) bool {
-			schema, found := schemas.Locate(builder.For.SelfRef.ReferredPkg)
+		matcher: func(schemas ir.Schemas, builder ir.Builder) bool {
+			schema, found := schemas.Get(builder.For.SelfRef.ReferredPkg)
 			if !found {
 				return false
 			}
 
-			return schema.Metadata.Kind == ast.SchemaKindComposable &&
+			return schema.Metadata.Kind == ir.SchemaKindComposable &&
 				schema.Metadata.Variant == variant &&
 				schema.Metadata.Identifier != ""
 		},

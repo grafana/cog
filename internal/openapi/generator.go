@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -26,15 +26,15 @@ const (
 
 type Config struct {
 	Package        string
-	SchemaMetadata ast.SchemaMeta
+	SchemaMetadata ir.SchemaMeta
 	Validate       bool
 }
 
 type generator struct {
-	schema *ast.Schema
+	schema *ir.Schema
 }
 
-func GenerateAST(ctx context.Context, oapi *openapi3.T, cfg Config) (*ast.Schema, error) {
+func GenerateAST(ctx context.Context, oapi *openapi3.T, cfg Config) (*ir.Schema, error) {
 	if cfg.Validate {
 		if err := oapi.Validate(ctx, openapi3.DisableExamplesValidation()); err != nil {
 			return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
@@ -42,7 +42,7 @@ func GenerateAST(ctx context.Context, oapi *openapi3.T, cfg Config) (*ast.Schema
 	}
 
 	g := &generator{
-		schema: ast.NewSchema(cfg.Package, cfg.SchemaMetadata),
+		schema: ir.NewSchema(cfg.Package, cfg.SchemaMetadata),
 	}
 
 	if oapi.Components == nil {
@@ -67,11 +67,11 @@ func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
 			return err
 		}
 
-		g.schema.AddObject(ast.Object{
+		g.schema.AddObject(ir.Object{
 			Name:     name,
 			Comments: schemaComments(schemaRef.Value),
 			Type:     def,
-			SelfRef: ast.RefType{
+			SelfRef: ir.RefType{
 				ReferredPkg:  g.schema.Package,
 				ReferredType: name,
 			},
@@ -81,7 +81,7 @@ func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
 	return nil
 }
 
-func (g *generator) walkSchemaRef(schemaRef *openapi3.SchemaRef) (ast.Type, error) {
+func (g *generator) walkSchemaRef(schemaRef *openapi3.SchemaRef) (ir.Type, error) {
 	if isRef(schemaRef.Ref) {
 		return g.walkRef(schemaRef)
 	}
@@ -89,7 +89,7 @@ func (g *generator) walkSchemaRef(schemaRef *openapi3.SchemaRef) (ast.Type, erro
 	return g.walkDefinitions(schemaRef.Value)
 }
 
-func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
+func (g *generator) walkDefinitions(schema *openapi3.Schema) (ir.Type, error) {
 	if schema.AllOf != nil {
 		return g.walkAllOf(schema)
 	}
@@ -121,34 +121,34 @@ func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
 	return g.walkAny(schema)
 }
 
-func (g *generator) walkRef(schema *openapi3.SchemaRef) (ast.Type, error) {
+func (g *generator) walkRef(schema *openapi3.SchemaRef) (ir.Type, error) {
 	pkg, referredKindName := g.getRefName(schema.Ref)
 
-	return ast.NewRef(pkg, referredKindName), nil
+	return ir.NewRef(pkg, referredKindName), nil
 }
 
-func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
+func (g *generator) walkObject(schema *openapi3.Schema) (ir.Type, error) {
 	if len(schema.Properties) == 0 {
 		if schema.AdditionalProperties.Schema == nil {
-			return ast.Any(), nil
+			return ir.Any(), nil
 		}
 
 		valueType, err := g.walkSchemaRef(schema.AdditionalProperties.Schema)
 		if err != nil {
-			return ast.Type{}, err
+			return ir.Type{}, err
 		}
 
-		return ast.NewMap(ast.String(), valueType), nil
+		return ir.NewMap(ir.String(), valueType), nil
 	}
 
-	fields := make([]ast.StructField, 0, len(schema.Properties))
+	fields := make([]ir.StructField, 0, len(schema.Properties))
 	for name, schemaRef := range schema.Properties {
 		def, err := g.walkSchemaRef(schemaRef)
 		if err != nil {
-			return ast.Type{}, err
+			return ir.Type{}, err
 		}
 
-		field := ast.NewStructField(name, def, ast.Comments(schemaComments(schemaRef.Value)))
+		field := ir.NewStructField(name, def, ir.Comments(schemaComments(schemaRef.Value)))
 		field.Required = tools.ItemInList(name, schema.Required)
 
 		fields = append(fields, field)
@@ -158,29 +158,29 @@ func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
 		return fields[i].Name < fields[j].Name
 	})
 
-	return ast.NewStruct(fields...), nil
+	return ir.NewStruct(fields...), nil
 }
 
-func (g *generator) walkArray(schema *openapi3.Schema) (ast.Type, error) {
+func (g *generator) walkArray(schema *openapi3.Schema) (ir.Type, error) {
 	def, err := g.walkSchemaRef(schema.Items)
 	if err != nil {
-		return ast.Type{}, err
+		return ir.Type{}, err
 	}
 
-	return ast.NewArray(def, ast.Default(schema.Default)), nil
+	return ir.NewArray(def, ir.Default(schema.Default)), nil
 }
 
-func (g *generator) walkString(schema *openapi3.Schema) (ast.Type, error) {
-	var t ast.Type
+func (g *generator) walkString(schema *openapi3.Schema) (ir.Type, error) {
+	var t ir.Type
 	switch schema.Format {
 	case FormatDateTime:
-		t = ast.String(ast.Hints(ast.JenniesHints{
-			ast.HintStringFormatDateTime: true,
+		t = ir.String(ir.Hints(ir.JenniesHints{
+			ir.HintStringFormatDateTime: true,
 		}))
 	case FormatByte:
-		t = ast.Bytes()
+		t = ir.Bytes()
 	default:
-		t = ast.String()
+		t = ir.String()
 	}
 
 	if schema.Pattern != "" && tools.RegexMatchesConstantString(schema.Pattern) {
@@ -193,15 +193,15 @@ func (g *generator) walkString(schema *openapi3.Schema) (ast.Type, error) {
 	return t, nil
 }
 
-func (g *generator) walkNumber(schema *openapi3.Schema) (ast.Type, error) {
-	var t ast.Type
+func (g *generator) walkNumber(schema *openapi3.Schema) (ir.Type, error) {
+	var t ir.Type
 	switch schema.Format {
 	case FormatFloat:
-		t = ast.NewScalar(ast.KindFloat32)
+		t = ir.NewScalar(ir.KindFloat32)
 	case FormatDouble:
-		t = ast.NewScalar(ast.KindFloat64)
+		t = ir.NewScalar(ir.KindFloat64)
 	default:
-		t = ast.NewScalar(ast.KindFloat32)
+		t = ir.NewScalar(ir.KindFloat32)
 	}
 	t.Scalar.Constraints = getConstraints(schema)
 	t.Nullable = schema.Nullable
@@ -209,15 +209,15 @@ func (g *generator) walkNumber(schema *openapi3.Schema) (ast.Type, error) {
 	return t, nil
 }
 
-func (g *generator) walkInteger(schema *openapi3.Schema) (ast.Type, error) {
-	var t ast.Type
+func (g *generator) walkInteger(schema *openapi3.Schema) (ir.Type, error) {
+	var t ir.Type
 	switch schema.Format {
 	case FormatInt32:
-		t = ast.NewScalar(ast.KindInt32)
+		t = ir.NewScalar(ir.KindInt32)
 	case FormatInt64:
-		t = ast.NewScalar(ast.KindInt64)
+		t = ir.NewScalar(ir.KindInt64)
 	default:
-		t = ast.NewScalar(ast.KindInt64)
+		t = ir.NewScalar(ir.KindInt64)
 	}
 
 	t.Scalar.Constraints = getConstraints(schema)
@@ -226,20 +226,20 @@ func (g *generator) walkInteger(schema *openapi3.Schema) (ast.Type, error) {
 	return t, nil
 }
 
-func (g *generator) walkBoolean(schema *openapi3.Schema) (ast.Type, error) {
-	return ast.Bool(ast.Default(schema.Default)), nil
+func (g *generator) walkBoolean(schema *openapi3.Schema) (ir.Type, error) {
+	return ir.Bool(ir.Default(schema.Default)), nil
 }
 
-func (g *generator) walkAny(_ *openapi3.Schema) (ast.Type, error) {
-	return ast.Any(), nil
+func (g *generator) walkAny(_ *openapi3.Schema) (ir.Type, error) {
+	return ir.Any(), nil
 }
 
-func (g *generator) walkAllOf(schema *openapi3.Schema) (ast.Type, error) {
-	branches := make([]ast.Type, len(schema.AllOf))
+func (g *generator) walkAllOf(schema *openapi3.Schema) (ir.Type, error) {
+	branches := make([]ir.Type, len(schema.AllOf))
 	for i, sch := range schema.AllOf {
 		def, err := g.walkSchemaRef(sch)
 		if err != nil {
-			return ast.Type{}, err
+			return ir.Type{}, err
 		}
 
 		branches[i] = def
@@ -249,22 +249,22 @@ func (g *generator) walkAllOf(schema *openapi3.Schema) (ast.Type, error) {
 		return branches[0], nil
 	}
 
-	return ast.NewIntersection(branches), nil
+	return ir.NewIntersection(branches), nil
 }
 
-func (g *generator) walkOneOf(schema *openapi3.Schema) (ast.Type, error) {
+func (g *generator) walkOneOf(schema *openapi3.Schema) (ir.Type, error) {
 	discriminator, mapping := g.getDiscriminator(schema)
 	return g.walkDisjunctions(schema.OneOf, discriminator, mapping)
 }
 
-func (g *generator) walkAnyOf(schema *openapi3.Schema) (ast.Type, error) {
+func (g *generator) walkAnyOf(schema *openapi3.Schema) (ir.Type, error) {
 	discriminator, mapping := g.getDiscriminator(schema)
 	return g.walkDisjunctions(schema.AnyOf, discriminator, mapping)
 }
 
-func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
+func (g *generator) walkEnum(schema *openapi3.Schema) (ir.Type, error) {
 	// Nullable enums? https://swagger.io/docs/specification/data-models/enums/
-	enums := make([]ast.EnumValue, 0, len(schema.Enum))
+	enums := make([]ir.EnumValue, 0, len(schema.Enum))
 	format := "%#v"
 	if schema.Type.Is(openapi3.TypeString) {
 		format = "%s"
@@ -272,32 +272,32 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 
 	enumType, err := getEnumType(schema.Type.Slice()[0])
 	if err != nil {
-		return ast.Type{}, err
+		return ir.Type{}, err
 	}
 
 	for _, value := range schema.Enum {
-		enums = append(enums, ast.EnumValue{
+		enums = append(enums, ir.EnumValue{
 			Type:  enumType,
 			Name:  fmt.Sprintf(format, value),
 			Value: value,
 		})
 	}
 
-	return ast.NewEnum(enums, ast.Default(schema.Default)), nil
+	return ir.NewEnum(enums, ir.Default(schema.Default)), nil
 }
 
-func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef, discriminator string, mapping map[string]string) (ast.Type, error) {
-	typeDefs := make([]ast.Type, 0, len(schemaRefs))
+func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef, discriminator string, mapping map[string]string) (ir.Type, error) {
+	typeDefs := make([]ir.Type, 0, len(schemaRefs))
 	for _, schemaRef := range schemaRefs {
 		def, err := g.walkSchemaRef(schemaRef)
 		if err != nil {
-			return ast.Type{}, err
+			return ir.Type{}, err
 		}
 
 		typeDefs = append(typeDefs, def)
 	}
 
-	return ast.NewDisjunction(typeDefs, ast.Discriminator(discriminator, mapping)), nil
+	return ir.NewDisjunction(typeDefs, ir.Discriminator(discriminator, mapping)), nil
 }
 
 func (g *generator) getDiscriminator(schema *openapi3.Schema) (string, map[string]string) {

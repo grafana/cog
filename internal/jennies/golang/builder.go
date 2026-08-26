@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -18,7 +18,7 @@ type Builder struct {
 	apiRefCollector *common.APIReferenceCollector
 
 	typeImportMapper func(pkg string) string
-	pathFormatter    func(path ast.Path) string
+	pathFormatter    func(path ir.Path) string
 	typeFormatter    *typeFormatter
 }
 
@@ -46,7 +46,7 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 	return files, nil
 }
 
-func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
+func (jenny *Builder) generateBuilder(context languages.Context, builder ir.Builder) ([]byte, error) {
 	imports := NewImportMap(jenny.Config.PackageRoot)
 	jenny.typeImportMapper = func(pkg string) string {
 		if imports.IsIdentical(pkg, builder.Package) {
@@ -79,7 +79,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		jenny.apiRefCollector.RegisterFunction(builder.Package, common.FunctionReference{
 			Name:     factory.Name,
 			Comments: factory.Comments,
-			Arguments: tools.Map(factory.Args, func(arg ast.Argument) common.ArgumentReference {
+			Arguments: tools.Map(factory.Args, func(arg ir.Argument) common.ArgumentReference {
 				return common.ArgumentReference{
 					Name: arg.Name,
 					Type: jenny.typeFormatter.formatType(arg.Type),
@@ -89,7 +89,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		})
 	}
 
-	constructorFor := func(ref *ast.RefType) string {
+	constructorFor := func(ref *ir.RefType) string {
 		constructorName := "New" + formatObjectName(ref.ReferredType)
 		constructorPkg := jenny.typeImportMapper(ref.ReferredPkg)
 		if constructorPkg != "" {
@@ -108,14 +108,14 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			},
 			"formatPath": jenny.pathFormatter,
 			"formatType": jenny.typeFormatter.formatType,
-			"formatTypeNoBuilder": func(typeDef ast.Type) string {
+			"formatTypeNoBuilder": func(typeDef ir.Type) string {
 				return jenny.typeFormatter.doFormatType(typeDef, false)
 			},
 			"typeHasBuilder": context.ResolveToBuilder,
-			"emptyValueForGuard": func(guard ast.AssignmentNilCheck) string {
+			"emptyValueForGuard": func(guard ir.AssignmentNilCheck) string {
 				return jenny.emptyValueForGuard(context, guard.EmptyValueType)
 			},
-			"formatValue": func(destinationType ast.Type, value any) string {
+			"formatValue": func(destinationType ir.Type, value any) string {
 				resolved := context.ResolveRefs(destinationType)
 
 				if !destinationType.IsRef() || !resolved.IsEnum() {
@@ -143,12 +143,12 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		})
 }
 
-func (jenny *Builder) emptyValueForGuard(context languages.Context, typeDef ast.Type) string {
+func (jenny *Builder) emptyValueForGuard(context languages.Context, typeDef ir.Type) string {
 	typeDef = typeDef.DeepCopy()
 	typeDef.Nullable = false
 
 	switch typeDef.Kind {
-	case ast.KindRef:
+	case ir.KindRef:
 		resolvedType := context.ResolveRefs(typeDef)
 		if resolvedType.IsStruct() {
 			constructor := "New" + formatFunctionName(typeDef.Ref.ReferredType) + "()"
@@ -162,16 +162,16 @@ func (jenny *Builder) emptyValueForGuard(context languages.Context, typeDef ast.
 		}
 
 		return jenny.emptyValueForGuard(context, resolvedType)
-	case ast.KindArray, ast.KindMap:
+	case ir.KindArray, ir.KindMap:
 		return jenny.typeFormatter.doFormatType(typeDef, false) + "{}"
-	case ast.KindStruct:
+	case ir.KindStruct:
 		return "&" + jenny.typeFormatter.doFormatType(typeDef, false) + "{}"
-	case ast.KindEnum:
+	case ir.KindEnum:
 		jenny.typeImportMapper("cog")
 		typeHint := jenny.typeFormatter.formatType(typeDef)
 
 		return fmt.Sprintf("cog.ToPtr[%s](%s)", typeHint, formatScalar(typeDef.AsEnum().Values[0].Value))
-	case ast.KindScalar:
+	case ir.KindScalar:
 		return "" // no need to do anything here
 
 	default:
@@ -181,7 +181,7 @@ func (jenny *Builder) emptyValueForGuard(context languages.Context, typeDef ast.
 
 // importType declares an import statement for the type definition of
 // the given object and returns a fully qualified type name for it.
-func (jenny *Builder) importType(typeRef ast.RefType) string {
+func (jenny *Builder) importType(typeRef ir.RefType) string {
 	pkg := jenny.typeImportMapper(typeRef.ReferredPkg)
 	typeName := formatObjectName(typeRef.ReferredType)
 	if pkg == "" {

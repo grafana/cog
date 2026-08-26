@@ -5,15 +5,15 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type builderAndFactory struct {
-	Builder ast.Builder
-	Factory ast.BuilderFactory
+	Builder ir.Builder
+	Factory ir.BuilderFactory
 }
 
 type Factory struct {
@@ -69,7 +69,7 @@ func (jenny *Factory) generateFactories(context languages.Context, factoriesPkg 
 		Funcs(template.FuncMap{
 			"formatBuilderFieldType": typesFormatter.formatBuilderFieldType,
 			"formatRawRef": func(pkg string, referredType string) string {
-				return typesFormatter.formatFieldType(ast.NewRef(pkg, referredType))
+				return typesFormatter.formatFieldType(ir.NewRef(pkg, referredType))
 			},
 			"factoryClassForPkg": func(pkg string) string {
 				return tools.UpperCamelCase(jenny.config.builderFactoryClassForPackage(pkg))

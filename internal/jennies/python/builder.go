@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -28,7 +28,7 @@ func (jenny *Builder) JennyName() string {
 
 func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error) {
 	files := codejen.Files{}
-	buildersByPackage := make(map[string][]ast.Builder)
+	buildersByPackage := make(map[string][]ir.Builder)
 
 	for _, builder := range context.Builders {
 		buildersByPackage[strings.ToLower(builder.Package)] = append(buildersByPackage[strings.ToLower(builder.Package)], builder)
@@ -68,7 +68,7 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 	return files, nil
 }
 
-func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
+func (jenny *Builder) generateBuilder(context languages.Context, builder ir.Builder) ([]byte, error) {
 	// every builder uses the following imports
 	jenny.imports.AddPackage("typing", "typing")
 	jenny.importModule("cogbuilder", "..cog", "builder")
@@ -87,7 +87,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		jenny.apiRefCollector.RegisterFunction(builder.Package, common.FunctionReference{
 			Name:     factory.Name,
 			Comments: factory.Comments,
-			Arguments: tools.Map(factory.Args, func(arg ast.Argument) common.ArgumentReference {
+			Arguments: tools.Map(factory.Args, func(arg ir.Argument) common.ArgumentReference {
 				return common.ArgumentReference{
 					Name: arg.Name,
 					Type: jenny.typeFormatter.formatType(arg.Type),
@@ -103,20 +103,20 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			"importModule":            jenny.importModule,
 			"isDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
 			"formatType":              jenny.typeFormatter.formatType,
-			"formatTypeNotNullable": func(def ast.Type) string {
+			"formatTypeNotNullable": func(def ir.Type) string {
 				typeDef := def.DeepCopy()
 				typeDef.Nullable = false
 
 				return jenny.typeFormatter.formatType(typeDef)
 			},
 			"formatRawType": jenny.rawTypeFormatter.formatType,
-			"formatRawTypeNotNullable": func(def ast.Type) string {
+			"formatRawTypeNotNullable": func(def ir.Type) string {
 				typeDef := def.DeepCopy()
 				typeDef.Nullable = false
 
 				return jenny.rawTypeFormatter.formatType(typeDef)
 			},
-			"formatValue": func(destinationType ast.Type, value any) string {
+			"formatValue": func(destinationType ir.Type, value any) string {
 				if destinationType.IsRef() {
 					referredObj, found := context.LocateObjectByRef(destinationType.AsRef())
 					if found && referredObj.Type.IsEnum() {
@@ -126,7 +126,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 
 				return formatValue(value)
 			},
-			"defaultForType": func(typeDef ast.Type) string {
+			"defaultForType": func(typeDef ir.Type) string {
 				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.importModule, nil))
 			},
 		}).

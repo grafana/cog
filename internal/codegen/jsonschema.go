@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/httputil"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jsonschema"
 )
 
@@ -48,7 +48,7 @@ func (input *JSONSchemaInput) packageName() string {
 	return guessPackageFromFilename(input.Path)
 }
 
-func (input *JSONSchemaInput) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
+func (input *JSONSchemaInput) LoadSchemas(ctx context.Context) (ir.Schemas, error) {
 	schemaReader, err := input.schemaReader(ctx)
 	if err != nil {
 		return nil, err

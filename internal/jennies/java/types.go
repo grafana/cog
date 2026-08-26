@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -30,43 +30,43 @@ func (tf *typeFormatter) withPackageMapper(packageMapper func(pkg string, class 
 	return tf
 }
 
-func (tf *typeFormatter) formatFieldType(def ast.Type) string {
+func (tf *typeFormatter) formatFieldType(def ir.Type) string {
 	switch def.Kind {
-	case ast.KindScalar:
+	case ir.KindScalar:
 		return formatScalarType(def.AsScalar())
-	case ast.KindRef:
+	case ir.KindRef:
 		return tf.formatReference(def.AsRef())
-	case ast.KindArray:
+	case ir.KindArray:
 		return tf.formatArray(def.AsArray())
-	case ast.KindComposableSlot:
+	case ir.KindComposableSlot:
 		return tf.formatComposable(def.AsComposableSlot())
-	case ast.KindMap:
+	case ir.KindMap:
 		return tf.formatMap(def.AsMap())
-	case ast.KindStruct:
+	case ir.KindStruct:
 		// TODO: Manage anonymous structs
 		return "Object"
-	case ast.KindConstantRef:
+	case ir.KindConstantRef:
 		return tf.formatConstantReference(def.AsConstantRef())
 	}
 
 	return "unknown"
 }
 
-func (tf *typeFormatter) typeHasBuilder(def ast.Type) bool {
+func (tf *typeFormatter) typeHasBuilder(def ir.Type) bool {
 	return tf.context.ResolveToBuilder(def)
 }
 
-func (tf *typeFormatter) resolvesToComposableSlot(typeDef ast.Type) bool {
+func (tf *typeFormatter) resolvesToComposableSlot(typeDef ir.Type) bool {
 	_, found := tf.context.ResolveToComposableSlot(typeDef)
 	return found
 }
 
-func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
+func (tf *typeFormatter) formatBuilderFieldType(def ir.Type) string {
 	if tf.resolvesToComposableSlot(def) || tf.typeHasBuilder(def) {
 		switch def.Kind {
-		case ast.KindArray:
+		case ir.KindArray:
 			return tf.formatArrayOrMapFields(def.AsArray().ValueType, "List", "List<")
-		case ast.KindMap:
+		case ir.KindMap:
 			return tf.formatArrayOrMapFields(def.AsMap().ValueType, "Map", "Map<String, ")
 		default:
 			return fmt.Sprintf("%s.Builder<%s>", tf.config.formatPackage("cog"), tf.formatFieldType(def))
@@ -76,23 +76,23 @@ func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
 	return tf.formatFieldType(def)
 }
 
-func (tf *typeFormatter) formatArrayOrMapFields(def ast.Type, importValue string, prefix string) string {
+func (tf *typeFormatter) formatArrayOrMapFields(def ir.Type, importValue string, prefix string) string {
 	tf.packageMapper("java.util", importValue)
-	if def.Kind == ast.KindArray || def.Kind == ast.KindMap {
+	if def.Kind == ir.KindArray || def.Kind == ir.KindMap {
 		return fmt.Sprintf("%s%s>", prefix, tf.formatBuilderFieldType(def))
 	}
 
 	return fmt.Sprintf("%s%s.Builder<%s>>", prefix, tf.config.formatPackage("cog"), tf.formatFieldType(def))
 }
 
-func (tf *typeFormatter) formatReference(def ast.RefType) string {
+func (tf *typeFormatter) formatReference(def ir.RefType) string {
 	object, _ := tf.context.LocateObjectByRef(def)
 	switch object.Type.Kind {
-	case ast.KindScalar:
+	case ir.KindScalar:
 		return formatScalarType(object.Type.AsScalar())
-	case ast.KindMap:
+	case ir.KindMap:
 		return tf.formatMap(object.Type.AsMap())
-	case ast.KindArray:
+	case ir.KindArray:
 		return tf.formatArray(object.Type.AsArray())
 	default:
 		tf.packageMapper(def.ReferredPkg, formatObjectName(def.ReferredType))
@@ -100,7 +100,7 @@ func (tf *typeFormatter) formatReference(def ast.RefType) string {
 	}
 }
 
-func (tf *typeFormatter) formatConstantReference(def ast.ConstantReferenceType) string {
+func (tf *typeFormatter) formatConstantReference(def ir.ConstantReferenceType) string {
 	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	if object.Type.IsEnum() {
 		return formatObjectName(def.ReferredType)
@@ -113,72 +113,72 @@ func (tf *typeFormatter) formatConstantReference(def ast.ConstantReferenceType) 
 	return "unknown"
 }
 
-func (tf *typeFormatter) formatArray(def ast.ArrayType) string {
+func (tf *typeFormatter) formatArray(def ir.ArrayType) string {
 	tf.packageMapper("java.util", "List")
 	return fmt.Sprintf("List<%s>", tf.formatFieldType(def.ValueType))
 }
 
-func (tf *typeFormatter) formatMap(def ast.MapType) string {
+func (tf *typeFormatter) formatMap(def ir.MapType) string {
 	tf.packageMapper("java.util", "Map")
 	mapType := "unknown"
 	switch def.ValueType.Kind {
-	case ast.KindRef:
+	case ir.KindRef:
 		mapType = tf.formatReference(def.ValueType.AsRef())
-	case ast.KindScalar:
+	case ir.KindScalar:
 		mapType = formatScalarType(def.ValueType.AsScalar())
-	case ast.KindMap:
+	case ir.KindMap:
 		mapType = tf.formatMap(def.ValueType.AsMap())
-	case ast.KindArray:
+	case ir.KindArray:
 		mapType = tf.formatArray(def.ValueType.AsArray())
-	case ast.KindConstantRef:
+	case ir.KindConstantRef:
 		mapType = tf.formatConstantReference(def.ValueType.AsConstantRef())
 	}
 
 	return fmt.Sprintf("Map<String, %s>", mapType)
 }
 
-func (tf *typeFormatter) formatComposable(def ast.ComposableSlotType) string {
+func (tf *typeFormatter) formatComposable(def ir.ComposableSlotType) string {
 	variant := tools.UpperCamelCase(string(def.Variant))
 	tf.packageMapper("cog.variants", variant)
 	return variant
 }
 
-func formatScalarType(def ast.ScalarType) string {
+func formatScalarType(def ir.ScalarType) string {
 	scalarType := "unknown"
 
 	switch def.ScalarKind {
-	case ast.KindString:
+	case ir.KindString:
 		scalarType = "String"
-	case ast.KindBytes:
+	case ir.KindBytes:
 		scalarType = "Byte"
-	case ast.KindInt16, ast.KindUint16:
+	case ir.KindInt16, ir.KindUint16:
 		scalarType = "Short"
-	case ast.KindInt8, ast.KindUint8, ast.KindInt32, ast.KindUint32:
+	case ir.KindInt8, ir.KindUint8, ir.KindInt32, ir.KindUint32:
 		scalarType = "Integer"
-	case ast.KindInt64, ast.KindUint64:
+	case ir.KindInt64, ir.KindUint64:
 		scalarType = "Long"
-	case ast.KindFloat32:
+	case ir.KindFloat32:
 		scalarType = "Float"
-	case ast.KindFloat64:
+	case ir.KindFloat64:
 		scalarType = "Double"
-	case ast.KindBool:
+	case ir.KindBool:
 		scalarType = "Boolean"
-	case ast.KindAny:
+	case ir.KindAny:
 		scalarType = "Object"
 	}
 
 	return scalarType
 }
 
-func (tf *typeFormatter) emptyValueForType(def ast.Type, useBuilders bool) string {
+func (tf *typeFormatter) emptyValueForType(def ir.Type, useBuilders bool) string {
 	switch def.Kind {
-	case ast.KindArray:
+	case ir.KindArray:
 		tf.packageMapper("java.util", "LinkedList")
 		return "new LinkedList<>()"
-	case ast.KindMap:
+	case ir.KindMap:
 		tf.packageMapper("java.util", "HashMap")
 		return "new HashMap<>()"
-	case ast.KindRef:
+	case ir.KindRef:
 		refDef := fmt.Sprintf("%s.%s", formatPackageName(def.AsRef().ReferredPkg), formatObjectName(def.AsRef().ReferredType))
 		if useBuilders && tf.typeHasBuilder(def) {
 			return fmt.Sprintf("new %sBuilder().build()", tf.config.formatPackage(refDef))
@@ -192,25 +192,25 @@ func (tf *typeFormatter) emptyValueForType(def ast.Type, useBuilders bool) strin
 		}
 
 		return fmt.Sprintf("new %s()", tf.config.formatPackage(refDef))
-	case ast.KindStruct:
+	case ir.KindStruct:
 		return "new Object()"
-	case ast.KindScalar:
+	case ir.KindScalar:
 		switch def.AsScalar().ScalarKind {
-		case ast.KindBool:
+		case ir.KindBool:
 			return "false"
-		case ast.KindFloat32:
+		case ir.KindFloat32:
 			return "0.0f"
-		case ast.KindFloat64:
+		case ir.KindFloat64:
 			return "0.0"
-		case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16, ast.KindInt32, ast.KindUint32:
+		case ir.KindInt8, ir.KindUint8, ir.KindInt16, ir.KindUint16, ir.KindInt32, ir.KindUint32:
 			return "0"
-		case ast.KindInt64, ast.KindUint64:
+		case ir.KindInt64, ir.KindUint64:
 			return "0L"
-		case ast.KindString:
+		case ir.KindString:
 			return `""`
-		case ast.KindBytes:
+		case ir.KindBytes:
 			return "(byte) 0"
-		case ast.KindAny:
+		case ir.KindAny:
 			return "new Object()"
 		default:
 			return "unknown"
@@ -220,7 +220,7 @@ func (tf *typeFormatter) emptyValueForType(def ast.Type, useBuilders bool) strin
 	}
 }
 
-func (tf *typeFormatter) formatFieldPath(fieldPath ast.Path) string {
+func (tf *typeFormatter) formatFieldPath(fieldPath ir.Path) string {
 	parts := make([]string, 0)
 	for i, part := range fieldPath {
 		output := tools.LowerCamelCase(part.Identifier)
@@ -235,7 +235,7 @@ func (tf *typeFormatter) formatFieldPath(fieldPath ast.Path) string {
 	return strings.Join(parts, ".")
 }
 
-func (tf *typeFormatter) formatPathIndex(pathIndex *ast.PathIndex) string {
+func (tf *typeFormatter) formatPathIndex(pathIndex *ir.PathIndex) string {
 	if pathIndex.Constant != nil {
 		return fmt.Sprintf("%#v", pathIndex.Constant)
 	}
@@ -245,7 +245,7 @@ func (tf *typeFormatter) formatPathIndex(pathIndex *ast.PathIndex) string {
 
 // formatAssignmentPath generates the pad to assign the value. When the value is a generic one (Object) like Custom or FieldConfig
 // we should return until this pad to set the object to it.
-func (tf *typeFormatter) formatAssignmentPath(resourceRoot string, fieldPath ast.Path) string {
+func (tf *typeFormatter) formatAssignmentPath(resourceRoot string, fieldPath ir.Path) string {
 	path := resourceRoot
 
 	for i := range fieldPath {
@@ -274,7 +274,7 @@ func (tf *typeFormatter) formatAssignmentPath(resourceRoot string, fieldPath ast
 	return path
 }
 
-func (tf *typeFormatter) formatRefType(destinationType ast.Type, value any) string {
+func (tf *typeFormatter) formatRefType(destinationType ir.Type, value any) string {
 	if !destinationType.IsRef() {
 		if value == nil {
 			return "null"
@@ -298,8 +298,8 @@ func (tf *typeFormatter) formatRefType(destinationType ast.Type, value any) stri
 	return fmt.Sprintf("%#v", value)
 }
 
-func (tf *typeFormatter) formatDisjunctionValue(object ast.Object, value any) string {
-	var field ast.StructField
+func (tf *typeFormatter) formatDisjunctionValue(object ir.Object, value any) string {
+	var field ir.StructField
 	for _, candidate := range object.Type.Struct.Fields {
 		if candidate.Type.AcceptsValue(value) {
 			field = candidate
@@ -315,17 +315,17 @@ func (tf *typeFormatter) formatDisjunctionValue(object ast.Object, value any) st
 	return fmt.Sprintf("%s.create%s(%#v)", object.SelfRef.ReferredType, tools.UpperCamelCase(field.Name), value)
 }
 
-func (tf *typeFormatter) formatEnumValue(obj ast.Object, val any) string {
+func (tf *typeFormatter) formatEnumValue(obj ir.Object, val any) string {
 	member, _ := obj.Type.AsEnum().MemberForValue(val)
 
 	return fmt.Sprintf("%s.%s", obj.Name, tools.UpperSnakeCase(member.Name))
 }
 
-func (tf *typeFormatter) objectNeedsCustomSerializer(obj ast.Object) bool {
+func (tf *typeFormatter) objectNeedsCustomSerializer(obj ir.Object) bool {
 	if !tf.config.GenerateBuilders || tf.config.SkipRuntime {
 		return false
 	}
-	if obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
+	if obj.Type.HasHint(ir.HintDisjunctionOfScalars) {
 		tf.packageMapper(fasterXMLPackageName, "databind.annotation.JsonSerialize")
 		return true
 	}
@@ -333,7 +333,7 @@ func (tf *typeFormatter) objectNeedsCustomSerializer(obj ast.Object) bool {
 	return false
 }
 
-func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ast.Object, tmpl *template.Template) bool {
+func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ir.Object, tmpl *template.Template) bool {
 	if !tf.config.GenerateBuilders || tf.config.SkipRuntime {
 		return false
 	}
@@ -345,7 +345,7 @@ func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ast.Object, tmpl *tem
 	return false
 }
 
-func (tf *typeFormatter) fillNullableAnnotationPattern(t ast.Type) string {
+func (tf *typeFormatter) fillNullableAnnotationPattern(t ir.Type) string {
 	if t.Nullable {
 		tf.packageMapper(fasterXMLPackageName, "annotation.JsonInclude")
 		return javaNullableField
@@ -365,7 +365,7 @@ func (tf *typeFormatter) fillNullableAnnotationPattern(t ast.Type) string {
 	return ""
 }
 
-func (tf *typeFormatter) formatGuardPath(fieldPath ast.Path) string {
+func (tf *typeFormatter) formatGuardPath(fieldPath ir.Path) string {
 	parts := make([]string, 0)
 	var castedPath string
 
@@ -391,7 +391,7 @@ func (tf *typeFormatter) formatGuardPath(fieldPath ast.Path) string {
 	return castedPath + strings.Join(parts, ".")
 }
 
-func (tf *typeFormatter) constantRefValue(def ast.ConstantReferenceType) string {
+func (tf *typeFormatter) constantRefValue(def ir.ConstantReferenceType) string {
 	obj, ok := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	if !ok {
 		return "unknown"
@@ -423,7 +423,7 @@ func (tf *typeFormatter) constantRefValue(def ast.ConstantReferenceType) string 
 	return "unknown"
 }
 
-func formatEnum(pkg string, object ast.Object, tmpl *template.Template) ([]byte, error) {
+func formatEnum(pkg string, object ir.Object, tmpl *template.Template) ([]byte, error) {
 	enum := object.Type.AsEnum()
 	values := make([]EnumValue, 0)
 	for _, value := range enum.Values {
@@ -437,7 +437,7 @@ func formatEnum(pkg string, object ast.Object, tmpl *template.Template) ([]byte,
 	}
 
 	enumType := "Integer"
-	if enum.Values[0].Type.AsScalar().ScalarKind == ast.KindString {
+	if enum.Values[0].Type.AsScalar().ScalarKind == ir.KindString {
 		enumType = "String"
 	}
 

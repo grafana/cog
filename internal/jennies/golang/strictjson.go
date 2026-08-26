@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -36,7 +36,7 @@ func newStrictJSONUnmarshal(config Config, tmpl *template.Template, imports *com
 	}
 }
 
-func (jenny strictJSONUnmarshal) generateForObject(buffer *strings.Builder, context languages.Context, object ast.Object) error {
+func (jenny strictJSONUnmarshal) generateForObject(buffer *strings.Builder, context languages.Context, object ir.Object) error {
 	if !jenny.config.GenerateJSONMarshaller || !jenny.config.GenerateStrictUnmarshaller {
 		return nil
 	}
@@ -56,11 +56,11 @@ func (jenny strictJSONUnmarshal) generateForObject(buffer *strings.Builder, cont
 	return nil
 }
 
-func (jenny strictJSONUnmarshal) objectNeedsUnmarshal(obj ast.Object) bool {
+func (jenny strictJSONUnmarshal) objectNeedsUnmarshal(obj ir.Object) bool {
 	return obj.Type.IsStruct()
 }
 
-func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj ast.Object) (string, error) {
+func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj ir.Object) (string, error) {
 	jenny.apiRefCollector.ObjectMethod(obj, common.MethodReference{
 		Name: "UnmarshalJSONStrict",
 		Arguments: []common.ArgumentReference{
@@ -76,14 +76,14 @@ func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj 
 	tmpl := jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(template.FuncMap{
-			"resolvesToArrayOfScalars": func(typeDef ast.Type) bool {
-				return context.IsArrayOfKinds(typeDef, ast.KindScalar, ast.KindEnum)
+			"resolvesToArrayOfScalars": func(typeDef ir.Type) bool {
+				return context.IsArrayOfKinds(typeDef, ir.KindScalar, ir.KindEnum)
 			},
-			"resolvesToMapOfScalars": func(typeDef ast.Type) bool {
-				return context.IsMapOfKinds(typeDef, ast.KindScalar, ast.KindEnum)
+			"resolvesToMapOfScalars": func(typeDef ir.Type) bool {
+				return context.IsMapOfKinds(typeDef, ir.KindScalar, ir.KindEnum)
 			},
 			"formatRawRef": func(pkg string, ref string) string {
-				return jenny.typeFormatter.formatRef(ast.NewRef(pkg, ref), false)
+				return jenny.typeFormatter.formatRef(ir.NewRef(pkg, ref), false)
 			},
 		})
 

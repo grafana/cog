@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -22,7 +22,7 @@ func newEqualityMethods(tmpl *template.Template, apiRefCollector *common.APIRefe
 	}
 }
 
-func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context languages.Context, object ast.Object, imports *common.DirectImportMap) error {
+func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context languages.Context, object ir.Object, imports *common.DirectImportMap) error {
 	if !object.Type.IsStruct() {
 		return nil
 	}
@@ -41,7 +41,7 @@ func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context 
 	tmpl := jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(template.FuncMap{
-			"typeHasEqualityFunc": func(typeDef ast.Type) bool {
+			"typeHasEqualityFunc": func(typeDef ir.Type) bool {
 				if !typeDef.IsRef() {
 					return false
 				}

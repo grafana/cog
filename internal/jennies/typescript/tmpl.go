@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -23,35 +23,35 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 		template.Funcs(config.OverridesTemplateFuncs),
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(template.FuncMap{
-			"formatType": func(_ ast.Type) string {
+			"formatType": func(_ ir.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
-			"formatRef": func(_ ast.RefType) string {
+			"formatRef": func(_ ir.RefType) string {
 				panic("formatRef() needs to be overridden by a jenny")
 			},
 			"formatIdentifier": formatIdentifier,
-			"typeIsDisjunctionOfBuilders": func(_ ast.Type) string {
+			"typeIsDisjunctionOfBuilders": func(_ ir.Type) string {
 				panic("typeIsDisjunctionOfBuilders() needs to be overridden by a jenny")
 			},
-			"defaultValueForType": func(_ ast.Type) string {
+			"defaultValueForType": func(_ ir.Type) string {
 				panic("defaultValueForType() needs to be overridden by a jenny")
 			},
-			"formatValue": func(destinationType ast.Type, value any) string {
+			"formatValue": func(destinationType ir.Type, value any) string {
 				panic("formatValue() needs to be overridden by a jenny")
 			},
-			"formatPath": func(_ ast.Path) string {
+			"formatPath": func(_ ir.Path) string {
 				panic("formatPath() needs to be overridden by a jenny")
 			},
-			"emptyValueForGuard": func(_ ast.Type) string {
+			"emptyValueForGuard": func(_ ir.Type) string {
 				panic("emptyValueForGuard() needs to be overridden by a jenny")
 			},
-			"typeHasBuilder": func(_ ast.Type) bool {
+			"typeHasBuilder": func(_ ir.Type) bool {
 				panic("typeHasBuilder() needs to be overridden by a jenny")
 			},
-			"formatTypeNoBuilder": func(_ ast.Type) bool {
+			"formatTypeNoBuilder": func(_ ir.Type) bool {
 				panic("formatTypeNoBuilder() needs to be overridden by a jenny")
 			},
-			"resolvesToComposableSlot": func(_ ast.Type) bool {
+			"resolvesToComposableSlot": func(_ ir.Type) bool {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},
 			"importPkg": func(pkg string) string {

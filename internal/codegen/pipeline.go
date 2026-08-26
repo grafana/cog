@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
-	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/ir"
+	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
@@ -129,15 +129,15 @@ func (pipeline *Pipeline) jenniesConfig() languages.Config {
 	}
 }
 
-func (pipeline *Pipeline) commonPasses() (compiler.Passes, error) {
+func (pipeline *Pipeline) commonPasses() (transforms.Transforms, error) {
 	if pipeline.Transforms.CommonPasses != nil {
 		return pipeline.Transforms.CommonPasses, nil
 	}
 
-	return cogyaml.NewCompilerLoader().PassesFrom(pipeline.Transforms.CommonPassesFiles)
+	return cogyaml.NewTransformsLoader().LoadFiles(pipeline.Transforms.CommonPassesFiles)
 }
 
-func (pipeline *Pipeline) finalPasses() compiler.Passes {
+func (pipeline *Pipeline) finalPasses() transforms.Transforms {
 	return pipeline.Transforms.FinalPasses
 }
 
@@ -263,8 +263,8 @@ func (pipeline *Pipeline) loadUnits() error {
 // LoadSchemas parses the schemas described by the pipeline and applies common
 // transformations.
 // Note: input-specific transformations are applied.
-func (pipeline *Pipeline) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
-	var allSchemas ast.Schemas
+func (pipeline *Pipeline) LoadSchemas(ctx context.Context) (ir.Schemas, error) {
+	var allSchemas ir.Schemas
 	var err error
 
 	// Merge additional units into the main pipeline

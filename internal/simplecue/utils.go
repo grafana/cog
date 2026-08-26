@@ -7,7 +7,7 @@ import (
 	"cuelang.org/go/cue"
 	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 )
 
 //nolint:unused
@@ -90,8 +90,8 @@ outer:
 	return a
 }
 
-func hintsFromCueValue(v cue.Value) ast.JenniesHints {
-	hints := make(ast.JenniesHints)
+func hintsFromCueValue(v cue.Value) ir.JenniesHints {
+	hints := make(ir.JenniesHints)
 
 	for _, a := range v.Attributes(cue.ValueAttr) {
 		if a.Name() != cogAnnotationName && a.Name() != cuetsyAnnotationName {

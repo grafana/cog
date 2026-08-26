@@ -4,7 +4,7 @@ import (
 	"io/fs"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast/compiler"
+	compiler2 "github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/languages"
@@ -97,19 +97,19 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	return jenny
 }
 
-func (language *Language) CompilerPasses() compiler.Passes {
-	return compiler.Passes{
-		&compiler.AnonymousStructsToNamed{},
-		&compiler.NotRequiredFieldAsNullableType{},
-		&compiler.DisjunctionWithNullToOptional{},
-		&compiler.DisjunctionOfConstantsToEnum{},
-		&compiler.AnonymousEnumToExplicitType{},
-		&compiler.PrefixEnumValues{},
-		&compiler.FlattenDisjunctions{},
-		&compiler.DisjunctionOfAnonymousStructsToExplicit{},
-		&compiler.DisjunctionInferMapping{},
-		&compiler.UndiscriminatedDisjunctionToAny{},
-		&compiler.DisjunctionToType{},
+func (language *Language) CompilerPasses() compiler2.Transforms {
+	return compiler2.Transforms{
+		&compiler2.AnonymousStructsToNamed{},
+		&compiler2.NotRequiredFieldAsNullableType{},
+		&compiler2.DisjunctionWithNullToOptional{},
+		&compiler2.DisjunctionOfConstantsToEnum{},
+		&compiler2.AnonymousEnumToExplicitType{},
+		&compiler2.PrefixEnumValues{},
+		&compiler2.FlattenDisjunctions{},
+		&compiler2.DisjunctionOfAnonymousStructsToExplicit{},
+		&compiler2.DisjunctionInferMapping{},
+		&compiler2.UndiscriminatedDisjunctionToAny{},
+		&compiler2.DisjunctionToType{},
 	}
 }
 

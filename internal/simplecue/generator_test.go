@@ -7,7 +7,7 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
@@ -46,10 +46,10 @@ Container: {
 	req.NoError(err)
 	require.NotNil(t, schemaAst)
 
-	objects := []ast.Object{
-		ast.NewObject("grafanatest", "Ref", ast.String()),
-		ast.NewObject("grafanatest", "Container", ast.NewStruct(
-			ast.NewStructField("ref", ast.NewRef("grafanatest", "Ref"), ast.Required()),
+	objects := []ir.Object{
+		ir.NewObject("grafanatest", "Ref", ir.String()),
+		ir.NewObject("grafanatest", "Container", ir.NewStruct(
+			ir.NewStructField("ref", ir.NewRef("grafanatest", "Ref"), ir.Required()),
 		)),
 	}
 
@@ -75,13 +75,13 @@ schema: {
 	req.NoError(err)
 	require.NotNil(t, schemaAst)
 
-	objects := []ast.Object{
-		ast.NewObject("grafanatest", "Origin", ast.NewStruct(
-			ast.NewStructField("creator", ast.String(), ast.Required()),
+	objects := []ir.Object{
+		ir.NewObject("grafanatest", "Origin", ir.NewStruct(
+			ir.NewStructField("creator", ir.String(), ir.Required()),
 		)),
-		ast.NewObject("grafanatest", "spec", ast.NewStruct(
-			ast.NewStructField("title", ast.String(), ast.Required()),
-			ast.NewStructField("origin", ast.NewRef("grafanatest", "Origin"), ast.Required()),
+		ir.NewObject("grafanatest", "spec", ir.NewStruct(
+			ir.NewStructField("title", ir.String(), ir.Required()),
+			ir.NewStructField("origin", ir.NewRef("grafanatest", "Origin"), ir.Required()),
 		)),
 	}
 
@@ -115,18 +115,18 @@ schema: {
 	req.NoError(err)
 	require.NotNil(t, schemaAst)
 
-	objects := []ast.Object{
-		ast.NewObject("grafanatest", "schema.#Origin", ast.NewStruct(
-			ast.NewStructField("creator", ast.String(), ast.Required()),
+	objects := []ir.Object{
+		ir.NewObject("grafanatest", "schema.#Origin", ir.NewStruct(
+			ir.NewStructField("creator", ir.String(), ir.Required()),
 		)),
-		ast.NewObject("grafanatest", "schema.spec.#Details", ast.NewMap(
-			ast.String(),
-			ast.Any(),
+		ir.NewObject("grafanatest", "schema.spec.#Details", ir.NewMap(
+			ir.String(),
+			ir.Any(),
 		)),
-		ast.NewObject("grafanatest", "spec", ast.NewStruct(
-			ast.NewStructField("title", ast.String(), ast.Required()),
-			ast.NewStructField("origin", ast.NewRef("grafanatest", "schema.#Origin"), ast.Required()),
-			ast.NewStructField("details", ast.NewRef("grafanatest", "schema.spec.#Details"), ast.Required()),
+		ir.NewObject("grafanatest", "spec", ir.NewStruct(
+			ir.NewStructField("title", ir.String(), ir.Required()),
+			ir.NewStructField("origin", ir.NewRef("grafanatest", "schema.#Origin"), ir.Required()),
+			ir.NewStructField("details", ir.NewRef("grafanatest", "schema.spec.#Details"), ir.Required()),
 		)),
 	}
 
@@ -154,16 +154,16 @@ ValueMap: {
 	req.NoError(err)
 	require.NotNil(t, schemaAst)
 
-	objects := []ast.Object{
-		ast.NewObject("grafanatest", "ValueMap", ast.NewStruct(
-			ast.NewStructField("type", ast.NewConstantReferenceType("grafanatest", "MappingType", "value"), ast.Required()),
+	objects := []ir.Object{
+		ir.NewObject("grafanatest", "ValueMap", ir.NewStruct(
+			ir.NewStructField("type", ir.NewConstantReferenceType("grafanatest", "MappingType", "value"), ir.Required()),
 		)),
-		ast.NewObject("grafanatest", "MappingType", ast.NewEnum([]ast.EnumValue{
-			{Name: "value", Value: "value", Type: ast.String()},
-			{Name: "range", Value: "range", Type: ast.String()},
+		ir.NewObject("grafanatest", "MappingType", ir.NewEnum([]ir.EnumValue{
+			{Name: "value", Value: "value", Type: ir.String()},
+			{Name: "range", Value: "range", Type: ir.String()},
 		})),
-		ast.NewObject("grafanatest", "Spec", ast.NewStruct(
-			ast.NewStructField("type", ast.NewRef("grafanatest", "ValueMap"), ast.Required()),
+		ir.NewObject("grafanatest", "Spec", ir.NewStruct(
+			ir.NewStructField("type", ir.NewRef("grafanatest", "ValueMap"), ir.Required()),
 		)),
 	}
 

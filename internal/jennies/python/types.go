@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -37,12 +37,12 @@ func builderTypeFormatter(context languages.Context, importPkg pkgImporter, impo
 	}
 }
 
-func (formatter *typeFormatter) formatObject(object ast.Object) (string, error) {
+func (formatter *typeFormatter) formatObject(object ir.Object) (string, error) {
 	var buffer strings.Builder
 
 	defName := formatObjectName(object.Name)
 
-	if !object.Type.IsAnyOf(ast.KindStruct, ast.KindEnum) {
+	if !object.Type.IsAnyOf(ir.KindStruct, ir.KindEnum) {
 		buffer.WriteString(formatter.formatComments(object.Comments))
 	}
 
@@ -53,9 +53,9 @@ func (formatter *typeFormatter) formatObject(object ast.Object) (string, error) 
 	}
 
 	switch object.Type.Kind {
-	case ast.KindEnum:
+	case ir.KindEnum:
 		buffer.WriteString(formatter.formatEnum(object))
-	case ast.KindStruct:
+	case ir.KindStruct:
 		return formatter.formatStruct(object), nil
 	default:
 		typingPkg := formatter.importPkg("typing", "typing")
@@ -65,7 +65,7 @@ func (formatter *typeFormatter) formatObject(object ast.Object) (string, error) 
 	return buffer.String(), nil
 }
 
-func (formatter *typeFormatter) formatType(def ast.Type) string {
+func (formatter *typeFormatter) formatType(def ir.Type) string {
 	result := "unknown"
 
 	if def.IsComposableSlot() {
@@ -125,7 +125,7 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 	return result
 }
 
-func (formatter *typeFormatter) formatEnum(def ast.Object) string {
+func (formatter *typeFormatter) formatEnum(def ir.Object) string {
 	var buffer strings.Builder
 
 	enumPkg := formatter.importPkg("enum", "enum")
@@ -134,7 +134,7 @@ func (formatter *typeFormatter) formatEnum(def ast.Object) string {
 	enumType := def.Type.AsEnum()
 
 	enumKind := enumPkg + ".IntEnum"
-	if enumType.Values[0].Type.AsScalar().ScalarKind == ast.KindString {
+	if enumType.Values[0].Type.AsScalar().ScalarKind == ir.KindString {
 		enumKind = enumPkg + ".StrEnum"
 	}
 	fmt.Fprintf(&buffer, "class %s(%s):\n", enumName, enumKind)
@@ -152,16 +152,16 @@ func (formatter *typeFormatter) formatEnum(def ast.Object) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatAnonymousEnum(typeDef ast.Type) string {
+func (formatter *typeFormatter) formatAnonymousEnum(typeDef ir.Type) string {
 	typingPkg := formatter.importPkg("typing", "typing")
-	literalValues := tools.Map(typeDef.AsEnum().Values, func(val ast.EnumValue) string {
+	literalValues := tools.Map(typeDef.AsEnum().Values, func(val ir.EnumValue) string {
 		return formatValue(val.Value)
 	})
 
 	return fmt.Sprintf("%s.Literal[%s]", typingPkg, strings.Join(literalValues, ", "))
 }
 
-func (formatter *typeFormatter) formatStruct(def ast.Object) string {
+func (formatter *typeFormatter) formatStruct(def ir.Object) string {
 	var buffer strings.Builder
 
 	classBases := ""
@@ -198,7 +198,7 @@ func (formatter *typeFormatter) formatStruct(def ast.Object) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatStructField(def ast.StructField) string {
+func (formatter *typeFormatter) formatStructField(def ir.StructField) string {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -210,22 +210,22 @@ func (formatter *typeFormatter) formatStructField(def ast.StructField) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatArray(def ast.ArrayType) string {
+func (formatter *typeFormatter) formatArray(def ir.ArrayType) string {
 	return fmt.Sprintf("list[%s]", formatter.formatType(def.ValueType))
 }
 
-func (formatter *typeFormatter) formatMap(def ast.MapType) string {
+func (formatter *typeFormatter) formatMap(def ir.MapType) string {
 	keyTypeString := formatter.formatType(def.IndexType)
 	valueTypeString := formatter.formatType(def.ValueType)
 
 	return fmt.Sprintf("dict[%s, %s]", keyTypeString, valueTypeString)
 }
 
-func (formatter *typeFormatter) formatRef(def ast.RefType) string {
+func (formatter *typeFormatter) formatRef(def ir.RefType) string {
 	return formatter.formatFullyQualifiedRef(def, !formatter.forBuilder)
 }
 
-func (formatter *typeFormatter) formatFullyQualifiedRef(def ast.RefType, escapeForwardRef bool) string {
+func (formatter *typeFormatter) formatFullyQualifiedRef(def ir.RefType, escapeForwardRef bool) string {
 	referredObject, found := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	if found && referredObject.Type.IsConcreteScalar() {
 		return formatter.formatType(referredObject.Type)
@@ -247,14 +247,14 @@ func (formatter *typeFormatter) formatFullyQualifiedRef(def ast.RefType, escapeF
 	return fmt.Sprintf("'%s'", formatted)
 }
 
-func (formatter *typeFormatter) formatDisjunction(def ast.DisjunctionType) string {
+func (formatter *typeFormatter) formatDisjunction(def ir.DisjunctionType) string {
 	typingPkg := formatter.importPkg("typing", "typing")
 	branches := tools.UniqueFormatted(def.Branches, formatter.formatType)
 
 	return fmt.Sprintf("%s.Union[%s]", typingPkg, strings.Join(branches, ", "))
 }
 
-func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) string {
+func (formatter *typeFormatter) formatEnumValue(enumObj ir.Object, val any) string {
 	referredPkg := enumObj.SelfRef.ReferredPkg
 	referredPkg = formatter.importModule(referredPkg, "..models", referredPkg)
 
@@ -268,26 +268,26 @@ func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) str
 	return fmt.Sprintf("%s.%s.%s", referredPkg, enumObj.Name, memberName)
 }
 
-func (formatter *typeFormatter) formatScalarKind(kind ast.ScalarKind) string {
+func (formatter *typeFormatter) formatScalarKind(kind ir.ScalarKind) string {
 	switch kind {
-	case ast.KindNull:
+	case ir.KindNull:
 		return "None"
-	case ast.KindAny:
+	case ir.KindAny:
 		return "object"
 
-	case ast.KindBytes:
+	case ir.KindBytes:
 		return "bytes"
-	case ast.KindString:
+	case ir.KindString:
 		return "str"
 
-	case ast.KindFloat32, ast.KindFloat64:
+	case ir.KindFloat32, ir.KindFloat64:
 		return "float"
-	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
+	case ir.KindUint8, ir.KindUint16, ir.KindUint32, ir.KindUint64:
 		return "int"
-	case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
+	case ir.KindInt8, ir.KindInt16, ir.KindInt32, ir.KindInt64:
 		return "int"
 
-	case ast.KindBool:
+	case ir.KindBool:
 		return "bool"
 	default:
 		return string(kind)
@@ -324,7 +324,7 @@ func (formatter *typeFormatter) formatComments(comments []string) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatConstantReference(def ast.ConstantReferenceType, shouldSetValue bool) string {
+func (formatter *typeFormatter) formatConstantReference(def ir.ConstantReferenceType, shouldSetValue bool) string {
 	referredObject, found := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	if !found {
 		return "unknown"
@@ -347,7 +347,7 @@ func (formatter *typeFormatter) formatConstantReference(def ast.ConstantReferenc
 	}
 
 	t := referredObject.Type.AsEnum().Values[0].Type
-	if t.AsScalar().ScalarKind == ast.KindString {
+	if t.AsScalar().ScalarKind == ir.KindString {
 		return "str"
 	}
 

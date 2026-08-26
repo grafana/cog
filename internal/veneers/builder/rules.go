@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers"
 )
@@ -15,11 +15,11 @@ type Rule struct {
 	Action   *Action
 }
 
-func (rule Rule) Matches(schemas ast.Schemas, builder ast.Builder) bool {
+func (rule Rule) Matches(schemas ir.Schemas, builder ir.Builder) bool {
 	return rule.Selector.Matches(schemas, builder)
 }
 
-func (rule Rule) Apply(ctx RuleCtx, selectedBuilders ast.Builders) (ast.Builders, error) {
+func (rule Rule) Apply(ctx RuleCtx, selectedBuilders ir.Builders) (ir.Builders, error) {
 	return rule.Action.run(ctx, selectedBuilders)
 }
 
@@ -29,18 +29,18 @@ func (rule Rule) String() string {
 
 type RuleCtx struct {
 	Logger   *slog.Logger
-	Schemas  ast.Schemas
-	Builders ast.Builders
+	Schemas  ir.Schemas
+	Builders ir.Builders
 }
 
-type ActionRunner func(ctx RuleCtx, selectedBuilders ast.Builders) (ast.Builders, error)
+type ActionRunner func(ctx RuleCtx, selectedBuilders ir.Builders) (ir.Builders, error)
 
 type Action struct {
 	description string
 	run         ActionRunner
 }
 
-func (action Action) Run(ctx RuleCtx, selectedBuilders ast.Builders) (ast.Builders, error) {
+func (action Action) Run(ctx RuleCtx, selectedBuilders ir.Builders) (ir.Builders, error) {
 	return action.run(ctx, selectedBuilders)
 }
 
@@ -54,7 +54,7 @@ func Omit(selector *Selector) *Rule {
 		Selector: selector,
 		Action: &Action{
 			description: "omit",
-			run: func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+			run: func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
 				return nil, nil
 			},
 		},
@@ -107,8 +107,8 @@ func VeneerTrailAsComments(selector *Selector) *Rule {
 	}
 }
 
-func Properties(selector *Selector, properties []ast.StructField) *Rule {
-	propNames := tools.Map(properties, func(prop ast.StructField) string {
+func Properties(selector *Selector, properties []ir.StructField) *Rule {
+	propNames := tools.Map(properties, func(prop ir.StructField) string {
 		return prop.Name
 	})
 
@@ -175,7 +175,7 @@ func AddOption(selector *Selector, newOption veneers.Option) *Rule {
 // AddFactory adds a builder factory to the selected builders.
 // These factories are meant to be used to simplify the instantiation of
 // builders for common use-cases.
-func AddFactory(selector *Selector, factory ast.BuilderFactory) *Rule {
+func AddFactory(selector *Selector, factory ir.BuilderFactory) *Rule {
 	return &Rule{
 		Selector: selector,
 		Action: &Action{

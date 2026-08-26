@@ -7,7 +7,7 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/logs"
@@ -16,7 +16,7 @@ import (
 )
 
 func TestRawTypes_Generate(t *testing.T) {
-	test := testutils.GoldenFilesTestSuite[ast.Schema]{
+	test := testutils.GoldenFilesTestSuite[ir.Schema]{
 		TestDataRoot: "../../../testdata/jennies/rawtypes",
 		Name:         "JavaRawTypes",
 	}
@@ -29,14 +29,14 @@ func TestRawTypes_Generate(t *testing.T) {
 	jenny := RawTypes{config: cfg, tmpl: initTemplates(cfg, common.NewAPIReferenceCollector())}
 	compilerPasses := New(cfg).CompilerPasses()
 
-	test.Run(t, func(tc *testutils.Test[ast.Schema]) {
+	test.Run(t, func(tc *testutils.Test[ir.Schema]) {
 		req := require.New(tc)
 
 		// We run the compiler passes defined fo Java since without them, we
 		// might not be able to translate some of the IR's semantics into Java.
 		// Example: disjunctions.
 		schema := tc.UnmarshalJSONInput(testutils.RawTypesIRInputFile)
-		processedAsts, err := compilerPasses.Process(logs.NoopLogger(), ast.Schemas{&schema})
+		processedAsts, err := compilerPasses.Process(logs.NoopLogger(), ir.Schemas{&schema})
 		req.NoError(err)
 
 		req.Len(processedAsts, 1, "we somehow got more ast.Schema than we put in")
@@ -61,14 +61,14 @@ public String customMethod() {
 }
 {{ end }}`
 
-	schema := &ast.Schema{
+	schema := &ir.Schema{
 		Package: "tests",
 		Objects: testutils.ObjectsMap(
-			ast.NewObject("tests", "Widget", ast.NewStruct(
-				ast.NewStructField("name", ast.NewScalar(ast.KindString), ast.Required()),
+			ir.NewObject("tests", "Widget", ir.NewStruct(
+				ir.NewStructField("name", ir.NewScalar(ir.KindString), ir.Required()),
 			)),
-			ast.NewObject("tests", "Gadget", ast.NewStruct(
-				ast.NewStructField("id", ast.NewScalar(ast.KindString), ast.Required()),
+			ir.NewObject("tests", "Gadget", ir.NewStruct(
+				ir.NewStructField("id", ir.NewScalar(ir.KindString), ir.Required()),
 			)),
 		),
 	}
@@ -76,7 +76,7 @@ public String customMethod() {
 		jenny := RawTypes{config: config, tmpl: initTemplates(config, common.NewAPIReferenceCollector())}
 		compilerPasses := New(config).CompilerPasses()
 
-		schemas, err := compilerPasses.Process(logs.NoopLogger(), ast.Schemas{schema})
+		schemas, err := compilerPasses.Process(logs.NoopLogger(), ir.Schemas{schema})
 		req.NoError(err)
 
 		files, err := jenny.Generate(languages.Context{Schemas: schemas})

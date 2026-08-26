@@ -6,7 +6,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -26,13 +26,13 @@ func newValidationMethods(tmpl *template.Template, packageMapper func(string) st
 	}
 }
 
-func (jenny validationMethods) generateForObject(buffer *strings.Builder, context languages.Context, object ast.Object, imports *common.DirectImportMap) error {
+func (jenny validationMethods) generateForObject(buffer *strings.Builder, context languages.Context, object ir.Object, imports *common.DirectImportMap) error {
 	if !object.Type.IsStruct() {
 		return nil
 	}
 
-	var resolvesToConstraints func(typeDef ast.Type) bool
-	resolvesToConstraints = func(typeDef ast.Type) bool {
+	var resolvesToConstraints func(typeDef ir.Type) bool
+	resolvesToConstraints = func(typeDef ir.Type) bool {
 		if typeDef.IsAny() {
 			return false
 		}
@@ -58,7 +58,7 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 		}
 
 		if typeDef.IsStruct() {
-			return slices.ContainsFunc(typeDef.AsStruct().Fields, func(field ast.StructField) bool {
+			return slices.ContainsFunc(typeDef.AsStruct().Fields, func(field ir.StructField) bool {
 				return resolvesToConstraints(field.Type)
 			})
 		}

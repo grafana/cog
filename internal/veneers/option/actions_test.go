@@ -3,7 +3,7 @@ package option
 import (
 	"testing"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
@@ -12,8 +12,8 @@ import (
 func TestRenameAction(t *testing.T) {
 	req := require.New(t)
 
-	option := ast.Option{Name: "Name"}
-	modifiedOpts, err := RenameAction("NewName")(RuleCtx{}, ast.Builder{}, option)
+	option := ir.Option{Name: "Name"}
+	modifiedOpts, err := RenameAction("NewName")(RuleCtx{}, ir.Builder{}, option)
 	req.NoError(err)
 
 	req.Len(modifiedOpts, 1)
@@ -23,8 +23,8 @@ func TestRenameAction(t *testing.T) {
 func TestOmitAction(t *testing.T) {
 	req := require.New(t)
 
-	option := ast.Option{Name: "Name"}
-	modifiedOpts, err := OmitAction()(RuleCtx{}, ast.Builder{}, option)
+	option := ir.Option{Name: "Name"}
+	modifiedOpts, err := OmitAction()(RuleCtx{}, ir.Builder{}, option)
 	req.NoError(err)
 
 	req.Empty(modifiedOpts)
@@ -33,20 +33,20 @@ func TestOmitAction(t *testing.T) {
 func TestUnfoldBooleanAction(t *testing.T) {
 	req := require.New(t)
 
-	option := ast.Option{
-		Args: []ast.Argument{
-			{Name: "editable", Type: ast.Bool()},
+	option := ir.Option{
+		Args: []ir.Argument{
+			{Name: "editable", Type: ir.Bool()},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "editable", Type: ast.Bool()},
-			}, ast.Argument{Name: "editable", Type: ast.Bool()}),
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{
+				{Identifier: "editable", Type: ir.Bool()},
+			}, ir.Argument{Name: "editable", Type: ir.Bool()}),
 		},
 	}
 	modifiedOpts, err := UnfoldBooleanAction(BooleanUnfold{
 		OptionTrue:  "Editable",
 		OptionFalse: "ReadOnly",
-	})(RuleCtx{}, ast.Builder{}, option)
+	})(RuleCtx{}, ir.Builder{}, option)
 	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
@@ -70,20 +70,20 @@ func TestUnfoldBooleanAction(t *testing.T) {
 func TestUnfoldBooleanAction_onNonBooleanDoesNothing(t *testing.T) {
 	req := require.New(t)
 
-	option := ast.Option{
-		Args: []ast.Argument{
-			{Name: "tags", Type: ast.NewArray(ast.String())},
+	option := ir.Option{
+		Args: []ir.Argument{
+			{Name: "tags", Type: ir.NewArray(ir.String())},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "tags", Type: ast.NewArray(ast.String())},
-			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{
+				{Identifier: "tags", Type: ir.NewArray(ir.String())},
+			}, ir.Argument{Name: "tags", Type: ir.NewArray(ir.String())}),
 		},
 	}
 	modifiedOpts, err := UnfoldBooleanAction(BooleanUnfold{
 		OptionTrue:  "TrueOpt",
 		OptionFalse: "FalseOpt",
-	})(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
+	})(RuleCtx{Logger: logs.NoopLogger()}, ir.Builder{}, option)
 	req.NoError(err)
 
 	req.Len(modifiedOpts, 1)
@@ -93,23 +93,23 @@ func TestUnfoldBooleanAction_onNonBooleanDoesNothing(t *testing.T) {
 func TestDisjunctionAsOptionsAction_withDisjunction(t *testing.T) {
 	req := require.New(t)
 
-	disjunctionType := ast.NewDisjunction(ast.Types{
-		ast.NewRef("dashboard", "Panel"),
-		ast.NewRef("dashboard", "Row"),
+	disjunctionType := ir.NewDisjunction(ir.Types{
+		ir.NewRef("dashboard", "Panel"),
+		ir.NewRef("dashboard", "Row"),
 	})
 
-	option := ast.Option{
+	option := ir.Option{
 		Name: "Panel",
-		Args: []ast.Argument{
+		Args: []ir.Argument{
 			{Name: "panel", Type: disjunctionType},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{
 				{Identifier: "panel", Type: disjunctionType},
-			}, ast.Argument{Name: "tags", Type: disjunctionType}),
+			}, ir.Argument{Name: "tags", Type: disjunctionType}),
 		},
 	}
-	modifiedOpts, err := DisjunctionAsOptionsAction(0)(RuleCtx{}, ast.Builder{}, option)
+	modifiedOpts, err := DisjunctionAsOptionsAction(0)(RuleCtx{}, ir.Builder{}, option)
 	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
@@ -128,27 +128,27 @@ func TestDisjunctionAsOptionsAction_withDisjunction(t *testing.T) {
 func TestDisjunctionAsOptionsAction_withDisjunctionAsSecondArg(t *testing.T) {
 	req := require.New(t)
 
-	disjunctionType := ast.NewDisjunction(ast.Types{
-		ast.NewRef("dashboard", "Panel"),
-		ast.NewRef("dashboard", "Row"),
+	disjunctionType := ir.NewDisjunction(ir.Types{
+		ir.NewRef("dashboard", "Panel"),
+		ir.NewRef("dashboard", "Row"),
 	})
 
-	option := ast.Option{
+	option := ir.Option{
 		Name: "Panel",
-		Args: []ast.Argument{
-			{Name: "key", Type: ast.String()},
+		Args: []ir.Argument{
+			{Name: "key", Type: ir.String()},
 			{Name: "panel", Type: disjunctionType},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{ // This assignment doesn't make sense, but for the purpose of this test it doesn't matter.
-				{Identifier: "key", Type: ast.String()},
-			}, ast.Argument{Name: "key", Type: ast.String()}),
-			ast.ArgumentAssignment(ast.Path{
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{ // This assignment doesn't make sense, but for the purpose of this test it doesn't matter.
+				{Identifier: "key", Type: ir.String()},
+			}, ir.Argument{Name: "key", Type: ir.String()}),
+			ir.ArgumentAssignment(ir.Path{
 				{Identifier: "panel", Type: disjunctionType},
-			}, ast.Argument{Name: "tags", Type: disjunctionType}),
+			}, ir.Argument{Name: "tags", Type: disjunctionType}),
 		},
 	}
-	modifiedOpts, err := DisjunctionAsOptionsAction(1)(RuleCtx{}, ast.Builder{}, option)
+	modifiedOpts, err := DisjunctionAsOptionsAction(1)(RuleCtx{}, ir.Builder{}, option)
 	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
@@ -157,7 +157,7 @@ func TestDisjunctionAsOptionsAction_withDisjunctionAsSecondArg(t *testing.T) {
 	req.Len(modifiedOpts[0].Args, 2)
 	req.Len(modifiedOpts[0].Assignments, 2)
 	req.Equal("key", modifiedOpts[0].Args[0].Name)
-	req.Equal(ast.String(), modifiedOpts[0].Args[0].Type)
+	req.Equal(ir.String(), modifiedOpts[0].Args[0].Type)
 	req.Equal("panel", modifiedOpts[0].Args[1].Name)
 	req.Equal(disjunctionType.Disjunction.Branches[0], modifiedOpts[0].Args[1].Type)
 
@@ -165,7 +165,7 @@ func TestDisjunctionAsOptionsAction_withDisjunctionAsSecondArg(t *testing.T) {
 	req.Len(modifiedOpts[1].Args, 2)
 	req.Len(modifiedOpts[1].Assignments, 2)
 	req.Equal("key", modifiedOpts[1].Args[0].Name)
-	req.Equal(ast.String(), modifiedOpts[1].Args[0].Type)
+	req.Equal(ir.String(), modifiedOpts[1].Args[0].Type)
 	req.Equal("row", modifiedOpts[1].Args[1].Name)
 	req.Equal(disjunctionType.Disjunction.Branches[1], modifiedOpts[1].Args[1].Type)
 }
@@ -173,90 +173,90 @@ func TestDisjunctionAsOptionsAction_withDisjunctionAsSecondArg(t *testing.T) {
 func TestDisjunctionAsOptionsAction_withDisjunctionStruct(t *testing.T) {
 	req := require.New(t)
 
-	panelType := ast.NewStruct()
-	rowType := ast.NewStruct()
-	panelOrRow := ast.NewStruct(
-		ast.NewStructField("Panel", ast.NewRef("dashboard", "Panel")),
-		ast.NewStructField("Row", ast.NewRef("dashboard", "Row")),
+	panelType := ir.NewStruct()
+	rowType := ir.NewStruct()
+	panelOrRow := ir.NewStruct(
+		ir.NewStructField("Panel", ir.NewRef("dashboard", "Panel")),
+		ir.NewStructField("Row", ir.NewRef("dashboard", "Row")),
 	)
-	panelOrRow.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = "not nil"
-	ref := ast.NewRef("dashboard", "PanelOrRow")
-	schema := &ast.Schema{
+	panelOrRow.Hints[ir.HintDiscriminatedDisjunctionOfRefs] = "not nil"
+	ref := ir.NewRef("dashboard", "PanelOrRow")
+	schema := &ir.Schema{
 		Package: "dashboard",
 		Objects: testutils.ObjectsMap(
-			ast.NewObject("dashboard", "PanelOrRow", panelOrRow),
-			ast.NewObject("dashboard", "Row", rowType),
-			ast.NewObject("dashboard", "Panel", panelType),
+			ir.NewObject("dashboard", "PanelOrRow", panelOrRow),
+			ir.NewObject("dashboard", "Row", rowType),
+			ir.NewObject("dashboard", "Panel", panelType),
 		),
 	}
-	option := ast.Option{
+	option := ir.Option{
 		Name: "Panel",
-		Args: []ast.Argument{
+		Args: []ir.Argument{
 			{Name: "panel", Type: ref},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{
 				{Identifier: "panel", Type: ref},
-			}, ast.Argument{Name: "tags", Type: ref}),
+			}, ir.Argument{Name: "tags", Type: ref}),
 		},
 	}
 	ctx := RuleCtx{
-		Schemas: ast.Schemas{schema},
+		Schemas: ir.Schemas{schema},
 	}
-	modifiedOpts, err := DisjunctionAsOptionsAction(0)(ctx, ast.Builder{}, option)
+	modifiedOpts, err := DisjunctionAsOptionsAction(0)(ctx, ir.Builder{}, option)
 	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
 
 	req.Equal("Panel", modifiedOpts[0].Name)
 	req.Len(modifiedOpts[0].Args, 1)
-	req.Equal(ast.NewRef("dashboard", "Panel"), modifiedOpts[0].Args[0].Type)
+	req.Equal(ir.NewRef("dashboard", "Panel"), modifiedOpts[0].Args[0].Type)
 	req.Equal("Panel", modifiedOpts[0].Args[0].Name)
 
 	req.Equal("Row", modifiedOpts[1].Name)
 	req.Len(modifiedOpts[1].Args, 1)
-	req.Equal(ast.NewRef("dashboard", "Row"), modifiedOpts[1].Args[0].Type)
+	req.Equal(ir.NewRef("dashboard", "Row"), modifiedOpts[1].Args[0].Type)
 	req.Equal("Row", modifiedOpts[1].Args[0].Name)
 }
 
 func TestDisjunctionAsOptionsAction_withDisjunctionStructAsSecondArg(t *testing.T) {
 	req := require.New(t)
 
-	panelType := ast.NewStruct()
-	rowType := ast.NewStruct()
-	panelOrRow := ast.NewStruct(
-		ast.NewStructField("Panel", ast.NewRef("dashboard", "Panel")),
-		ast.NewStructField("Row", ast.NewRef("dashboard", "Row")),
+	panelType := ir.NewStruct()
+	rowType := ir.NewStruct()
+	panelOrRow := ir.NewStruct(
+		ir.NewStructField("Panel", ir.NewRef("dashboard", "Panel")),
+		ir.NewStructField("Row", ir.NewRef("dashboard", "Row")),
 	)
-	panelOrRow.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = "not nil"
-	ref := ast.NewRef("dashboard", "PanelOrRow")
-	schema := &ast.Schema{
+	panelOrRow.Hints[ir.HintDiscriminatedDisjunctionOfRefs] = "not nil"
+	ref := ir.NewRef("dashboard", "PanelOrRow")
+	schema := &ir.Schema{
 		Package: "dashboard",
 		Objects: testutils.ObjectsMap(
-			ast.NewObject("dashboard", "PanelOrRow", panelOrRow),
-			ast.NewObject("dashboard", "Row", rowType),
-			ast.NewObject("dashboard", "Panel", panelType),
+			ir.NewObject("dashboard", "PanelOrRow", panelOrRow),
+			ir.NewObject("dashboard", "Row", rowType),
+			ir.NewObject("dashboard", "Panel", panelType),
 		),
 	}
-	option := ast.Option{
+	option := ir.Option{
 		Name: "Panel",
-		Args: []ast.Argument{
-			{Name: "key", Type: ast.String()},
+		Args: []ir.Argument{
+			{Name: "key", Type: ir.String()},
 			{Name: "panel", Type: ref},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{ // This assignment doesn't make sense, but for the purpose of this test it doesn't matter.
-				{Identifier: "key", Type: ast.String()},
-			}, ast.Argument{Name: "key", Type: ast.String()}),
-			ast.ArgumentAssignment(ast.Path{
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{ // This assignment doesn't make sense, but for the purpose of this test it doesn't matter.
+				{Identifier: "key", Type: ir.String()},
+			}, ir.Argument{Name: "key", Type: ir.String()}),
+			ir.ArgumentAssignment(ir.Path{
 				{Identifier: "panel", Type: ref},
-			}, ast.Argument{Name: "tags", Type: ref}),
+			}, ir.Argument{Name: "tags", Type: ref}),
 		},
 	}
 	ctx := RuleCtx{
-		Schemas: ast.Schemas{schema},
+		Schemas: ir.Schemas{schema},
 	}
-	modifiedOpts, err := DisjunctionAsOptionsAction(1)(ctx, ast.Builder{}, option)
+	modifiedOpts, err := DisjunctionAsOptionsAction(1)(ctx, ir.Builder{}, option)
 	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
@@ -265,49 +265,49 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStructAsSecondArg(t *testing.
 	req.Len(modifiedOpts[0].Args, 2)
 	req.Len(modifiedOpts[0].Assignments, 2)
 	req.Equal("key", modifiedOpts[0].Args[0].Name)
-	req.Equal(ast.String(), modifiedOpts[0].Args[0].Type)
-	req.Equal(ast.NewRef("dashboard", "Panel"), modifiedOpts[0].Args[1].Type)
+	req.Equal(ir.String(), modifiedOpts[0].Args[0].Type)
+	req.Equal(ir.NewRef("dashboard", "Panel"), modifiedOpts[0].Args[1].Type)
 	req.Equal("Panel", modifiedOpts[0].Args[1].Name)
 
 	req.Equal("Row", modifiedOpts[1].Name)
 	req.Len(modifiedOpts[1].Args, 2)
 	req.Len(modifiedOpts[1].Assignments, 2)
 	req.Equal("key", modifiedOpts[0].Args[0].Name)
-	req.Equal(ast.String(), modifiedOpts[0].Args[0].Type)
-	req.Equal(ast.NewRef("dashboard", "Row"), modifiedOpts[1].Args[1].Type)
+	req.Equal(ir.String(), modifiedOpts[0].Args[0].Type)
+	req.Equal(ir.NewRef("dashboard", "Row"), modifiedOpts[1].Args[1].Type)
 	req.Equal("Row", modifiedOpts[1].Args[1].Name)
 }
 
 func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {
 	req := require.New(t)
 
-	timeType := ast.NewStruct(
-		ast.NewStructField("from", ast.String()),
-		ast.NewStructField("to", ast.String()),
-		ast.NewStructField("auto", ast.Bool()),
+	timeType := ir.NewStruct(
+		ir.NewStructField("from", ir.String()),
+		ir.NewStructField("to", ir.String()),
+		ir.NewStructField("auto", ir.Bool()),
 	)
-	ref := ast.NewRef("dashboard", "Time")
-	schema := &ast.Schema{
+	ref := ir.NewRef("dashboard", "Time")
+	schema := &ir.Schema{
 		Package: "dashboard",
 		Objects: testutils.ObjectsMap(
-			ast.NewObject("dashboard", "Time", timeType),
+			ir.NewObject("dashboard", "Time", timeType),
 		),
 	}
-	option := ast.Option{
+	option := ir.Option{
 		Name: "Time",
-		Args: []ast.Argument{
+		Args: []ir.Argument{
 			{Name: "time", Type: ref},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{
 				{Identifier: "time", Type: ref},
-			}, ast.Argument{Name: "editable", Type: ref}),
+			}, ir.Argument{Name: "editable", Type: ref}),
 		},
 	}
 	ctx := RuleCtx{
-		Schemas: ast.Schemas{schema},
+		Schemas: ir.Schemas{schema},
 	}
-	modifiedOpts, err := StructFieldsAsOptionsAction("from", "to")(ctx, ast.Builder{}, option)
+	modifiedOpts, err := StructFieldsAsOptionsAction("from", "to")(ctx, ir.Builder{}, option)
 	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
@@ -315,14 +315,14 @@ func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {
 	req.Equal("from", modifiedOpts[0].Name)
 	req.Len(modifiedOpts[0].Args, 1)
 	req.Equal("from", modifiedOpts[0].Args[0].Name)
-	req.Equal(ast.String(), modifiedOpts[0].Args[0].Type)
+	req.Equal(ir.String(), modifiedOpts[0].Args[0].Type)
 	req.Len(modifiedOpts[0].Assignments, 1)
 	req.Equal("time.from", modifiedOpts[0].Assignments[0].Path.String())
 
 	req.Equal("to", modifiedOpts[1].Name)
 	req.Len(modifiedOpts[1].Args, 1)
 	req.Equal("to", modifiedOpts[1].Args[0].Name)
-	req.Equal(ast.String(), modifiedOpts[1].Args[0].Type)
+	req.Equal(ir.String(), modifiedOpts[1].Args[0].Type)
 	req.Len(modifiedOpts[1].Assignments, 1)
 	req.Equal("time.to", modifiedOpts[1].Assignments[0].Path.String())
 }
@@ -330,213 +330,213 @@ func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {
 func TestArrayToAppendAction_withNoArgument(t *testing.T) {
 	req := require.New(t)
 
-	option := ast.Option{
-		Assignments: []ast.Assignment{
-			ast.ConstantAssignment(ast.Path{
-				{Identifier: "editable", Type: ast.Bool()},
+	option := ir.Option{
+		Assignments: []ir.Assignment{
+			ir.ConstantAssignment(ir.Path{
+				{Identifier: "editable", Type: ir.Bool()},
 			}, true),
 		},
 	}
-	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
+	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{Logger: logs.NoopLogger()}, ir.Builder{}, option)
 	req.NoError(err)
 
-	req.Equal([]ast.Option{option}, modifiedOpts)
+	req.Equal([]ir.Option{option}, modifiedOpts)
 }
 
 func TestArrayToAppendAction_withNonArrayArgument(t *testing.T) {
 	req := require.New(t)
 
-	option := ast.Option{
-		Args: []ast.Argument{
-			{Name: "editable", Type: ast.Bool()},
+	option := ir.Option{
+		Args: []ir.Argument{
+			{Name: "editable", Type: ir.Bool()},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "editable", Type: ast.Bool()},
-			}, ast.Argument{Name: "editable", Type: ast.Bool()}),
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{
+				{Identifier: "editable", Type: ir.Bool()},
+			}, ir.Argument{Name: "editable", Type: ir.Bool()}),
 		},
 	}
-	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
+	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{Logger: logs.NoopLogger()}, ir.Builder{}, option)
 	req.NoError(err)
 
-	req.Equal([]ast.Option{option}, modifiedOpts)
+	req.Equal([]ir.Option{option}, modifiedOpts)
 }
 
 func TestArrayToAppendAction_withArrayArgument(t *testing.T) {
 	req := require.New(t)
 
 	// input
-	option := ast.Option{
-		Args: []ast.Argument{
-			{Name: "tags", Type: ast.NewArray(ast.String())},
+	option := ir.Option{
+		Args: []ir.Argument{
+			{Name: "tags", Type: ir.NewArray(ir.String())},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "tags", Type: ast.NewArray(ast.String())},
-			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{
+				{Identifier: "tags", Type: ir.NewArray(ir.String())},
+			}, ir.Argument{Name: "tags", Type: ir.NewArray(ir.String())}),
 		},
 	}
 
 	// expected output
-	expectedOption := ast.Option{
-		Args: []ast.Argument{
-			{Name: "tag", Type: ast.String()},
+	expectedOption := ir.Option{
+		Args: []ir.Argument{
+			{Name: "tag", Type: ir.String()},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(
-				ast.Path{
-					{Identifier: "tags", Type: ast.NewArray(ast.String())},
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(
+				ir.Path{
+					{Identifier: "tags", Type: ir.NewArray(ir.String())},
 				},
-				ast.Argument{Name: "tag", Type: ast.String()},
-				ast.Method(ast.AppendAssignment),
+				ir.Argument{Name: "tag", Type: ir.String()},
+				ir.Method(ir.AppendAssignment),
 			),
 		},
 		VeneerTrail: []string{"ArrayToAppend"},
 	}
 
-	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{}, ast.Builder{}, option)
+	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{}, ir.Builder{}, option)
 	req.NoError(err)
 
-	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
+	req.Equal([]ir.Option{expectedOption}, modifiedOpts)
 }
 
 func TestStructFieldsAsArgumentsAction_withNoArgument(t *testing.T) {
 	req := require.New(t)
 
-	option := ast.Option{
-		Assignments: []ast.Assignment{
-			ast.ConstantAssignment(ast.Path{
-				{Identifier: "editable", Type: ast.Bool()},
+	option := ir.Option{
+		Assignments: []ir.Assignment{
+			ir.ConstantAssignment(ir.Path{
+				{Identifier: "editable", Type: ir.Bool()},
 			}, true),
 		},
 	}
-	modifiedOpts, err := StructFieldsAsArgumentsAction()(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
+	modifiedOpts, err := StructFieldsAsArgumentsAction()(RuleCtx{Logger: logs.NoopLogger()}, ir.Builder{}, option)
 	req.NoError(err)
 
-	req.Equal([]ast.Option{option}, modifiedOpts)
+	req.Equal([]ir.Option{option}, modifiedOpts)
 }
 
 func TestStructFieldsAsArgumentsAction_withNonStructArgument(t *testing.T) {
 	req := require.New(t)
 
-	option := ast.Option{
-		Args: []ast.Argument{
-			{Name: "tags", Type: ast.NewArray(ast.String())},
+	option := ir.Option{
+		Args: []ir.Argument{
+			{Name: "tags", Type: ir.NewArray(ir.String())},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "tags", Type: ast.NewArray(ast.String())},
-			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{
+				{Identifier: "tags", Type: ir.NewArray(ir.String())},
+			}, ir.Argument{Name: "tags", Type: ir.NewArray(ir.String())}),
 		},
 	}
-	modifiedOpts, err := StructFieldsAsArgumentsAction()(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
+	modifiedOpts, err := StructFieldsAsArgumentsAction()(RuleCtx{Logger: logs.NoopLogger()}, ir.Builder{}, option)
 	req.NoError(err)
 
-	req.Equal([]ast.Option{option}, modifiedOpts)
+	req.Equal([]ir.Option{option}, modifiedOpts)
 }
 
 func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
 	req := require.New(t)
 
-	structType := ast.NewStruct(
-		ast.NewStructField("from", ast.String()),
-		ast.NewStructField("to", ast.String()),
-		ast.NewStructField("type", ast.String(ast.Value("time"))),
+	structType := ir.NewStruct(
+		ir.NewStructField("from", ir.String()),
+		ir.NewStructField("to", ir.String()),
+		ir.NewStructField("type", ir.String(ir.Value("time"))),
 	)
 
 	// input
-	option := ast.Option{
-		Args: []ast.Argument{
+	option := ir.Option{
+		Args: []ir.Argument{
 			{Name: "time", Type: structType},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{
 				{Identifier: "time", Type: structType},
-			}, ast.Argument{Name: "time", Type: structType}),
+			}, ir.Argument{Name: "time", Type: structType}),
 		},
 	}
 
 	// expected
-	expectedOption := ast.Option{
-		Args: []ast.Argument{
-			{Name: "from", Type: ast.String()},
-			{Name: "to", Type: ast.String()},
+	expectedOption := ir.Option{
+		Args: []ir.Argument{
+			{Name: "from", Type: ir.String()},
+			{Name: "to", Type: ir.String()},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{
 				{Identifier: "time", Type: structType},
-				{Identifier: "from", Type: ast.String()},
-			}, ast.Argument{Name: "from", Type: ast.String()}),
-			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "from", Type: ir.String()},
+			}, ir.Argument{Name: "from", Type: ir.String()}),
+			ir.ArgumentAssignment(ir.Path{
 				{Identifier: "time", Type: structType},
-				{Identifier: "to", Type: ast.String()},
-			}, ast.Argument{Name: "to", Type: ast.String()}),
-			ast.ConstantAssignment(ast.Path{
+				{Identifier: "to", Type: ir.String()},
+			}, ir.Argument{Name: "to", Type: ir.String()}),
+			ir.ConstantAssignment(ir.Path{
 				{Identifier: "time", Type: structType},
-				{Identifier: "type", Type: ast.String(ast.Value("time"))},
+				{Identifier: "type", Type: ir.String(ir.Value("time"))},
 			}, "time"),
 		},
 		VeneerTrail: []string{"StructFieldsAsArguments"},
 	}
 
-	modifiedOpts, err := StructFieldsAsArgumentsAction()(RuleCtx{}, ast.Builder{}, option)
+	modifiedOpts, err := StructFieldsAsArgumentsAction()(RuleCtx{}, ir.Builder{}, option)
 	req.NoError(err)
 
-	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
+	req.Equal([]ir.Option{expectedOption}, modifiedOpts)
 }
 
 func TestStructFieldsAsArgumentsAction_withArrayOfStructArgument(t *testing.T) {
 	req := require.New(t)
 
-	structType := ast.NewStruct(
-		ast.NewStructField("from", ast.String()),
-		ast.NewStructField("to", ast.String()),
-		ast.NewStructField("type", ast.String(ast.Value("time"))),
+	structType := ir.NewStruct(
+		ir.NewStructField("from", ir.String()),
+		ir.NewStructField("to", ir.String()),
+		ir.NewStructField("type", ir.String(ir.Value("time"))),
 	)
 
 	// input
-	option := ast.Option{
-		Args: []ast.Argument{
+	option := ir.Option{
+		Args: []ir.Argument{
 			{Name: "time", Type: structType},
 		},
-		Assignments: []ast.Assignment{
-			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "time", Type: ast.NewArray(structType)},
-			}, ast.Argument{Name: "time", Type: structType}),
+		Assignments: []ir.Assignment{
+			ir.ArgumentAssignment(ir.Path{
+				{Identifier: "time", Type: ir.NewArray(structType)},
+			}, ir.Argument{Name: "time", Type: structType}),
 		},
 	}
 
 	// expected
-	expectedOption := ast.Option{
-		Args: []ast.Argument{
-			{Name: "from", Type: ast.String()},
-			{Name: "to", Type: ast.String()},
+	expectedOption := ir.Option{
+		Args: []ir.Argument{
+			{Name: "from", Type: ir.String()},
+			{Name: "to", Type: ir.String()},
 		},
-		Assignments: []ast.Assignment{
+		Assignments: []ir.Assignment{
 			{
-				Method: ast.AppendAssignment,
-				Path:   ast.Path{{Identifier: "time", Type: ast.NewArray(structType)}},
-				Value: ast.AssignmentValue{
-					Envelope: &ast.AssignmentEnvelope{
+				Method: ir.AppendAssignment,
+				Path:   ir.Path{{Identifier: "time", Type: ir.NewArray(structType)}},
+				Value: ir.AssignmentValue{
+					Envelope: &ir.AssignmentEnvelope{
 						Type: structType,
-						Values: []ast.EnvelopeFieldValue{
+						Values: []ir.EnvelopeFieldValue{
 							{
-								Path: ast.Path{{Identifier: "from", Type: ast.String()}},
-								Value: ast.AssignmentValue{Argument: &ast.Argument{
+								Path: ir.Path{{Identifier: "from", Type: ir.String()}},
+								Value: ir.AssignmentValue{Argument: &ir.Argument{
 									Name: "from",
-									Type: ast.String(),
+									Type: ir.String(),
 								}},
 							},
 							{
-								Path: ast.Path{{Identifier: "to", Type: ast.String()}},
-								Value: ast.AssignmentValue{Argument: &ast.Argument{
+								Path: ir.Path{{Identifier: "to", Type: ir.String()}},
+								Value: ir.AssignmentValue{Argument: &ir.Argument{
 									Name: "to",
-									Type: ast.String(),
+									Type: ir.String(),
 								}},
 							},
 							{
-								Path:  ast.Path{{Identifier: "type", Type: ast.String(ast.Value("time"))}},
-								Value: ast.AssignmentValue{Constant: "time"},
+								Path:  ir.Path{{Identifier: "type", Type: ir.String(ir.Value("time"))}},
+								Value: ir.AssignmentValue{Constant: "time"},
 							},
 						},
 					},
@@ -546,17 +546,17 @@ func TestStructFieldsAsArgumentsAction_withArrayOfStructArgument(t *testing.T) {
 		VeneerTrail: []string{"StructFieldsAsArguments"},
 	}
 
-	modifiedOpts, err := StructFieldsAsArgumentsAction()(RuleCtx{}, ast.Builder{}, option)
+	modifiedOpts, err := StructFieldsAsArgumentsAction()(RuleCtx{}, ir.Builder{}, option)
 	req.NoError(err)
 
-	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
+	req.Equal([]ir.Option{expectedOption}, modifiedOpts)
 }
 
 func TestDuplicateAction(t *testing.T) {
 	req := require.New(t)
 
-	option := ast.Option{Name: "Name"}
-	modifiedOpts, err := DuplicateAction("Duplicated")(RuleCtx{}, ast.Builder{}, option)
+	option := ir.Option{Name: "Name"}
+	modifiedOpts, err := DuplicateAction("Duplicated")(RuleCtx{}, ir.Builder{}, option)
 	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)

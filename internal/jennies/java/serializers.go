@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -24,8 +24,8 @@ func (jenny *Serializers) Generate(context languages.Context) (codejen.Files, er
 	serializers := make(codejen.Files, 0)
 	for _, schema := range context.Schemas {
 		var hasErr error
-		schema.Objects.Iterate(func(key string, obj ast.Object) {
-			if obj.Type.HasAnyHint(ast.HintDisjunctionOfScalars, ast.HintDiscriminatedDisjunctionOfRefs, ast.HintDisjunctionOfScalarsAndRefs) {
+		schema.Objects.Iterate(func(key string, obj ir.Object) {
+			if obj.Type.HasAnyHint(ir.HintDisjunctionOfScalars, ir.HintDiscriminatedDisjunctionOfRefs, ir.HintDisjunctionOfScalarsAndRefs) {
 				f, err := jenny.genSerializer(obj)
 				if err != nil {
 					hasErr = err
@@ -42,7 +42,7 @@ func (jenny *Serializers) Generate(context languages.Context) (codejen.Files, er
 	return serializers, nil
 }
 
-func (jenny *Serializers) genSerializer(obj ast.Object) (*codejen.File, error) {
+func (jenny *Serializers) genSerializer(obj ir.Object) (*codejen.File, error) {
 	rendered, err := jenny.tmpl.Render("marshalling/disjunctions.json_marshall.tmpl", Unmarshalling{
 		Package: jenny.config.formatPackage(obj.SelfRef.ReferredPkg),
 		Name:    tools.UpperCamelCase(obj.Name),
