@@ -3,7 +3,7 @@ package builder
 import (
 	"testing"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
@@ -11,27 +11,27 @@ import (
 func TestDuplicate(t *testing.T) {
 	req := require.New(t)
 
-	originalObject := ast.NewObject("pkg", "Dashboard", ast.NewStruct(
-		ast.NewStructField("name", ast.String()),
+	originalObject := ir.NewObject("pkg", "Dashboard", ir.NewStruct(
+		ir.NewStructField("name", ir.String()),
 	))
-	argument := ast.Argument{Name: "title", Type: ast.String()}
-	schemas := ast.Schemas{
-		&ast.Schema{
+	argument := ir.Argument{Name: "title", Type: ir.String()}
+	schemas := ir.Schemas{
+		&ir.Schema{
 			Package: "pkg",
 			Objects: testutils.ObjectsMap(originalObject),
 		},
 	}
-	originalBuilders := ast.Builders{
+	originalBuilders := ir.Builders{
 		{
 			For:     originalObject,
 			Package: "pkg",
 			Name:    "Dashboard",
-			Options: []ast.Option{
+			Options: []ir.Option{
 				{
 					Name: "name",
-					Args: []ast.Argument{argument},
-					Assignments: []ast.Assignment{
-						ast.ArgumentAssignment(ast.PathFromStructField(originalObject.Type.Struct.Fields[0]), argument),
+					Args: []ir.Argument{argument},
+					Assignments: []ir.Assignment{
+						ir.ArgumentAssignment(ir.PathFromStructField(originalObject.Type.Struct.Fields[0]), argument),
 					},
 				},
 			},
@@ -52,27 +52,27 @@ func TestDuplicate(t *testing.T) {
 func TestInitialize(t *testing.T) {
 	req := require.New(t)
 
-	originalObject := ast.NewObject("pkg", "Dashboard", ast.NewStruct(
-		ast.NewStructField("name", ast.String()),
+	originalObject := ir.NewObject("pkg", "Dashboard", ir.NewStruct(
+		ir.NewStructField("name", ir.String()),
 	))
-	argument := ast.Argument{Name: "name", Type: ast.String()}
-	schemas := ast.Schemas{
-		&ast.Schema{
+	argument := ir.Argument{Name: "name", Type: ir.String()}
+	schemas := ir.Schemas{
+		&ir.Schema{
 			Package: "pkg",
 			Objects: testutils.ObjectsMap(originalObject),
 		},
 	}
-	originalBuilders := ast.Builders{
+	originalBuilders := ir.Builders{
 		{
 			For:     originalObject,
 			Package: "pkg",
 			Name:    "Dashboard",
-			Options: []ast.Option{
+			Options: []ir.Option{
 				{
 					Name: "name",
-					Args: []ast.Argument{argument},
-					Assignments: []ast.Assignment{
-						ast.ArgumentAssignment(ast.PathFromStructField(originalObject.Type.Struct.Fields[0]), argument),
+					Args: []ir.Argument{argument},
+					Assignments: []ir.Assignment{
+						ir.ArgumentAssignment(ir.PathFromStructField(originalObject.Type.Struct.Fields[0]), argument),
 					},
 				},
 			},
@@ -85,11 +85,11 @@ func TestInitialize(t *testing.T) {
 	updatedBuilders, err := action(RuleCtx{Schemas: schemas, Builders: originalBuilders}, originalBuilders)
 	req.NoError(err)
 
-	expectedAssignments := []ast.Assignment{
+	expectedAssignments := []ir.Assignment{
 		{
-			Path:   ast.Path{{Identifier: "name", Type: ast.String()}},
-			Value:  ast.AssignmentValue{Constant: "great name, isn't it?"},
-			Method: ast.DirectAssignment,
+			Path:   ir.Path{{Identifier: "name", Type: ir.String()}},
+			Value:  ir.AssignmentValue{Constant: "great name, isn't it?"},
+			Method: ir.DirectAssignment,
 		},
 	}
 
@@ -100,28 +100,28 @@ func TestInitialize(t *testing.T) {
 func TestPromoteOptionsToConstructor(t *testing.T) {
 	req := require.New(t)
 
-	originalObject := ast.NewObject("pkg", "Dashboard", ast.NewStruct(
-		ast.NewStructField("uid", ast.String()),
-		ast.NewStructField("name", ast.String()),
+	originalObject := ir.NewObject("pkg", "Dashboard", ir.NewStruct(
+		ir.NewStructField("uid", ir.String()),
+		ir.NewStructField("name", ir.String()),
 	))
-	argument := ast.Argument{Name: "name", Type: ast.String()}
-	assignment := ast.ArgumentAssignment(ast.PathFromStructField(originalObject.Type.Struct.Fields[0]), argument)
-	schemas := ast.Schemas{
-		&ast.Schema{
+	argument := ir.Argument{Name: "name", Type: ir.String()}
+	assignment := ir.ArgumentAssignment(ir.PathFromStructField(originalObject.Type.Struct.Fields[0]), argument)
+	schemas := ir.Schemas{
+		&ir.Schema{
 			Package: "pkg",
 			Objects: testutils.ObjectsMap(originalObject),
 		},
 	}
-	originalBuilders := ast.Builders{
+	originalBuilders := ir.Builders{
 		{
 			For:     originalObject,
 			Package: "pkg",
 			Name:    "Dashboard",
-			Options: []ast.Option{
+			Options: []ir.Option{
 				{
 					Name:        "name",
-					Args:        []ast.Argument{argument},
-					Assignments: []ast.Assignment{assignment},
+					Args:        []ir.Argument{argument},
+					Assignments: []ir.Assignment{assignment},
 				},
 			},
 		},
@@ -131,8 +131,8 @@ func TestPromoteOptionsToConstructor(t *testing.T) {
 	updatedBuilders, err := action(RuleCtx{Schemas: schemas, Builders: originalBuilders}, originalBuilders)
 	req.NoError(err)
 
-	expectedArgs := []ast.Argument{argument}
-	expectedAssignments := []ast.Assignment{assignment}
+	expectedArgs := []ir.Argument{argument}
+	expectedAssignments := []ir.Assignment{assignment}
 
 	req.Len(updatedBuilders, 1)
 	req.Equal(expectedArgs, updatedBuilders[0].Constructor.Args)
@@ -142,25 +142,25 @@ func TestPromoteOptionsToConstructor(t *testing.T) {
 func TestGenericAction(t *testing.T) {
 	req := require.New(t)
 
-	originalObject := ast.NewObject("generic", "Panel", ast.NewStruct(
-		ast.NewStructField("uid", ast.String()),
-		ast.NewStructField("name", ast.String()),
+	originalObject := ir.NewObject("generic", "Panel", ir.NewStruct(
+		ir.NewStructField("uid", ir.String()),
+		ir.NewStructField("name", ir.String()),
 	))
 
-	schemas := ast.Schemas{
-		&ast.Schema{
+	schemas := ir.Schemas{
+		&ir.Schema{
 			Package: "generic",
 			Objects: testutils.ObjectsMap(originalObject),
 		},
 	}
-	originalBuilders := ast.Builders{
+	originalBuilders := ir.Builders{
 		{
 			For:     originalObject,
 			Package: "generic",
 		},
 	}
 
-	expectedBuilders := ast.Builders{
+	expectedBuilders := ir.Builders{
 		{
 			For:         originalObject,
 			Package:     "generic",

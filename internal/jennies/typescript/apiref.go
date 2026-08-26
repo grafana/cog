@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -12,8 +12,8 @@ import (
 
 func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 	return common.APIReferenceFormatter{
-		KindName: func(kind ast.Kind) string {
-			if kind == ast.KindStruct {
+		KindName: func(kind ir.Kind) string {
+			if kind == ir.KindStruct {
 				return "interface"
 			}
 
@@ -31,10 +31,10 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			return fmt.Sprintf("%[1]s(%[2]s)", formatIdentifier(function.Name), strings.Join(args, ", "))
 		},
 
-		ObjectName: func(object ast.Object) string {
+		ObjectName: func(object ir.Object) string {
 			return tools.CleanupNames(object.Name)
 		},
-		ObjectDefinition: func(context languages.Context, object ast.Object) string {
+		ObjectDefinition: func(context languages.Context, object ir.Object) string {
 			typesFormatter := defaultTypeFormatter(config, context, func(pkg string) string {
 				return pkg
 			})
@@ -53,28 +53,28 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			return fmt.Sprintf("%[1]s(%[2]s)", formatIdentifier(method.Name), strings.Join(args, ", "))
 		},
 
-		BuilderName: func(builder ast.Builder) string {
+		BuilderName: func(builder ir.Builder) string {
 			return tools.UpperCamelCase(builder.Name) + "Builder"
 		},
-		ConstructorSignature: func(context languages.Context, builder ast.Builder) string {
+		ConstructorSignature: func(context languages.Context, builder ir.Builder) string {
 			typesFormatter := builderTypeFormatter(config, context, func(pkg string) string {
 				return pkg
 			})
-			args := tools.Map(builder.Constructor.Args, func(arg ast.Argument) string {
+			args := tools.Map(builder.Constructor.Args, func(arg ir.Argument) string {
 				return formatIdentifier(arg.Name) + ": " + typesFormatter.formatType(arg.Type)
 			})
 
 			return fmt.Sprintf("new %[1]s(%[2]s)", tools.UpperCamelCase(builder.Name)+"Builder", strings.Join(args, ", "))
 		},
-		OptionName: func(option ast.Option) string {
+		OptionName: func(option ir.Option) string {
 			return formatIdentifier(option.Name)
 		},
-		OptionSignature: func(context languages.Context, builder ast.Builder, option ast.Option) string {
+		OptionSignature: func(context languages.Context, builder ir.Builder, option ir.Option) string {
 			typesFormatter := builderTypeFormatter(config, context, func(pkg string) string {
 				return pkg
 			})
 
-			args := tools.Map(option.Args, func(arg ast.Argument) string {
+			args := tools.Map(option.Args, func(arg ir.Argument) string {
 				return formatIdentifier(arg.Name) + ": " + typesFormatter.formatType(arg.Type)
 			})
 

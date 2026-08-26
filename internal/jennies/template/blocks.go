@@ -3,7 +3,7 @@ package template
 import (
 	"fmt"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 )
 
 // CustomObjectMethodAllBlock returns the template block name for custom methods.
@@ -11,35 +11,35 @@ func CustomObjectMethodAllBlock() string {
 	return "object_all_custom_methods"
 }
 
-func CustomObjectUnmarshalBlock(obj ast.Object) string {
+func CustomObjectUnmarshalBlock(obj ir.Object) string {
 	return fmt.Sprintf("object_%s_%s_custom_unmarshal", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
 }
 
-func CustomObjectStrictUnmarshalBlock(obj ast.Object) string {
+func CustomObjectStrictUnmarshalBlock(obj ir.Object) string {
 	return fmt.Sprintf("object_%s_%s_custom_strict_unmarshal", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
 }
 
-func ExtraPackageDocsBlock(schema *ast.Schema) string {
+func ExtraPackageDocsBlock(schema *ir.Schema) string {
 	return fmt.Sprintf("api_reference_package_%s_extra", schema.Package)
 }
 
-func ExtraObjectDocsBlock(obj ast.Object) string {
+func ExtraObjectDocsBlock(obj ir.Object) string {
 	return fmt.Sprintf("api_reference_object_%s_%s_extra", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
 }
 
-func ExtraBuilderDocsBlock(builder ast.Builder) string {
+func ExtraBuilderDocsBlock(builder ir.Builder) string {
 	return fmt.Sprintf("api_reference_builder_%s_%s_extra", builder.Package, builder.Name)
 }
 
-func CustomObjectVariantBlock(object ast.Object) string {
+func CustomObjectVariantBlock(object ir.Object) string {
 	return fmt.Sprintf("object_variant_%s", object.Type.ImplementedVariant())
 }
 
-func CustomObjectMethodsBlock(obj ast.Object) string {
+func CustomObjectMethodsBlock(obj ir.Object) string {
 	return fmt.Sprintf("object_%s_%s_custom_methods", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
 }
 
-func CustomSchemaVariantBlock(schema *ast.Schema) string {
+func CustomSchemaVariantBlock(schema *ir.Schema) string {
 	return fmt.Sprintf("schema_variant_%s", schema.Metadata.Variant)
 }
 

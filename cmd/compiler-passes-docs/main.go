@@ -17,22 +17,22 @@ import (
 )
 
 //nolint:gosec
-const compilerPassTypesSourceDir = "./internal/ast/compiler"
+const irTransformsTypesSourceDir = "./internal/ir/transforms"
 
 //nolint:gosec
 const yamlCompilerPassTypesSourceDir = "./internal/yaml"
 
 const outputFile = "./docs/reference/schema_transformations.md"
 
-type compilerPassParam struct {
+type transformParam struct {
 	Name          string
 	Type          string
 	Documentation string
 }
 
-type compilerPassDocEntry struct {
+type transformationDocEntry struct {
 	YamlName      string
-	Parameters    []compilerPassParam
+	Parameters    []transformParam
 	Documentation string
 }
 
@@ -45,26 +45,26 @@ func yamlNameForField(field reflect.StructField) string {
 	return yamlName
 }
 
-func compilerPassParameters(yamlCompilerPassComments map[string]string, compilerPassType reflect.Type) []compilerPassParam {
-	params := make([]compilerPassParam, 0, compilerPassType.NumField())
-	for i := 0; i < compilerPassType.NumField(); i++ {
-		field := compilerPassType.Field(i)
+func transformParameters(yamlTransformComments map[string]string, transformType reflect.Type) []transformParam {
+	params := make([]transformParam, 0, transformType.NumField())
+	for i := 0; i < transformType.NumField(); i++ {
+		field := transformType.Field(i)
 		fieldType := field.Type.Name()
 		if field.Type.Name() == "" {
 			fieldType = field.Type.String()
 		}
 
-		params = append(params, compilerPassParam{
+		params = append(params, transformParam{
 			Name:          yamlNameForField(field),
 			Type:          fieldType,
-			Documentation: yamlCompilerPassComments[fmt.Sprintf("%s.%s", compilerPassType.Name(), field.Name)],
+			Documentation: yamlTransformComments[fmt.Sprintf("%s.%s", transformType.Name(), field.Name)],
 		})
 	}
 
 	return params
 }
 
-func buildYamlCompilerPassTypesCommentsMap(yamlTypesInputDir string) (map[string]string, error) {
+func buildYamlTransformTypesCommentsMap(yamlTypesInputDir string) (map[string]string, error) {
 	commentsMap := make(map[string]string)
 
 	packages, err := parser.ParseDir(token.NewFileSet(), yamlTypesInputDir, nil, parser.ParseComments)
@@ -106,25 +106,25 @@ func buildYamlCompilerPassTypesCommentsMap(yamlTypesInputDir string) (map[string
 	return commentsMap, nil
 }
 
-func compilerPassDocEntries(compilerPassComments map[string]string, yamlCompilerPassComments map[string]string) []compilerPassDocEntry {
-	var entries []compilerPassDocEntry
-	yamlCompilerPassTypeOf := reflect.TypeFor[yaml.CompilerPass]()
+func transformationsDocEntries(transformationsComments map[string]string, yamlTransformationsComments map[string]string) []transformationDocEntry {
+	var entries []transformationDocEntry
+	yamlTransformTypeOf := reflect.TypeFor[yaml.Transform]()
 
-	for i := 0; i < yamlCompilerPassTypeOf.NumField(); i++ {
-		field := yamlCompilerPassTypeOf.Field(i)
+	for i := 0; i < yamlTransformTypeOf.NumField(); i++ {
+		field := yamlTransformTypeOf.Field(i)
 
-		compilerPassMethod, found := field.Type.MethodByName("AsCompilerPass")
+		asTransformMethod, found := field.Type.MethodByName("AsTransform")
 		if !found {
 			continue
 		}
 
-		compilerPassType := compilerPassMethod.Type.Out(0)
-		compilerPassTypeName := compilerPassType.Elem().Name()
+		transformType := asTransformMethod.Type.Out(0)
+		transformTypeName := transformType.Elem().Name()
 
-		entries = append(entries, compilerPassDocEntry{
+		entries = append(entries, transformationDocEntry{
 			YamlName:      yamlNameForField(field),
-			Parameters:    compilerPassParameters(yamlCompilerPassComments, field.Type.Elem()),
-			Documentation: compilerPassComments[compilerPassTypeName],
+			Parameters:    transformParameters(yamlTransformationsComments, field.Type.Elem()),
+			Documentation: transformationsComments[transformTypeName],
 		})
 	}
 
@@ -135,8 +135,8 @@ func compilerPassDocEntries(compilerPassComments map[string]string, yamlCompiler
 	return entries
 }
 
-func buildCompilerPassTypesCommentsMap(typesInputDir string) (map[string]string, error) {
-	compilerPassComments := make(map[string]string)
+func buildTransformTypesCommentsMap(typesInputDir string) (map[string]string, error) {
+	transformComments := make(map[string]string)
 
 	packages, err := parser.ParseDir(token.NewFileSet(), typesInputDir, nil, parser.ParseComments)
 	if err != nil {
@@ -151,14 +151,14 @@ func buildCompilerPassTypesCommentsMap(typesInputDir string) (map[string]string,
 				continue
 			}
 
-			compilerPassComments[t.Name] = t.Doc
+			transformComments[t.Name] = t.Doc
 		}
 	}
 
-	return compilerPassComments, nil
+	return transformComments, nil
 }
 
-func docEntriesToMarkdown(entries []compilerPassDocEntry) []byte {
+func docEntriesToMarkdown(entries []transformationDocEntry) []byte {
 	var markdown bytes.Buffer
 
 	markdown.WriteString("<!-- Generated with `make docs` -->\n")
@@ -200,17 +200,17 @@ func docEntriesToMarkdown(entries []compilerPassDocEntry) []byte {
 }
 
 func main() {
-	compilerPassComments, err := buildCompilerPassTypesCommentsMap(compilerPassTypesSourceDir)
+	transformComments, err := buildTransformTypesCommentsMap(irTransformsTypesSourceDir)
 	if err != nil {
 		panic(err)
 	}
 
-	yamlCompilerPassComments, err := buildYamlCompilerPassTypesCommentsMap(yamlCompilerPassTypesSourceDir)
+	yamlTransformsComments, err := buildYamlTransformTypesCommentsMap(yamlCompilerPassTypesSourceDir)
 	if err != nil {
 		panic(err)
 	}
 
-	docEntries := compilerPassDocEntries(compilerPassComments, yamlCompilerPassComments)
+	docEntries := transformationsDocEntries(transformComments, yamlTransformsComments)
 
 	if err := os.WriteFile(outputFile, docEntriesToMarkdown(docEntries), 0600); err != nil {
 		panic(err)

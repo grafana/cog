@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
@@ -34,13 +34,13 @@ func (jenny Schema) Generate(context languages.Context) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny Schema) generateSchema(context languages.Context, schema *ast.Schema) ([]byte, error) {
+func (jenny Schema) generateSchema(context languages.Context, schema *ir.Schema) ([]byte, error) {
 	jsonschemaJenny := jsonschema.Schema{
 		Config: jsonschema.Config{
 			Debug:   jenny.Config.debug,
 			Compact: jenny.Config.Compact,
 		},
-		ReferenceFormatter: func(ref ast.RefType) string {
+		ReferenceFormatter: func(ref ir.RefType) string {
 			return fmt.Sprintf("#/components/schemas/%s", ref.ReferredType)
 		},
 		OpenAPI3Compatible: true,

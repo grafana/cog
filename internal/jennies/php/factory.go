@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -13,8 +13,8 @@ import (
 )
 
 type builderAndFactory struct {
-	Builder ast.Builder
-	Factory ast.BuilderFactory
+	Builder ir.Builder
+	Factory ir.BuilderFactory
 }
 
 type Factory struct {
@@ -40,10 +40,10 @@ func (jenny *Factory) Generate(context languages.Context) (codejen.Files, error)
 			})
 
 			factoriesClassName := jenny.config.builderFactoryClassForPackage(builder.Package)
-			fakeFactoryObject := ast.Object{
+			fakeFactoryObject := ir.Object{
 				Name: factoriesClassName,
-				Type: ast.NewStruct(),
-				SelfRef: ast.RefType{
+				Type: ir.NewStruct(),
+				SelfRef: ir.RefType{
 					ReferredPkg:  builder.Package,
 					ReferredType: factoriesClassName,
 				},
@@ -52,7 +52,7 @@ func (jenny *Factory) Generate(context languages.Context) (codejen.Files, error)
 				Name:     factory.Name,
 				Comments: factory.Comments,
 				Static:   true,
-				Arguments: tools.Map(factory.Args, func(arg ast.Argument) common.ArgumentReference {
+				Arguments: tools.Map(factory.Args, func(arg ir.Argument) common.ArgumentReference {
 					return common.ArgumentReference{
 						Name: arg.Name,
 						Type: jenny.typeFormatter.formatType(arg.Type),

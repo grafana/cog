@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
@@ -18,7 +18,7 @@ type RawTypes struct {
 	config        Config
 	tmpl          *template.Template
 	typeFormatter *typeFormatter
-	schemas       ast.Schemas
+	schemas       ir.Schemas
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -46,7 +46,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	return files, nil
 }
 
-func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Schema) ([]byte, error) {
+func (jenny RawTypes) generateSchema(context languages.Context, schema *ir.Schema) ([]byte, error) {
 	var buffer strings.Builder
 	var err error
 
@@ -61,7 +61,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context, pkgMapper)
 
-	schema.Objects.Iterate(func(_ string, object ast.Object) {
+	schema.Objects.Iterate(func(_ string, object ir.Object) {
 		typeDefGen, innerErr := jenny.formatObject(context, object, pkgMapper)
 		if innerErr != nil {
 			err = innerErr
@@ -83,7 +83,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	return []byte(importStatements + buffer.String()), nil
 }
 
-func (jenny RawTypes) formatObject(context languages.Context, def ast.Object, packageMapper packageMapper) ([]byte, error) {
+func (jenny RawTypes) formatObject(context languages.Context, def ir.Object, packageMapper packageMapper) ([]byte, error) {
 	var buffer strings.Builder
 
 	if len(def.Comments) != 0 || def.DeprecationMessage != "" {
@@ -162,9 +162,9 @@ func prefixLinesWith(input string, prefix string) string {
 * 					 Default and "empty" values management 					  *
 ******************************************************************************/
 
-func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper packageMapper) any {
+func (jenny RawTypes) defaultValueForObject(object ir.Object, packageMapper packageMapper) any {
 	switch object.Type.Kind {
-	case ast.KindEnum:
+	case ir.KindEnum:
 		enum := object.Type.AsEnum()
 		defaultValue := enum.Values[0].Value
 		if object.Type.Default != nil {
@@ -177,50 +177,50 @@ func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper pac
 	}
 }
 
-func (jenny RawTypes) defaultValueForType(typeDef ast.Type, packageMapper packageMapper) any {
+func (jenny RawTypes) defaultValueForType(typeDef ir.Type, packageMapper packageMapper) any {
 	if typeDef.Default != nil {
 		return typeDef.Default
 	}
 
 	switch typeDef.Kind {
-	case ast.KindDisjunction:
+	case ir.KindDisjunction:
 		return jenny.defaultValueForType(typeDef.AsDisjunction().Branches[0], packageMapper)
-	case ast.KindStruct:
+	case ir.KindStruct:
 		return jenny.defaultValuesForStructType(typeDef, packageMapper)
-	case ast.KindEnum: // anonymous enum
+	case ir.KindEnum: // anonymous enum
 		defaultValue := typeDef.AsEnum().Values[0].Value
 		if typeDef.Default != nil {
 			defaultValue = typeDef.Default
 		}
 
 		return defaultValue
-	case ast.KindRef:
+	case ir.KindRef:
 		return jenny.defaultValuesForReference(typeDef, packageMapper)
-	case ast.KindMap:
+	case ir.KindMap:
 		return raw("{}")
-	case ast.KindArray:
+	case ir.KindArray:
 		return raw("[]")
-	case ast.KindScalar:
+	case ir.KindScalar:
 		return defaultValueForScalar(typeDef.AsScalar())
-	case ast.KindIntersection:
+	case ir.KindIntersection:
 		return jenny.defaultValuesForIntersection(typeDef.AsIntersection(), packageMapper)
-	case ast.KindConstantRef:
+	case ir.KindConstantRef:
 		return jenny.defaultValueForConstantReferences(typeDef.AsConstantRef())
 	default:
 		return "unknown"
 	}
 }
 
-func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMapper packageMapper) *orderedmap.Map[string, any] {
+func (jenny RawTypes) defaultValuesForStructType(structType ir.Type, packageMapper packageMapper) *orderedmap.Map[string, any] {
 	defaults := orderedmap.New[string, any]()
 
 	for _, field := range structType.AsStruct().Fields {
 		if field.Type.Default != nil {
 			switch field.Type.Kind {
-			case ast.KindRef:
+			case ir.KindRef:
 				defaults.Set(field.Name, jenny.defaultValuesForReference(field.Type, packageMapper))
 				continue
-			case ast.KindStruct:
+			case ir.KindStruct:
 				defaultMap := field.Type.Default.(map[string]any)
 				defaults.Set(field.Name, jenny.defaultValueForStructs(field.Type.AsStruct(), orderedmap.FromMap(defaultMap)))
 				continue
@@ -245,31 +245,31 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 	return defaults
 }
 
-func defaultValueForScalar(scalar ast.ScalarType) any {
+func defaultValueForScalar(scalar ir.ScalarType) any {
 	// The scalar represents a constant
 	if scalar.Value != nil {
 		return scalar.Value
 	}
 
 	switch scalar.ScalarKind {
-	case ast.KindNull:
+	case ir.KindNull:
 		return raw("null")
-	case ast.KindAny:
+	case ir.KindAny:
 		return raw("{}")
 
-	case ast.KindBytes, ast.KindString:
+	case ir.KindBytes, ir.KindString:
 		return raw("\"\"")
 
-	case ast.KindFloat32, ast.KindFloat64:
+	case ir.KindFloat32, ir.KindFloat64:
 		return 0.0
 
-	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
+	case ir.KindUint8, ir.KindUint16, ir.KindUint32, ir.KindUint64:
 		return 0
 
-	case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
+	case ir.KindInt8, ir.KindInt16, ir.KindInt32, ir.KindInt64:
 		return 0
 
-	case ast.KindBool:
+	case ir.KindBool:
 		return false
 
 	default:
@@ -277,7 +277,7 @@ func defaultValueForScalar(scalar ast.ScalarType) any {
 	}
 }
 
-func (jenny RawTypes) defaultValuesForIntersection(intersectDef ast.IntersectionType, packageMapper packageMapper) *orderedmap.Map[string, any] {
+func (jenny RawTypes) defaultValuesForIntersection(intersectDef ir.IntersectionType, packageMapper packageMapper) *orderedmap.Map[string, any] {
 	defaults := orderedmap.New[string, any]()
 
 	for _, branch := range intersectDef.Branches {
@@ -298,11 +298,11 @@ func (jenny RawTypes) defaultValuesForIntersection(intersectDef ast.Intersection
 	return defaults
 }
 
-func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper packageMapper) any {
+func (jenny RawTypes) defaultValuesForReference(typeDef ir.Type, packageMapper packageMapper) any {
 	ref := typeDef.AsRef()
 
 	pkg := packageMapper(ref.ReferredPkg)
-	referredType, _ := jenny.schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	referredType, _ := jenny.schemas.GetObject(ref.ReferredPkg, ref.ReferredType)
 	referredTypeName := formatObjectName(referredType.Name)
 	if referredTypeName == "" {
 		referredTypeName = formatObjectName(ref.ReferredType)
@@ -333,7 +333,7 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	return raw(fmt.Sprintf("default%s()", tools.UpperCamelCase(referredTypeName)))
 }
 
-func (jenny RawTypes) defaultValueForStructs(def ast.StructType, m *orderedmap.Map[string, any]) any {
+func (jenny RawTypes) defaultValueForStructs(def ir.StructType, m *orderedmap.Map[string, any]) any {
 	var buffer strings.Builder
 
 	for _, f := range def.Fields {
@@ -346,7 +346,7 @@ func (jenny RawTypes) defaultValueForStructs(def ast.StructType, m *orderedmap.M
 			default:
 				if f.Type.IsRef() {
 					ref := f.Type.AsRef()
-					referredType, refFound := jenny.schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
+					referredType, refFound := jenny.schemas.GetObject(ref.ReferredPkg, ref.ReferredType)
 
 					if refFound && referredType.Type.IsEnum() {
 						fmt.Fprintf(&buffer, "%s: %v, ", f.Name, jenny.typeFormatter.enums.formatValue(referredType, x))
@@ -358,11 +358,11 @@ func (jenny RawTypes) defaultValueForStructs(def ast.StructType, m *orderedmap.M
 			}
 		} else if f.Required {
 			switch f.Type.Kind {
-			case ast.KindStruct:
+			case ir.KindStruct:
 				fmt.Fprintf(&buffer, "%s: { %v }, ", f.Name, defaultEmptyValuesForStructs(f.Type.AsStruct()))
-			case ast.KindArray:
+			case ir.KindArray:
 				fmt.Fprintf(&buffer, "%s: []", f.Name)
-			case ast.KindScalar:
+			case ir.KindScalar:
 				fmt.Fprintf(&buffer, "%s: %v, ", f.Name, defaultValueForScalar(f.Type.AsScalar()))
 			}
 		}
@@ -371,16 +371,16 @@ func (jenny RawTypes) defaultValueForStructs(def ast.StructType, m *orderedmap.M
 	return raw(fmt.Sprintf("{ %+v}", buffer.String()))
 }
 
-func defaultEmptyValuesForStructs(def ast.StructType) string {
+func defaultEmptyValuesForStructs(def ir.StructType) string {
 	var buffer strings.Builder
 
 	for _, f := range def.Fields {
 		switch f.Type.Kind {
-		case ast.KindStruct:
+		case ir.KindStruct:
 			fmt.Fprintf(&buffer, "%s: { %v }, ", f.Name, defaultEmptyValuesForStructs(f.Type.AsStruct()))
-		case ast.KindArray:
+		case ir.KindArray:
 			fmt.Fprintf(&buffer, "%s: []", f.Name)
-		case ast.KindScalar:
+		case ir.KindScalar:
 			fmt.Fprintf(&buffer, "%s: %v, ", f.Name, defaultValueForScalar(f.Type.AsScalar()))
 		default:
 		}
@@ -389,8 +389,8 @@ func defaultEmptyValuesForStructs(def ast.StructType) string {
 	return buffer.String()
 }
 
-func (jenny RawTypes) defaultValueForConstantReferences(def ast.ConstantReferenceType) any {
-	referredType, ok := jenny.schemas.LocateObject(def.ReferredPkg, def.ReferredType)
+func (jenny RawTypes) defaultValueForConstantReferences(def ir.ConstantReferenceType) any {
+	referredType, ok := jenny.schemas.GetObject(def.ReferredPkg, def.ReferredType)
 	if !ok {
 		return "unknown"
 	}
@@ -406,7 +406,7 @@ func (jenny RawTypes) defaultValueForConstantReferences(def ast.ConstantReferenc
 	return "unknown"
 }
 
-func hasStructDefaults(typeDef ast.Type, defaults any) bool {
+func hasStructDefaults(typeDef ir.Type, defaults any) bool {
 	_, ok := defaults.(map[string]any)
 	return ok && typeDef.IsStruct()
 }

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/template"
@@ -52,7 +52,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	return files, nil
 }
 
-func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Schema) ([]byte, error) {
+func (jenny RawTypes) generateSchema(context languages.Context, schema *ir.Schema) ([]byte, error) {
 	imports := NewImportMap(jenny.config.PackageRoot)
 	jenny.packageMapper = func(pkg string) string {
 		if imports.IsIdentical(pkg, schema.Package) {
@@ -85,7 +85,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 	jenny.attributes.identifyDisjunctionBranches(schema)
 
-	schema.Objects.Iterate(func(_ string, object ast.Object) {
+	schema.Objects.Iterate(func(_ string, object ir.Object) {
 		innerErr := jenny.formatObject(&buffer, object)
 		if innerErr != nil {
 			err = innerErr
@@ -134,7 +134,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 %[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String())), nil
 }
 
-func (jenny RawTypes) formatObject(buffer *strings.Builder, object ast.Object) error {
+func (jenny RawTypes) formatObject(buffer *strings.Builder, object ir.Object) error {
 	comments := object.Comments
 	if jenny.config.debug {
 		passesTrail := tools.Map(object.PassesTrail, func(trail string) string {

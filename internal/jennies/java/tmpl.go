@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -44,11 +44,11 @@ func formattingTemplateFuncs() template.FuncMap {
 		"escapeVar":         escapeVarName,
 		"formatScalar":      formatScalar,
 		"cleanString":       cleanString,
-		"formatIntegerLetter": func(t ast.Type) string {
+		"formatIntegerLetter": func(t ir.Type) string {
 			switch t.AsScalar().ScalarKind {
-			case ast.KindInt64, ast.KindUint64:
+			case ir.KindInt64, ir.KindUint64:
 				return "L"
-			case ast.KindFloat32:
+			case ir.KindFloat32:
 				return "f"
 			}
 			return ""
@@ -65,58 +65,58 @@ func functions() template.FuncMap {
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
-		"refToType": func(ref ast.RefType) ast.Type {
+		"refToType": func(ref ir.RefType) ir.Type {
 			return ref.AsType()
 		},
-		"importStdPkg": func(_ ast.Type) string {
+		"importStdPkg": func(_ ir.Type) string {
 			panic("importStdPkg() needs to be overridden by a jenny")
 		},
 		"importPkg": func(_ string) string {
 			panic("importPkg() needs to be overridden by a jenny")
 		},
-		"formatPackageName": func(_ ast.Type) string {
+		"formatPackageName": func(_ ir.Type) string {
 			panic("formatPackageName() needs to be overridden by a jenny")
 		},
-		"formatRawRef": func(_ ast.Type) string {
+		"formatRawRef": func(_ ir.Type) string {
 			panic("formatRawRef() needs to be overridden by a jenny")
 		},
-		"fillNullableAnnotationPattern": func(_ ast.Type) string {
+		"fillNullableAnnotationPattern": func(_ ir.Type) string {
 			panic("fillNullableAnnotationPattern() needs to be overridden by a jenny")
 		},
-		"formatValue": func(_ ast.Type) string {
+		"formatValue": func(_ ir.Type) string {
 			panic("formatValue() needs to be overridden by a jenny")
 		},
-		"formatPathIndex": func(_ *ast.PathIndex) string {
+		"formatPathIndex": func(_ *ir.PathIndex) string {
 			panic("formatPathIndex() needs to be overridden by a jenny")
 		},
-		"formatPath": func(_ ast.Type) string {
+		"formatPath": func(_ ir.Type) string {
 			panic("formatPath() needs to be overridden by a jenny")
 		},
-		"formatAssignmentPath": func(_ ast.Type) string {
+		"formatAssignmentPath": func(_ ir.Type) string {
 			panic("formatAssignmentPath() needs to be overridden by a jenny")
 		},
-		"formatBuilderFieldType": func(_ ast.Type) string {
+		"formatBuilderFieldType": func(_ ir.Type) string {
 			panic("formatBuilderFieldType() needs to be overridden by a jenny")
 		},
-		"formatType": func(_ ast.Type) string {
+		"formatType": func(_ ir.Type) string {
 			panic("formatType() needs to be overridden by a jenny")
 		},
-		"typeHasBuilder": func(_ ast.Type) bool {
+		"typeHasBuilder": func(_ ir.Type) bool {
 			panic("typeHasBuilder() needs to be overridden by a jenny")
 		},
-		"emptyValueForType": func(_ ast.Type) string {
+		"emptyValueForType": func(_ ir.Type) string {
 			panic("emptyValueForType() needs to be overridden by a jenny")
 		},
-		"resolvesToComposableSlot": func(_ ast.Type) bool {
+		"resolvesToComposableSlot": func(_ ir.Type) bool {
 			panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 		},
-		"formatRefType": func(_ ast.Type, value any) string {
+		"formatRefType": func(_ ir.Type, value any) string {
 			panic("formatRefType() needs to be overridden by a jenny")
 		},
-		"formatGuardPath": func(_ ast.Path) string {
+		"formatGuardPath": func(_ ir.Path) string {
 			panic("formatGuardPath() needs to be overridden by a jenny")
 		},
-		"enumFromConstantRef": func(_ ast.Type) string {
+		"enumFromConstantRef": func(_ ir.Type) string {
 			panic("enumFromConstantRef() needs to be overridden by a jenny")
 		},
 		"factoryClassForPkg": func(_ string) string {
@@ -147,7 +147,7 @@ type ClassTemplate struct {
 	Comments           []string
 	DeprecationMessage string
 
-	Fields     []ast.StructField
+	Fields     []ir.StructField
 	Builders   []BuilderTemplate
 	HasBuilder bool
 
@@ -163,13 +163,13 @@ type ClassTemplate struct {
 }
 
 type ConstructorTemplate struct {
-	Args        []ast.Argument
+	Args        []ir.Argument
 	Assignments []ConstructorAssignmentTemplate
 }
 
 type ConstructorAssignmentTemplate struct {
 	Name         string
-	Type         ast.Type
+	Type         ir.Type
 	Value        any
 	ValueFromArg string
 }
@@ -196,9 +196,9 @@ type BuilderTemplate struct {
 	ImportAlias          string // alias to the pkg in which the object being built lives.
 	Comments             []string
 	DeprecationMessage   string
-	Constructor          ast.Constructor
-	Properties           []ast.StructField
-	Options              []ast.Option
+	Constructor          ir.Constructor
+	Properties           []ir.StructField
+	Options              []ir.Option
 	IsGenericPanel       bool
 }
 
@@ -226,7 +226,7 @@ type Unmarshalling struct {
 	ShouldUnmarshallingPanels bool
 	Imports                   fmt.Stringer
 	DataqueryUnmarshalling    []DataqueryUnmarshalling
-	Fields                    []ast.StructField
+	Fields                    []ir.StructField
 	Hint                      any
 }
 

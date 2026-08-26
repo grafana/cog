@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/languages"
 )
 
@@ -16,7 +16,7 @@ func newEqualityMethods() equalityMethods {
 
 // generateForObject generates a TypeScript equality function for struct objects.
 // Since TypeScript uses interfaces (not classes), equality is a standalone exported function.
-func (jenny equalityMethods) generateForObject(context languages.Context, object ast.Object) string {
+func (jenny equalityMethods) generateForObject(context languages.Context, object ir.Object) string {
 	if !object.Type.IsStruct() {
 		return ""
 	}
@@ -52,7 +52,7 @@ func (jenny equalityMethods) generateForObject(context languages.Context, object
 func (jenny equalityMethods) writeTypeEquality(
 	buffer *strings.Builder,
 	context languages.Context,
-	typeDef ast.Type,
+	typeDef ir.Type,
 	selfExpr, otherExpr string,
 	depth int,
 ) {
@@ -96,7 +96,7 @@ func (jenny equalityMethods) equalsFuncNameForObject(name string) string {
 	return "equals" + formatObjectName(name)
 }
 
-func (jenny equalityMethods) equalsFuncName(typeDef ast.Type) string {
+func (jenny equalityMethods) equalsFuncName(typeDef ir.Type) string {
 	if typeDef.IsRef() {
 		return jenny.equalsFuncNameForObject(typeDef.AsRef().ReferredType)
 	}

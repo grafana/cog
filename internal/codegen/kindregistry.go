@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 )
 
 type KindRegistryInput struct {
@@ -27,8 +27,8 @@ func (input *KindRegistryInput) interpolateParameters(interpolator ParametersInt
 	input.Version = interpolator(input.Version)
 }
 
-func (input *KindRegistryInput) LoadSchemas(_ context.Context) (ast.Schemas, error) {
-	var allSchemas ast.Schemas
+func (input *KindRegistryInput) LoadSchemas(_ context.Context) (ir.Schemas, error) {
+	var allSchemas ir.Schemas
 	var cueImports []string
 	var cueEntrypoints []string
 
@@ -56,7 +56,7 @@ func (input *KindRegistryInput) LoadSchemas(_ context.Context) (ast.Schemas, err
 		cueImports = append(cueImports, fmt.Sprintf("%s:%s", commonPkgPath, "github.com/grafana/grafana/packages/grafana-schema/src/common"))
 	}
 
-	kindLoader := func(loader func(input CueInput) (ast.Schemas, error), entrypoints []string) error {
+	kindLoader := func(loader func(input CueInput) (ir.Schemas, error), entrypoints []string) error {
 		for _, entrypoint := range entrypoints {
 			schemas, err := loader(CueInput{
 				InputBase:  input.InputBase,

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -12,8 +12,8 @@ import (
 
 func apiReferenceFormatter() common.APIReferenceFormatter {
 	return common.APIReferenceFormatter{
-		KindName: func(kind ast.Kind) string {
-			if kind == ast.KindStruct {
+		KindName: func(kind ir.Kind) string {
+			if kind == ir.KindStruct {
 				return "class"
 			}
 
@@ -36,10 +36,10 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 			return fmt.Sprintf("def %[1]s(%[2]s)%[3]s", formatFunctionName(function.Name), strings.Join(args, ", "), returnType)
 		},
 
-		ObjectName: func(object ast.Object) string {
+		ObjectName: func(object ir.Object) string {
 			return formatObjectName(object.Name)
 		},
-		ObjectDefinition: func(context languages.Context, object ast.Object) string {
+		ObjectDefinition: func(context languages.Context, object ir.Object) string {
 			typesFormatter := defaultTypeFormatter(context, func(alias string, pkg string) string {
 				return alias
 			}, func(alias string, pkg string, module string) string {
@@ -75,16 +75,16 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 			return fmt.Sprintf("%[1]sdef %[2]s(%[3]s)%[4]s", classmethod, methodName, strings.Join(args, ", "), returnType)
 		},
 
-		BuilderName: func(builder ast.Builder) string {
+		BuilderName: func(builder ir.Builder) string {
 			return formatObjectName(builder.Name)
 		},
-		ConstructorSignature: func(context languages.Context, builder ast.Builder) string {
+		ConstructorSignature: func(context languages.Context, builder ir.Builder) string {
 			typesFormatter := builderTypeFormatter(context, func(alias string, pkg string) string {
 				return alias
 			}, func(alias string, pkg string, module string) string {
 				return alias
 			})
-			args := tools.Map(builder.Constructor.Args, func(arg ast.Argument) string {
+			args := tools.Map(builder.Constructor.Args, func(arg ir.Argument) string {
 				argType := typesFormatter.formatType(arg.Type)
 				if argType != "" {
 					argType = ": " + argType
@@ -95,16 +95,16 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 
 			return fmt.Sprintf("%[1]s(%[2]s)", formatObjectName(builder.Name), strings.Join(args, ", "))
 		},
-		OptionName: func(option ast.Option) string {
+		OptionName: func(option ir.Option) string {
 			return formatIdentifier(option.Name)
 		},
-		OptionSignature: func(context languages.Context, builder ast.Builder, option ast.Option) string {
+		OptionSignature: func(context languages.Context, builder ir.Builder, option ir.Option) string {
 			typesFormatter := builderTypeFormatter(context, func(alias string, pkg string) string {
 				return alias
 			}, func(alias string, pkg string, module string) string {
 				return alias
 			})
-			args := tools.Map(option.Args, func(arg ast.Argument) string {
+			args := tools.Map(option.Args, func(arg ir.Argument) string {
 				newArgType := arg.Type.DeepCopy()
 				newArgType.Nullable = false
 

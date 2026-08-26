@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"testing"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/veneers/builder"
 	"github.com/grafana/cog/internal/veneers/option"
@@ -15,35 +15,35 @@ import (
 type rewriteTestCase struct {
 	description string
 
-	inputBuilders  ast.Builders
+	inputBuilders  ir.Builders
 	builderRules   []*builder.Rule
 	optionRules    []option.Rule
-	outputBuilders ast.Builders
+	outputBuilders ir.Builders
 }
 
 func testData() []rewriteTestCase {
 	return []rewriteTestCase{
 		{
 			description:    "no rewrite rules",
-			inputBuilders:  ast.Builders{dashboardBuilder(), panelBuilder()},
+			inputBuilders:  ir.Builders{dashboardBuilder(), panelBuilder()},
 			builderRules:   nil,
 			optionRules:    nil,
-			outputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
+			outputBuilders: ir.Builders{dashboardBuilder(), panelBuilder()},
 		},
 
 		{
 			description:   "omit an entire builder",
-			inputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
+			inputBuilders: ir.Builders{dashboardBuilder(), panelBuilder()},
 			builderRules: []*builder.Rule{
 				builder.Omit(builder.ByObjectName("test_pkg", "Dashboard")),
 			},
 			optionRules:    nil,
-			outputBuilders: ast.Builders{panelBuilder()},
+			outputBuilders: ir.Builders{panelBuilder()},
 		},
 
 		{
 			description:   "rename single option in single builder",
-			inputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
+			inputBuilders: ir.Builders{dashboardBuilder(), panelBuilder()},
 			builderRules:  nil,
 			optionRules: []option.Rule{
 				option.Rename(
@@ -51,40 +51,40 @@ func testData() []rewriteTestCase {
 					"kind",
 				),
 			},
-			outputBuilders: ast.Builders{
+			outputBuilders: ir.Builders{
 				dashboardBuilder(),
 				{
 					Package: "test_pkg",
-					For: ast.NewObject(
+					For: ir.NewObject(
 						"test_pkg",
 						"Panel",
-						ast.NewStruct(
-							ast.NewStructField("id", ast.NewScalar(ast.KindInt64)),
-							ast.NewStructField("type", ast.String()),
+						ir.NewStruct(
+							ir.NewStructField("id", ir.NewScalar(ir.KindInt64)),
+							ir.NewStructField("type", ir.String()),
 						),
 					),
-					Options: []ast.Option{
+					Options: []ir.Option{
 						{
 							Name: "id",
-							Args: []ast.Argument{
-								{Name: "id", Type: ast.NewScalar(ast.KindInt64)},
+							Args: []ir.Argument{
+								{Name: "id", Type: ir.NewScalar(ir.KindInt64)},
 							},
-							Assignments: []ast.Assignment{
-								ast.ArgumentAssignment(
-									ast.Path{{Identifier: "id", Type: ast.NewScalar(ast.KindInt64)}},
-									ast.Argument{Name: "id", Type: ast.NewScalar(ast.KindInt64)},
+							Assignments: []ir.Assignment{
+								ir.ArgumentAssignment(
+									ir.Path{{Identifier: "id", Type: ir.NewScalar(ir.KindInt64)}},
+									ir.Argument{Name: "id", Type: ir.NewScalar(ir.KindInt64)},
 								),
 							},
 						},
 						{
 							Name: "kind",
-							Args: []ast.Argument{
-								{Name: "type", Type: ast.String()},
+							Args: []ir.Argument{
+								{Name: "type", Type: ir.String()},
 							},
-							Assignments: []ast.Assignment{
-								ast.ArgumentAssignment(
-									ast.Path{{Identifier: "type", Type: ast.String()}},
-									ast.Argument{Name: "type", Type: ast.String()},
+							Assignments: []ir.Assignment{
+								ir.ArgumentAssignment(
+									ir.Path{{Identifier: "type", Type: ir.String()}},
+									ir.Argument{Name: "type", Type: ir.String()},
 								),
 							},
 							VeneerTrail: []string{"Rename[type → kind]"},
@@ -96,34 +96,34 @@ func testData() []rewriteTestCase {
 
 		{
 			description:   "omit single option in single builder",
-			inputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
+			inputBuilders: ir.Builders{dashboardBuilder(), panelBuilder()},
 			builderRules:  nil,
 			optionRules: []option.Rule{
 				option.Omit(
 					option.ByName("test_pkg", "Dashboard", "title"),
 				),
 			},
-			outputBuilders: ast.Builders{
+			outputBuilders: ir.Builders{
 				{
 					Package: "test_pkg",
-					For: ast.NewObject(
+					For: ir.NewObject(
 						"test_pkg",
 						"Dashboard",
-						ast.NewStruct(
-							ast.NewStructField("uid", ast.String()),
-							ast.NewStructField("title", ast.String()),
+						ir.NewStruct(
+							ir.NewStructField("uid", ir.String()),
+							ir.NewStructField("title", ir.String()),
 						),
 					),
-					Options: []ast.Option{
+					Options: []ir.Option{
 						{
 							Name: "uid",
-							Args: []ast.Argument{
-								{Name: "uid", Type: ast.String()},
+							Args: []ir.Argument{
+								{Name: "uid", Type: ir.String()},
 							},
-							Assignments: []ast.Assignment{
-								ast.ArgumentAssignment(
-									ast.Path{{Identifier: "uid", Type: ast.String()}},
-									ast.Argument{Name: "uid", Type: ast.String()},
+							Assignments: []ir.Assignment{
+								ir.ArgumentAssignment(
+									ir.Path{{Identifier: "uid", Type: ir.String()}},
+									ir.Argument{Name: "uid", Type: ir.String()},
 								),
 							},
 						},
@@ -135,39 +135,39 @@ func testData() []rewriteTestCase {
 	}
 }
 
-func dashboardBuilder() ast.Builder {
-	return ast.Builder{
+func dashboardBuilder() ir.Builder {
+	return ir.Builder{
 		Package: "test_pkg",
-		For: ast.NewObject(
+		For: ir.NewObject(
 			"test_pkg",
 			"Dashboard",
-			ast.NewStruct(
-				ast.NewStructField("uid", ast.String()),
-				ast.NewStructField("title", ast.String()),
+			ir.NewStruct(
+				ir.NewStructField("uid", ir.String()),
+				ir.NewStructField("title", ir.String()),
 			),
 		),
-		Options: []ast.Option{
+		Options: []ir.Option{
 			{
 				Name: "uid",
-				Args: []ast.Argument{
-					{Name: "uid", Type: ast.String()},
+				Args: []ir.Argument{
+					{Name: "uid", Type: ir.String()},
 				},
-				Assignments: []ast.Assignment{
-					ast.ArgumentAssignment(
-						ast.Path{{Identifier: "uid", Type: ast.String()}},
-						ast.Argument{Name: "uid", Type: ast.String()},
+				Assignments: []ir.Assignment{
+					ir.ArgumentAssignment(
+						ir.Path{{Identifier: "uid", Type: ir.String()}},
+						ir.Argument{Name: "uid", Type: ir.String()},
 					),
 				},
 			},
 			{
 				Name: "title",
-				Args: []ast.Argument{
-					{Name: "title", Type: ast.String()},
+				Args: []ir.Argument{
+					{Name: "title", Type: ir.String()},
 				},
-				Assignments: []ast.Assignment{
-					ast.ArgumentAssignment(
-						ast.Path{{Identifier: "title", Type: ast.String()}},
-						ast.Argument{Name: "title", Type: ast.String()},
+				Assignments: []ir.Assignment{
+					ir.ArgumentAssignment(
+						ir.Path{{Identifier: "title", Type: ir.String()}},
+						ir.Argument{Name: "title", Type: ir.String()},
 					),
 				},
 			},
@@ -175,39 +175,39 @@ func dashboardBuilder() ast.Builder {
 	}
 }
 
-func panelBuilder() ast.Builder {
-	return ast.Builder{
+func panelBuilder() ir.Builder {
+	return ir.Builder{
 		Package: "test_pkg",
-		For: ast.NewObject(
+		For: ir.NewObject(
 			"test_pkg",
 			"Panel",
-			ast.NewStruct(
-				ast.NewStructField("id", ast.NewScalar(ast.KindInt64)),
-				ast.NewStructField("type", ast.String()),
+			ir.NewStruct(
+				ir.NewStructField("id", ir.NewScalar(ir.KindInt64)),
+				ir.NewStructField("type", ir.String()),
 			),
 		),
-		Options: []ast.Option{
+		Options: []ir.Option{
 			{
 				Name: "id",
-				Args: []ast.Argument{
-					{Name: "id", Type: ast.NewScalar(ast.KindInt64)},
+				Args: []ir.Argument{
+					{Name: "id", Type: ir.NewScalar(ir.KindInt64)},
 				},
-				Assignments: []ast.Assignment{
-					ast.ArgumentAssignment(
-						ast.Path{{Identifier: "id", Type: ast.NewScalar(ast.KindInt64)}},
-						ast.Argument{Name: "id", Type: ast.NewScalar(ast.KindInt64)},
+				Assignments: []ir.Assignment{
+					ir.ArgumentAssignment(
+						ir.Path{{Identifier: "id", Type: ir.NewScalar(ir.KindInt64)}},
+						ir.Argument{Name: "id", Type: ir.NewScalar(ir.KindInt64)},
 					),
 				},
 			},
 			{
 				Name: "type",
-				Args: []ast.Argument{
-					{Name: "type", Type: ast.String()},
+				Args: []ir.Argument{
+					{Name: "type", Type: ir.String()},
 				},
-				Assignments: []ast.Assignment{
-					ast.ArgumentAssignment(
-						ast.Path{{Identifier: "type", Type: ast.String()}},
-						ast.Argument{Name: "type", Type: ast.String()},
+				Assignments: []ir.Assignment{
+					ir.ArgumentAssignment(
+						ir.Path{{Identifier: "type", Type: ir.String()}},
+						ir.Argument{Name: "type", Type: ir.String()},
 					),
 				},
 			},
@@ -237,7 +237,7 @@ func TestRewriter_ApplyTo(t *testing.T) {
 			expectedBuildersJSON := mustMarshalJSON(t, tc.outputBuilders)
 
 			// apply the rewrite rules
-			rewrittenBuilders, err := rewriter.ApplyTo(ast.Schemas{}, tc.inputBuilders, "go")
+			rewrittenBuilders, err := rewriter.ApplyTo(ir.Schemas{}, tc.inputBuilders, "go")
 			req.NoError(err)
 
 			// save the output states

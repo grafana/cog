@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast/compiler"
+	compiler2 "github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/languages"
 	schemaparser "github.com/santhosh-tekuri/jsonschema/v6"
 )
@@ -56,10 +56,10 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	return jenny
 }
 
-func (language *Language) CompilerPasses() compiler.Passes {
-	return compiler.Passes{
-		&compiler.DisjunctionWithNullToOptional{},
-		&compiler.InferEntrypoint{},
+func (language *Language) CompilerPasses() compiler2.Transforms {
+	return compiler2.Transforms{
+		&compiler2.DisjunctionWithNullToOptional{},
+		&compiler2.InferEntrypoint{},
 	}
 }
 

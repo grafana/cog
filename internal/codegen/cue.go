@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"cuelang.org/go/cue"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/simplecue"
 	"github.com/grafana/cog/internal/tools"
 	cogcue "github.com/grafana/cog/pkg/cue"
@@ -13,10 +13,10 @@ import (
 type genericCueLoader struct {
 	*CueInput
 
-	loader func(input CueInput) (ast.Schemas, error)
+	loader func(input CueInput) (ir.Schemas, error)
 }
 
-func (loader *genericCueLoader) LoadSchemas(_ context.Context) (ast.Schemas, error) {
+func (loader *genericCueLoader) LoadSchemas(_ context.Context) (ir.Schemas, error) {
 	return loader.loader(*loader.CueInput)
 }
 
@@ -94,7 +94,7 @@ func (input *CueInput) interpolateParameters(interpolator ParametersInterpolator
 	input.CueImports = tools.Map(input.CueImports, interpolator)
 }
 
-func cueLoader(input CueInput) (ast.Schemas, error) {
+func cueLoader(input CueInput) (ir.Schemas, error) {
 	schemaRootValue, libraries, err := input.schemaRootValue(context.Background())
 	if err != nil {
 		return nil, err

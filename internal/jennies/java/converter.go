@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -43,7 +43,7 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 
 	var err error
 	for _, schema := range context.Schemas {
-		filterDataqueryObjects(schema).Iterate(func(key string, obj ast.Object) {
+		filterDataqueryObjects(schema).Iterate(func(key string, obj ir.Object) {
 			output, genErr := jenny.generateDataqueryConverter(obj)
 			if genErr != nil {
 				err = genErr
@@ -62,12 +62,12 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 	return files, err
 }
 
-func filterDataqueryObjects(schema *ast.Schema) *orderedmap.Map[string, ast.Object] {
-	filteredObjects := orderedmap.New[string, ast.Object]()
+func filterDataqueryObjects(schema *ir.Schema) *orderedmap.Map[string, ir.Object] {
+	filteredObjects := orderedmap.New[string, ir.Object]()
 
-	schema.Objects.Iterate(func(key string, obj ast.Object) {
-		if obj.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) {
-			if !obj.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
+	schema.Objects.Iterate(func(key string, obj ir.Object) {
+		if obj.Type.ImplementedVariant() == string(ir.SchemaVariantDataQuery) {
+			if !obj.Type.HasHint(ir.HintSkipVariantPluginRegistration) {
 				filteredObjects.Set(key, obj)
 			}
 		}
@@ -76,11 +76,11 @@ func filterDataqueryObjects(schema *ast.Schema) *orderedmap.Map[string, ast.Obje
 	return filteredObjects
 }
 
-func (jenny *Converter) generateConverter(context languages.Context, builder ast.Builder) ([]byte, error) {
+func (jenny *Converter) generateConverter(context languages.Context, builder ir.Builder) ([]byte, error) {
 	converter := languages.NewConverterGenerator(jenny.nullableConfig, context.ConverterConfig).FromBuilder(context, builder)
 
-	schema, schemaFound := context.Schemas.Locate(builder.Package)
-	isPanel := schemaFound && schema.Metadata.Variant == ast.SchemaVariantPanel && builder.Name == "Panel"
+	schema, schemaFound := context.Schemas.Get(builder.Package)
+	isPanel := schemaFound && schema.Metadata.Variant == ir.SchemaVariantPanel && builder.Name == "Panel"
 
 	imports := NewImportMap(jenny.config.PackagePath)
 	packageMapper := func(pkg string, class string) string {
@@ -96,7 +96,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(map[string]any{
 			"formatRawRef": func(pkg string, ref string) string {
-				return typeFormatter.formatReference(ast.NewRef(pkg, ref).AsRef())
+				return typeFormatter.formatReference(ir.NewRef(pkg, ref).AsRef())
 			},
 			"formatPath":        typeFormatter.formatFieldPath,
 			"formatType":        typeFormatter.formatFieldType,
@@ -113,8 +113,8 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 		})
 }
 
-func (jenny *Converter) generateDataqueryConverter(obj ast.Object) ([]byte, error) {
-	var disjunctionStruct *ast.StructType
+func (jenny *Converter) generateDataqueryConverter(obj ir.Object) ([]byte, error) {
+	var disjunctionStruct *ir.StructType
 
 	if obj.Type.IsDisjunctionOfRefs() {
 		disjunctionStruct = obj.Type.Struct

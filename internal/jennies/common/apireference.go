@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
@@ -20,8 +20,8 @@ type ArgumentReference struct {
 }
 
 type MethodReference struct {
-	ReceiverObject  *ast.Object
-	ReceiverBuilder *ast.Builder
+	ReceiverObject  *ir.Object
+	ReceiverBuilder *ir.Builder
 
 	Name      string
 	Comments  []string
@@ -38,7 +38,7 @@ type FunctionReference struct {
 }
 
 type VirtualObject struct {
-	Object  ast.Object
+	Object  ir.Object
 	Methods []MethodReference
 }
 
@@ -58,7 +58,7 @@ func NewAPIReferenceCollector() *APIReferenceCollector {
 	}
 }
 
-func (collector *APIReferenceCollector) VirtualObject(object ast.Object) {
+func (collector *APIReferenceCollector) VirtualObject(object ir.Object) {
 	objectRef := object.SelfRef.String()
 	pkg := object.SelfRef.ReferredPkg
 	if collector.virtualObjects[pkg] == nil {
@@ -74,7 +74,7 @@ func (collector *APIReferenceCollector) VirtualObject(object ast.Object) {
 	}
 }
 
-func (collector *APIReferenceCollector) VirtualObjectMethod(object ast.Object, method MethodReference) {
+func (collector *APIReferenceCollector) VirtualObjectMethod(object ir.Object, method MethodReference) {
 	pkg := object.SelfRef.ReferredPkg
 	objectRef := object.SelfRef.String()
 
@@ -86,13 +86,13 @@ func (collector *APIReferenceCollector) VirtualObjectMethod(object ast.Object, m
 	collector.virtualObjects[pkg][objectRef] = virtualObject
 }
 
-func (collector *APIReferenceCollector) ObjectMethod(object ast.Object, methodReference MethodReference) {
+func (collector *APIReferenceCollector) ObjectMethod(object ir.Object, methodReference MethodReference) {
 	objectRef := object.SelfRef.String()
 	methodReference.ReceiverObject = &object
 	collector.objectMethods[objectRef] = append(collector.objectMethods[objectRef], methodReference)
 }
 
-func (collector *APIReferenceCollector) methodsForObject(object ast.Object) []MethodReference {
+func (collector *APIReferenceCollector) methodsForObject(object ir.Object) []MethodReference {
 	pkg := object.SelfRef.ReferredPkg
 	objectRef := object.SelfRef.String()
 
@@ -103,13 +103,13 @@ func (collector *APIReferenceCollector) methodsForObject(object ast.Object) []Me
 	return collector.objectMethods[objectRef]
 }
 
-func (collector *APIReferenceCollector) BuilderMethod(builder ast.Builder, methodReference MethodReference) {
+func (collector *APIReferenceCollector) BuilderMethod(builder ir.Builder, methodReference MethodReference) {
 	ref := fmt.Sprintf("%s_%s", builder.Package, builder.Name)
 	methodReference.ReceiverBuilder = &builder
 	collector.builderMethods[ref] = append(collector.builderMethods[ref], methodReference)
 }
 
-func (collector *APIReferenceCollector) methodsForBuilder(builder ast.Builder) []MethodReference {
+func (collector *APIReferenceCollector) methodsForBuilder(builder ir.Builder) []MethodReference {
 	ref := fmt.Sprintf("%s_%s", builder.Package, builder.Name)
 	return collector.builderMethods[ref]
 }
@@ -123,21 +123,21 @@ func (collector *APIReferenceCollector) functionsForPackage(pkg string) []Functi
 }
 
 type APIReferenceFormatter struct {
-	KindName func(kind ast.Kind) string
+	KindName func(kind ir.Kind) string
 
 	FunctionName      func(function FunctionReference) string
 	FunctionSignature func(context languages.Context, function FunctionReference) string
 
-	ObjectName       func(object ast.Object) string
-	ObjectDefinition func(context languages.Context, object ast.Object) string
+	ObjectName       func(object ir.Object) string
+	ObjectDefinition func(context languages.Context, object ir.Object) string
 
 	MethodName      func(method MethodReference) string
 	MethodSignature func(context languages.Context, method MethodReference) string
 
-	BuilderName          func(builder ast.Builder) string
-	ConstructorSignature func(context languages.Context, builder ast.Builder) string
-	OptionName           func(option ast.Option) string
-	OptionSignature      func(context languages.Context, builder ast.Builder, option ast.Option) string
+	BuilderName          func(builder ir.Builder) string
+	ConstructorSignature func(context languages.Context, builder ir.Builder) string
+	OptionName           func(option ir.Option) string
+	OptionSignature      func(context languages.Context, builder ir.Builder, option ir.Option) string
 }
 
 type APIReference struct {
@@ -185,7 +185,7 @@ func (jenny APIReference) index(context languages.Context) (codejen.File, error)
 
 	buffer.WriteString("# Packages\n\n")
 
-	slices.SortFunc(context.Schemas, func(schemaA, schemaB *ast.Schema) int {
+	slices.SortFunc(context.Schemas, func(schemaA, schemaB *ir.Schema) int {
 		return strings.Compare(schemaA.Package, schemaB.Package)
 	})
 
@@ -200,7 +200,7 @@ func (jenny APIReference) index(context languages.Context) (codejen.File, error)
 	return *codejen.NewFile("docs/Reference/index.md", buffer.Bytes(), jenny), nil
 }
 
-func (jenny APIReference) referenceForSchema(context languages.Context, schema *ast.Schema) (codejen.Files, error) {
+func (jenny APIReference) referenceForSchema(context languages.Context, schema *ir.Schema) (codejen.Files, error) {
 	files := make([]codejen.File, 0, schema.Objects.Len()+1)
 
 	schemaIndexFile, err := jenny.schemaIndex(context, schema)
@@ -210,7 +210,7 @@ func (jenny APIReference) referenceForSchema(context languages.Context, schema *
 	files = append(files, schemaIndexFile)
 
 	var inner error
-	schema.Objects.Iterate(func(_ string, object ast.Object) {
+	schema.Objects.Iterate(func(_ string, object ir.Object) {
 		if inner != nil {
 			return
 		}
@@ -237,7 +237,7 @@ func (jenny APIReference) referenceForSchema(context languages.Context, schema *
 	return files, nil
 }
 
-func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Schema) (codejen.File, error) {
+func (jenny APIReference) schemaIndex(context languages.Context, schema *ir.Schema) (codejen.File, error) {
 	var buffer bytes.Buffer
 
 	badge := jenny.packageBadge(schema)
@@ -250,7 +250,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 	buffer.WriteString("## Objects\n\n")
 
 	objects := orderedmap.New[string, string]()
-	schema.Objects.Iterate(func(_ string, object ast.Object) {
+	schema.Objects.Iterate(func(_ string, object ir.Object) {
 		objects.Set(object.Name, fmt.Sprintf(" * %[2]s [%[1]s](./object-%[1]s.md)\n", jenny.Formatter.ObjectName(object), jenny.kindBadge(object.Type.Kind)))
 	})
 	for _, virtualObject := range jenny.Collector.virtualObjects[schema.Package] {
@@ -265,7 +265,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 	buffer.WriteString("## Builders\n\n")
 
 	builders := context.Builders.ByPackage(schema.Package)
-	slices.SortFunc(builders, func(builderA, builderB ast.Builder) int {
+	slices.SortFunc(builders, func(builderA, builderB ir.Builder) int {
 		return strings.Compare(builderA.Name, builderB.Name)
 	})
 
@@ -303,7 +303,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 	return *codejen.NewFile(fmt.Sprintf("docs/Reference/%s/index.md", schema.Package), buffer.Bytes(), jenny), nil
 }
 
-func (jenny APIReference) referenceForObject(context languages.Context, object ast.Object) (codejen.File, error) {
+func (jenny APIReference) referenceForObject(context languages.Context, object ir.Object) (codejen.File, error) {
 	var buffer bytes.Buffer
 
 	objectName := jenny.Formatter.ObjectName(object)
@@ -347,7 +347,7 @@ title: %[2]s %[1]s
 	if len(buildersForObjet) != 0 {
 		buffer.WriteString("## See also\n\n")
 
-		slices.SortFunc(buildersForObjet, func(builderA, builderB ast.Builder) int {
+		slices.SortFunc(buildersForObjet, func(builderA, builderB ir.Builder) int {
 			builderAName := fmt.Sprintf("%s.%s", builderA.Package, builderA.Name)
 			builderBName := fmt.Sprintf("%s.%s", builderB.Package, builderB.Name)
 			return strings.Compare(builderAName, builderBName)
@@ -389,7 +389,7 @@ func (jenny APIReference) formatMethodReference(buffer *bytes.Buffer, context la
 	buffer.WriteString("\n```\n")
 }
 
-func (jenny APIReference) referenceForBuilder(context languages.Context, builder ast.Builder) (codejen.File, error) {
+func (jenny APIReference) referenceForBuilder(context languages.Context, builder ir.Builder) (codejen.File, error) {
 	var buffer bytes.Buffer
 
 	builderName := jenny.Formatter.BuilderName(builder)
@@ -430,7 +430,7 @@ title: %[2]s %[1]s
 		buffer.WriteString("\n")
 	}
 
-	slices.SortFunc(builder.Options, func(optionA, optionB ast.Option) int {
+	slices.SortFunc(builder.Options, func(optionA, optionB ir.Option) int {
 		return strings.Compare(optionA.Name, optionB.Name)
 	})
 
@@ -466,8 +466,8 @@ title: %[2]s %[1]s
 	return *codejen.NewFile(fmt.Sprintf("docs/Reference/%s/builder-%s.md", builder.Package, builderName), buffer.Bytes(), jenny), nil
 }
 
-func (jenny APIReference) packageBadge(schema *ast.Schema) string {
-	if schema.Metadata.Kind == ast.SchemaKindCore {
+func (jenny APIReference) packageBadge(schema *ir.Schema) string {
+	if schema.Metadata.Kind == ir.SchemaKindCore {
 		return "<span class=\"badge package-core\"></span>"
 	}
 
@@ -478,7 +478,7 @@ func (jenny APIReference) packageBadge(schema *ast.Schema) string {
 	return fmt.Sprintf("<span class=\"badge package-variant-%s\"></span>", string(schema.Metadata.Variant))
 }
 
-func (jenny APIReference) objectBadge(object ast.Object) string {
+func (jenny APIReference) objectBadge(object ir.Object) string {
 	badge := jenny.kindBadge(object.Type.Kind)
 
 	if object.DeprecationMessage != "" {
@@ -488,7 +488,7 @@ func (jenny APIReference) objectBadge(object ast.Object) string {
 	return badge
 }
 
-func (jenny APIReference) kindBadge(kind ast.Kind) string {
+func (jenny APIReference) kindBadge(kind ir.Kind) string {
 	return fmt.Sprintf("<span class=\"badge object-type-%s\"></span>", jenny.Formatter.KindName(kind))
 }
 
@@ -500,7 +500,7 @@ func (jenny APIReference) functionBadge() string {
 	return "<span class=\"badge function\"></span>"
 }
 
-func (jenny APIReference) builderBadge(builder ast.Builder) string {
+func (jenny APIReference) builderBadge(builder ir.Builder) string {
 	badge := "<span class=\"badge builder\"></span>"
 
 	if builder.DeprecationMessage != "" {

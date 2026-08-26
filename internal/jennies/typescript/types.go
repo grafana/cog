@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type enumFormatter interface {
-	formatDeclaration(def ast.Object) string
-	formatValue(enumObj ast.Object, val any) string
+	formatDeclaration(def ir.Object) string
+	formatValue(enumObj ir.Object, val any) string
 }
 
 type packageMapper func(pkg string) string
@@ -46,7 +46,7 @@ func (formatter *typeFormatter) variantInterface(variant string) string {
 	return fmt.Sprintf("%s.%s", referredPkg, tools.UpperCamelCase(variant))
 }
 
-func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
+func (formatter *typeFormatter) formatTypeDeclaration(def ir.Object) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("export ")
@@ -54,16 +54,16 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 	objectName := formatObjectName(def.Name)
 
 	switch def.Type.Kind {
-	case ast.KindStruct:
+	case ir.KindStruct:
 		buffer.WriteString(fmt.Sprintf("interface %s ", objectName))
 		buffer.WriteString(formatter.formatStructFields(def.Type))
 		buffer.WriteString("\n")
-	case ast.KindEnum:
+	case ir.KindEnum:
 		buffer.WriteString(formatter.enums.formatDeclaration(def))
 		buffer.WriteString("\n")
-	case ast.KindDisjunction, ast.KindMap, ast.KindArray, ast.KindRef:
+	case ir.KindDisjunction, ir.KindMap, ir.KindArray, ir.KindRef:
 		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", objectName, formatter.formatType(def.Type)))
-	case ast.KindScalar:
+	case ir.KindScalar:
 		scalarType := def.Type.AsScalar()
 		typeValue := formatValue(scalarType.Value)
 
@@ -76,11 +76,11 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 		} else {
 			buffer.WriteString(fmt.Sprintf("const %s = %s;\n", objectName, typeValue))
 		}
-	case ast.KindIntersection:
+	case ir.KindIntersection:
 		buffer.WriteString(fmt.Sprintf("interface %s ", objectName))
 		buffer.WriteString(formatter.formatType(def.Type))
 		buffer.WriteString("\n")
-	case ast.KindComposableSlot:
+	case ir.KindComposableSlot:
 		buffer.WriteString(fmt.Sprintf("interface %s %s\n", objectName, formatter.variantInterface(string(def.Type.AsComposableSlot().Variant))))
 	default:
 		return fmt.Sprintf("unhandled object of type: %s", def.Type.Kind)
@@ -89,34 +89,34 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatType(def ast.Type) string {
+func (formatter *typeFormatter) formatType(def ir.Type) string {
 	return formatter.doFormatType(def, formatter.forBuilder)
 }
 
-func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool) string {
+func (formatter *typeFormatter) doFormatType(def ir.Type, resolveBuilders bool) string {
 	switch def.Kind {
-	case ast.KindDisjunction:
+	case ir.KindDisjunction:
 		return formatter.formatDisjunction(def.AsDisjunction(), resolveBuilders)
-	case ast.KindRef:
+	case ir.KindRef:
 		return formatter.formatRef(def.AsRef(), resolveBuilders)
-	case ast.KindArray:
+	case ir.KindArray:
 		return formatter.formatArray(def.AsArray(), resolveBuilders)
-	case ast.KindStruct:
+	case ir.KindStruct:
 		return formatter.formatStructFields(def)
-	case ast.KindMap:
+	case ir.KindMap:
 		return formatter.formatMap(def.AsMap(), resolveBuilders)
-	case ast.KindEnum:
+	case ir.KindEnum:
 		return formatter.formatAnonymousEnum(def.AsEnum())
-	case ast.KindScalar:
+	case ir.KindScalar:
 		// This scalar actually refers to a constant
 		if def.AsScalar().Value != nil {
 			return formatValue(def.AsScalar().Value)
 		}
 
 		return formatter.formatScalarKind(def.AsScalar().ScalarKind)
-	case ast.KindIntersection:
+	case ir.KindIntersection:
 		return formatter.formatIntersection(def.AsIntersection())
-	case ast.KindComposableSlot:
+	case ir.KindComposableSlot:
 		formatted := formatter.variantInterface(string(def.AsComposableSlot().Variant))
 
 		if !resolveBuilders {
@@ -126,14 +126,14 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 		cogAlias := formatter.packageMapper("cog")
 
 		return fmt.Sprintf("%s.Builder<%s>", cogAlias, formatted)
-	case ast.KindConstantRef:
+	case ir.KindConstantRef:
 		return formatter.formatConstantReferences(def.AsConstantRef())
 	default:
 		return string(def.Kind)
 	}
 }
 
-func (formatter *typeFormatter) formatRef(refType ast.RefType, resolveBuilders bool) string {
+func (formatter *typeFormatter) formatRef(refType ir.RefType, resolveBuilders bool) string {
 	formatted := tools.CleanupNames(refType.ReferredType)
 
 	referredPkg := formatter.packageMapper(refType.ReferredPkg)
@@ -158,7 +158,7 @@ func (formatter *typeFormatter) formatRef(refType ast.RefType, resolveBuilders b
 	return formatted
 }
 
-func (formatter *typeFormatter) formatStructFields(structType ast.Type) string {
+func (formatter *typeFormatter) formatStructFields(structType ir.Type) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("{\n")
@@ -184,7 +184,7 @@ func (formatter *typeFormatter) formatStructFields(structType ast.Type) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatField(def ast.StructField) string {
+func (formatter *typeFormatter) formatField(def ir.StructField) string {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -208,31 +208,31 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatScalarKind(kind ast.ScalarKind) string {
+func (formatter *typeFormatter) formatScalarKind(kind ir.ScalarKind) string {
 	switch kind {
-	case ast.KindNull:
+	case ir.KindNull:
 		return "null"
-	case ast.KindAny:
+	case ir.KindAny:
 		return "any"
 
-	case ast.KindBytes, ast.KindString:
+	case ir.KindBytes, ir.KindString:
 		return "string"
 
-	case ast.KindFloat32, ast.KindFloat64:
+	case ir.KindFloat32, ir.KindFloat64:
 		return "number"
-	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
+	case ir.KindUint8, ir.KindUint16, ir.KindUint32, ir.KindUint64:
 		return "number"
-	case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
+	case ir.KindInt8, ir.KindInt16, ir.KindInt32, ir.KindInt64:
 		return "number"
 
-	case ast.KindBool:
+	case ir.KindBool:
 		return "boolean"
 	default:
 		return string(kind)
 	}
 }
 
-func (formatter *typeFormatter) formatArray(def ast.ArrayType, resolveBuilders bool) string {
+func (formatter *typeFormatter) formatArray(def ir.ArrayType, resolveBuilders bool) string {
 	subTypeString := formatter.doFormatType(def.ValueType, resolveBuilders)
 
 	if def.ValueType.IsDisjunction() {
@@ -242,22 +242,22 @@ func (formatter *typeFormatter) formatArray(def ast.ArrayType, resolveBuilders b
 	return fmt.Sprintf("%s[]", subTypeString)
 }
 
-func (formatter *typeFormatter) formatDisjunction(def ast.DisjunctionType, resolveBuilders bool) string {
-	subTypes := tools.UniqueFormatted(def.Branches, func(subType ast.Type) string {
+func (formatter *typeFormatter) formatDisjunction(def ir.DisjunctionType, resolveBuilders bool) string {
+	subTypes := tools.UniqueFormatted(def.Branches, func(subType ir.Type) string {
 		return formatter.doFormatType(subType, resolveBuilders)
 	})
 
 	return strings.Join(subTypes, " | ")
 }
 
-func (formatter *typeFormatter) formatMap(def ast.MapType, resolveBuilders bool) string {
+func (formatter *typeFormatter) formatMap(def ir.MapType, resolveBuilders bool) string {
 	keyTypeString := formatter.doFormatType(def.IndexType, resolveBuilders)
 	valueTypeString := formatter.doFormatType(def.ValueType, resolveBuilders)
 
 	return fmt.Sprintf("Record<%s, %s>", keyTypeString, valueTypeString)
 }
 
-func (formatter *typeFormatter) formatAnonymousEnum(def ast.EnumType) string {
+func (formatter *typeFormatter) formatAnonymousEnum(def ir.EnumType) string {
 	values := make([]string, 0, len(def.Values))
 	for _, value := range def.Values {
 		values = append(values, fmt.Sprintf("%#v", value.Value))
@@ -268,11 +268,11 @@ func (formatter *typeFormatter) formatAnonymousEnum(def ast.EnumType) string {
 	return enumeration
 }
 
-func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) string {
+func (formatter *typeFormatter) formatIntersection(def ir.IntersectionType) string {
 	var buffer strings.Builder
 
-	refs := make([]ast.Type, 0)
-	rest := make([]ast.Type, 0)
+	refs := make([]ir.Type, 0)
+	rest := make([]ir.Type, 0)
 	for _, b := range def.Branches {
 		if b.Ref != nil {
 			refs = append(refs, b)
@@ -310,7 +310,7 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatConstantReferences(def ast.ConstantReferenceType) string {
+func (formatter *typeFormatter) formatConstantReferences(def ir.ConstantReferenceType) string {
 	referredType, found := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	if !found {
 		return "unknown"
@@ -330,7 +330,7 @@ type enumAsTypeFormatter struct {
 	packageMapper func(pkg string) string
 }
 
-func (formatter *enumAsTypeFormatter) formatDeclaration(def ast.Object) string {
+func (formatter *enumAsTypeFormatter) formatDeclaration(def ir.Object) string {
 	var buffer strings.Builder
 	objectName := formatObjectName(def.Name)
 
@@ -343,7 +343,7 @@ func (formatter *enumAsTypeFormatter) formatDeclaration(def ast.Object) string {
 	return buffer.String()
 }
 
-func (formatter *enumAsTypeFormatter) formatValue(enumObj ast.Object, val any) string {
+func (formatter *enumAsTypeFormatter) formatValue(enumObj ir.Object, val any) string {
 	referredPkg := formatter.packageMapper(enumObj.SelfRef.ReferredPkg)
 	pkgPrefix := ""
 	if referredPkg != "" {
@@ -358,15 +358,15 @@ func (formatter *enumAsTypeFormatter) formatValue(enumObj ast.Object, val any) s
 type enumAsDisjunctionFormatter struct {
 }
 
-func (formatter *enumAsDisjunctionFormatter) formatDeclaration(def ast.Object) string {
-	values := tools.Map(def.Type.Enum.Values, func(value ast.EnumValue) string {
+func (formatter *enumAsDisjunctionFormatter) formatDeclaration(def ir.Object) string {
+	values := tools.Map(def.Type.Enum.Values, func(value ir.EnumValue) string {
 		return formatValue(value.Value)
 	})
 
 	return fmt.Sprintf("type %s = %s;", formatObjectName(def.Name), strings.Join(values, " | "))
 }
 
-func (formatter *enumAsDisjunctionFormatter) formatValue(enumObj ast.Object, val any) string {
+func (formatter *enumAsDisjunctionFormatter) formatValue(enumObj ir.Object, val any) string {
 	if val == nil {
 		return formatValue(enumObj.Type.Enum.Values[0].Value)
 	}

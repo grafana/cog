@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -41,7 +41,7 @@ func (jenny Builder) Generate(context languages.Context) (codejen.Files, error) 
 	return files, nil
 }
 
-func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
+func (jenny Builder) genBuilder(context languages.Context, builder ir.Builder) ([]byte, error) {
 	jenny.imports = NewImportMap(jenny.config.PackagePath)
 
 	packageMapper := func(pkg string, class string) string {
@@ -81,7 +81,7 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 
 	return jenny.tmpl.Funcs(map[string]any{
 		"formatBuilderFieldType": jenny.typeFormatter.formatBuilderFieldType,
-		"emptyValueForType": func(def ast.Type) string {
+		"emptyValueForType": func(def ir.Type) string {
 			return jenny.typeFormatter.emptyValueForType(def, true)
 		},
 		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
@@ -94,7 +94,7 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 	}).RenderAsBytes("builders/builder.tmpl", tmpl)
 }
 
-func (jenny Builder) getBuilderName(builder ast.Builder) string {
+func (jenny Builder) getBuilderName(builder ir.Builder) string {
 	if builder.For.SelfRef.ReferredPkg != builder.Package {
 		return fmt.Sprintf("%s%s", tools.UpperCamelCase(builder.Package), tools.UpperCamelCase(builder.Name))
 	}
@@ -102,7 +102,7 @@ func (jenny Builder) getBuilderName(builder ast.Builder) string {
 	return tools.UpperCamelCase(builder.Name)
 }
 
-func (jenny Builder) getBuilderSignature(pkg string, obj ast.Object) string {
+func (jenny Builder) getBuilderSignature(pkg string, obj ir.Object) string {
 	if pkg != obj.SelfRef.ReferredPkg {
 		jenny.imports.Add(obj.SelfRef.ReferredType, obj.SelfRef.ReferredPkg)
 	}

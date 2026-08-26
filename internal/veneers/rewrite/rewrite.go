@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/builder"
@@ -52,10 +52,10 @@ func NewRewrite(logger *slog.Logger, rules []RuleSet, config Config) *Rewriter {
 	}
 }
 
-func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, language string) ([]ast.Builder, error) {
+func (engine *Rewriter) ApplyTo(schemas ir.Schemas, builders []ir.Builder, language string) ([]ir.Builder, error) {
 	var err error
 	// TODO: should we deepCopy the builders instead?
-	newBuilders := make([]ast.Builder, 0, len(builders))
+	newBuilders := make([]ir.Builder, 0, len(builders))
 	newBuilders = append(newBuilders, builders...)
 
 	// start by applying veneers common to all languages, then
@@ -88,15 +88,15 @@ func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, lan
 	return newBuilders, nil
 }
 
-func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, builders []ast.Builder, rules []*builder.Rule) ([]ast.Builder, error) {
+func (engine *Rewriter) applyBuilderRules(language string, schemas ir.Schemas, builders []ir.Builder, rules []*builder.Rule) ([]ir.Builder, error) {
 	var err error
-	var transformedBuilders []ast.Builder
+	var transformedBuilders []ir.Builder
 
 	for _, rule := range rules {
 		logger := engine.logger.With(slog.String("language", language), slog.String("rule", rule.String()))
 
-		unselectedBuilders := make([]ast.Builder, 0, len(builders))
-		var matches ast.Builders
+		unselectedBuilders := make([]ir.Builder, 0, len(builders))
+		var matches ir.Builders
 		for _, candidate := range builders {
 			if !rule.Matches(schemas, candidate) {
 				unselectedBuilders = append(unselectedBuilders, candidate)
@@ -129,7 +129,7 @@ func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, 
 	return builders, nil
 }
 
-func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, builders []ast.Builder, rules []option.Rule) ([]ast.Builder, error) {
+func (engine *Rewriter) applyOptionRules(language string, schemas ir.Schemas, builders []ir.Builder, rules []option.Rule) ([]ir.Builder, error) {
 	for _, rule := range rules {
 		matches := 0
 		logger := engine.logger.With(slog.String("language", language), slog.String("rule", rule.String()))
@@ -139,7 +139,7 @@ func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, b
 		}
 
 		for i, b := range builders {
-			processedOptions := make([]ast.Option, 0, len(b.Options))
+			processedOptions := make([]ir.Option, 0, len(b.Options))
 
 			for _, opt := range b.Options {
 				if !rule.Matches(b, opt) {
@@ -165,7 +165,7 @@ func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, b
 		}
 	}
 
-	return tools.Filter(builders, func(builder ast.Builder) bool {
+	return tools.Filter(builders, func(builder ir.Builder) bool {
 		// "no options" means that the builder was dismissed.
 		return len(builder.Options) != 0
 	}), nil

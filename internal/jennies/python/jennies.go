@@ -4,8 +4,8 @@ import (
 	"io/fs"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/ir"
+	compiler2 "github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -110,22 +110,22 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	return jenny
 }
 
-func (language *Language) CompilerPasses() compiler.Passes {
-	return compiler.Passes{
-		&compiler.AnonymousStructsToNamed{},
-		&compiler.NotRequiredFieldAsNullableType{},
-		&compiler.DisjunctionWithNullToOptional{},
-		&compiler.DisjunctionOfConstantsToEnum{},
-		&compiler.FlattenDisjunctions{},
-		&compiler.DisjunctionInferMapping{},
-		&compiler.RenameNumericEnumValues{},
-		&compiler.DisjunctionPropagateVariant{},
+func (language *Language) CompilerPasses() compiler2.Transforms {
+	return compiler2.Transforms{
+		&compiler2.AnonymousStructsToNamed{},
+		&compiler2.NotRequiredFieldAsNullableType{},
+		&compiler2.DisjunctionWithNullToOptional{},
+		&compiler2.DisjunctionOfConstantsToEnum{},
+		&compiler2.FlattenDisjunctions{},
+		&compiler2.DisjunctionInferMapping{},
+		&compiler2.RenameNumericEnumValues{},
+		&compiler2.DisjunctionPropagateVariant{},
 	}
 }
 
 func (language *Language) NullableKinds() languages.NullableConfig {
 	return languages.NullableConfig{
-		Kinds:              []ast.Kind{ast.KindMap, ast.KindArray, ast.KindRef, ast.KindStruct},
+		Kinds:              []ir.Kind{ir.KindMap, ir.KindArray, ir.KindRef, ir.KindStruct},
 		ProtectArrayAppend: true,
 		AnyIsNullable:      true,
 	}
