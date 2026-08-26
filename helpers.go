@@ -7,13 +7,13 @@ import (
 
 	"cuelang.org/go/cue"
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/openapi"
 	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/simplecue"
+	"github.com/grafana/cog/pkg/ast/compiler"
 )
 
 // SchemaToTypesPipeline represents a simplified codegen.Pipeline, meant to
