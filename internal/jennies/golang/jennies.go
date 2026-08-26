@@ -3,6 +3,7 @@ package golang
 import (
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -93,12 +94,14 @@ func (config Config) importPath(suffix string) string {
 }
 
 type Language struct {
+	logger          *slog.Logger
 	config          Config
 	apiRefCollector *common.APIReferenceCollector
 }
 
-func New(config Config) *Language {
+func New(logger *slog.Logger, config Config) *Language {
 	return &Language{
+		logger:          logger,
 		config:          config,
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
@@ -154,8 +157,8 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	return jenny
 }
 
-func (language *Language) CompilerPasses() compiler.Passes {
-	return compiler.Passes{
+func (language *Language) TransformSchemas(schemas ast.Schemas) (ast.Schemas, error) {
+	passes := compiler.Passes{
 		&compiler.AnonymousStructsToNamed{},
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.DisjunctionWithNullToOptional{},
@@ -172,6 +175,8 @@ func (language *Language) CompilerPasses() compiler.Passes {
 			GenerateUndiscriminatedDisjunctions: language.config.GenerateUndiscriminatedDisjunctions,
 		},
 	}
+
+	return passes.Process(language.logger, schemas)
 }
 
 func (language *Language) NullableKinds() languages.NullableConfig {

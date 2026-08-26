@@ -312,7 +312,7 @@ func (pipeline *Pipeline) OutputLanguages() (languages.Languages, error) {
 	for _, output := range pipeline.Output.Languages {
 		switch {
 		case output.Go != nil:
-			outputs[golang.LanguageRef] = golang.New(*output.Go)
+			outputs[golang.LanguageRef] = golang.New(pipeline.logger, *output.Go)
 		case output.Java != nil:
 			outputs[java.LanguageRef] = java.New(*output.Java)
 		case output.JSONSchema != nil:

@@ -3,13 +3,12 @@ package languages
 import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/pkg/ast"
-	"github.com/grafana/cog/pkg/ast/compiler"
 )
 
 type Language interface {
 	Name() string
 	Jennies(config Config) *codejen.JennyList[Context]
-	CompilerPasses() compiler.Passes
+	TransformSchemas(schemas ast.Schemas) (ast.Schemas, error)
 }
 
 type NullableConfig struct {
