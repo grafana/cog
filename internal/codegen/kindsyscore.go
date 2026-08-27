@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"cuelang.org/go/cue"
-	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/simplecue"
+	"github.com/grafana/cog/pkg/ir"
 )
 
 func kindsysCoreLoader(input CueInput) (ir.Schemas, error) {

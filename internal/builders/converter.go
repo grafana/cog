@@ -5,10 +5,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/grafana/cog/internal/ir"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 type MappingGuard struct {
@@ -575,8 +575,8 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ir.Path,
 		// Map and slice defaults are skipped: they can't be compared with != in Go (compile error
 		// for concrete map types, runtime panic for interface types).
 		if assignmentType.IsScalar() && assignmentType.Default != nil {
-			_, defaultIsMap := assignmentType.Default.(map[string]interface{})
-			_, defaultIsSlice := assignmentType.Default.([]interface{})
+			_, defaultIsMap := assignmentType.Default.(map[string]any)
+			_, defaultIsSlice := assignmentType.Default.([]any)
 			if !defaultIsMap && !defaultIsSlice {
 				guard := MappingGuard{
 					Path:  valuesRootPath.Append(assignment.Path),

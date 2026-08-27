@@ -17,7 +17,7 @@ import (
 )
 
 //nolint:gosec
-const irTransformsTypesSourceDir = "./internal/ir/transforms"
+const irTransformsTypesSourceDir = "./pkg/ir/transforms"
 
 //nolint:gosec
 const yamlCompilerPassTypesSourceDir = "./internal/yaml"

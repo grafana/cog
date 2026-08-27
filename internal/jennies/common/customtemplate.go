@@ -10,7 +10,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/template"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 // CustomTemplates allows the addition of user-originated templates and files to be included

@@ -5,12 +5,12 @@ import (
 	"log/slog"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ir"
-	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/ir/transforms"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 const LanguageRef = "php"

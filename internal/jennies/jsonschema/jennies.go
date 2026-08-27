@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ir"
-	"github.com/grafana/cog/internal/ir/transforms"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/ir/transforms"
+	"github.com/grafana/cog/pkg/languages"
 	schemaparser "github.com/santhosh-tekuri/jsonschema/v6"
 )
 
@@ -47,7 +47,7 @@ func (language *Language) Name() string {
 
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
-	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
+	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
 		return LanguageRef
 	})
 

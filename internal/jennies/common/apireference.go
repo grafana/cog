@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/template"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 type ArgumentReference struct {
@@ -194,7 +194,7 @@ func (jenny APIReference) index(context languages.Context) (codejen.File, error)
 		if badge != "" {
 			badge += " "
 		}
-		buffer.WriteString(fmt.Sprintf(" * %[1]s[%[2]s](./%[2]s/index.md)\n", badge, schema.Package))
+		fmt.Fprintf(&buffer, " * %[1]s[%[2]s](./%[2]s/index.md)\n", badge, schema.Package)
 	}
 
 	return *codejen.NewFile("docs/Reference/index.md", buffer.Bytes(), jenny), nil
@@ -245,7 +245,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ir.Sche
 		badge += " "
 	}
 
-	buffer.WriteString(fmt.Sprintf("# %s%s\n\n", badge, schema.Package))
+	fmt.Fprintf(&buffer, "# %s%s\n\n", badge, schema.Package)
 
 	buffer.WriteString("## Objects\n\n")
 
@@ -270,7 +270,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ir.Sche
 	})
 
 	for _, builder := range builders {
-		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./builder-%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge(builder)))
+		fmt.Fprintf(&buffer, " * %[2]s [%[1]s](./builder-%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge(builder))
 	}
 
 	functions := jenny.Collector.functionsForPackage(schema.Package)
@@ -279,13 +279,14 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ir.Sche
 		buffer.WriteString("## Functions\n\n")
 
 		for _, functionReference := range functions {
-			buffer.WriteString(fmt.Sprintf("### %[2]s %[1]s\n\n", jenny.Formatter.FunctionName(functionReference), jenny.functionBadge()))
+			fmt.Fprintf(&buffer, "### %[2]s %[1]s\n\n", jenny.Formatter.FunctionName(functionReference), jenny.functionBadge())
 
 			if len(functionReference.Comments) != 0 {
-				buffer.WriteString(strings.Join(functionReference.Comments, "\n\n") + "\n\n")
+				buffer.WriteString(strings.Join(functionReference.Comments, "\n\n"))
+				buffer.WriteString("\n\n")
 			}
 
-			buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
+			fmt.Fprintf(&buffer, "```%s\n", jenny.Language)
 			buffer.WriteString(jenny.Formatter.FunctionSignature(context, functionReference))
 			buffer.WriteString("\n```\n")
 
@@ -308,12 +309,12 @@ func (jenny APIReference) referenceForObject(context languages.Context, object i
 
 	objectName := jenny.Formatter.ObjectName(object)
 
-	buffer.WriteString(fmt.Sprintf(`---
+	fmt.Fprintf(&buffer, `---
 title: %[2]s %[1]s
 ---
-`, objectName, jenny.objectBadge(object)))
+`, objectName, jenny.objectBadge(object))
 
-	buffer.WriteString(fmt.Sprintf("# %[2]s %[1]s\n\n", objectName, jenny.objectBadge(object)))
+	fmt.Fprintf(&buffer, "# %[2]s %[1]s\n\n", objectName, jenny.objectBadge(object))
 
 	if object.DeprecationMessage != "" {
 		buffer.WriteString(jenny.deprecatedBadge())
@@ -322,12 +323,13 @@ title: %[2]s %[1]s
 	}
 
 	if len(object.Comments) != 0 {
-		buffer.WriteString(strings.Join(object.Comments, "\n\n") + "\n\n")
+		buffer.WriteString(strings.Join(object.Comments, "\n\n"))
+		buffer.WriteString("\n\n")
 	}
 
 	buffer.WriteString("## Definition\n\n")
 
-	buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
+	fmt.Fprintf(&buffer, "```%s\n", jenny.Language)
 	buffer.WriteString(jenny.Formatter.ObjectDefinition(context, object))
 	buffer.WriteString("\n```\n")
 
@@ -354,9 +356,9 @@ title: %[2]s %[1]s
 		})
 		for _, builder := range buildersForObjet {
 			if builder.Package == object.SelfRef.ReferredPkg {
-				buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./builder-%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge(builder)))
+				fmt.Fprintf(&buffer, " * %[2]s [%[1]s](./builder-%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge(builder))
 			} else {
-				buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../%[1]s/builder-%[2]s.md)\n", builder.Package, jenny.Formatter.BuilderName(builder), jenny.builderBadge(builder)))
+				fmt.Fprintf(&buffer, " * %[3]s [%[1]s.%[2]s](../%[1]s/builder-%[2]s.md)\n", builder.Package, jenny.Formatter.BuilderName(builder), jenny.builderBadge(builder))
 			}
 		}
 	}
@@ -378,13 +380,14 @@ func (jenny APIReference) referenceStructMethods(buffer *bytes.Buffer, context l
 }
 
 func (jenny APIReference) formatMethodReference(buffer *bytes.Buffer, context languages.Context, method MethodReference) {
-	buffer.WriteString(fmt.Sprintf("### %[2]s %[1]s\n\n", jenny.Formatter.MethodName(method), jenny.methodBadge()))
+	fmt.Fprintf(buffer, "### %[2]s %[1]s\n\n", jenny.Formatter.MethodName(method), jenny.methodBadge())
 
 	if len(method.Comments) != 0 {
-		buffer.WriteString(strings.Join(method.Comments, "\n\n") + "\n\n")
+		buffer.WriteString(strings.Join(method.Comments, "\n\n"))
+		buffer.WriteString("\n\n")
 	}
 
-	buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
+	fmt.Fprintf(buffer, "```%s\n", jenny.Language)
 	buffer.WriteString(jenny.Formatter.MethodSignature(context, method))
 	buffer.WriteString("\n```\n")
 }
@@ -394,12 +397,12 @@ func (jenny APIReference) referenceForBuilder(context languages.Context, builder
 
 	builderName := jenny.Formatter.BuilderName(builder)
 
-	buffer.WriteString(fmt.Sprintf(`---
+	fmt.Fprintf(&buffer, `---
 title: %[2]s %[1]s
 ---
-`, builderName, jenny.builderBadge(builder)))
+`, builderName, jenny.builderBadge(builder))
 
-	buffer.WriteString(fmt.Sprintf("# %[2]s %[1]s\n\n", builderName, jenny.builderBadge(builder)))
+	fmt.Fprintf(&buffer, "# %[2]s %[1]s\n\n", builderName, jenny.builderBadge(builder))
 
 	if builder.DeprecationMessage != "" {
 		buffer.WriteString(jenny.deprecatedBadge())
@@ -408,12 +411,13 @@ title: %[2]s %[1]s
 	}
 
 	if len(builder.For.Comments) != 0 {
-		buffer.WriteString(strings.Join(builder.For.Comments, "\n\n") + "\n\n")
+		buffer.WriteString(strings.Join(builder.For.Comments, "\n\n"))
+		buffer.WriteString("\n\n")
 	}
 
 	buffer.WriteString("## Constructor\n\n")
 
-	buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
+	fmt.Fprintf(&buffer, "```%s\n", jenny.Language)
 	buffer.WriteString(jenny.Formatter.ConstructorSignature(context, builder))
 	buffer.WriteString("\n```\n")
 
@@ -435,13 +439,14 @@ title: %[2]s %[1]s
 	})
 
 	for _, option := range builder.Options {
-		buffer.WriteString(fmt.Sprintf("### %[2]s %[1]s\n\n", jenny.Formatter.OptionName(option), jenny.methodBadge()))
+		fmt.Fprintf(&buffer, "### %[2]s %[1]s\n\n", jenny.Formatter.OptionName(option), jenny.methodBadge())
 
 		if len(option.Comments) != 0 {
-			buffer.WriteString(strings.Join(option.Comments, "\n\n") + "\n\n")
+			buffer.WriteString(strings.Join(option.Comments, "\n\n"))
+			buffer.WriteString("\n\n")
 		}
 
-		buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
+		fmt.Fprintf(&buffer, "```%s\n", jenny.Language)
 		buffer.WriteString(jenny.Formatter.OptionSignature(context, builder, option))
 		buffer.WriteString("\n```\n")
 
@@ -458,9 +463,9 @@ title: %[2]s %[1]s
 	buffer.WriteString("## See also\n\n")
 
 	if builder.Package == builder.For.SelfRef.ReferredPkg {
-		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./object-%[1]s.md)\n", jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind)))
+		fmt.Fprintf(&buffer, " * %[2]s [%[1]s](./object-%[1]s.md)\n", jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind))
 	} else {
-		buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../%[1]s/object-%[2]s.md)\n", builder.For.SelfRef.ReferredPkg, jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind)))
+		fmt.Fprintf(&buffer, " * %[3]s [%[1]s.%[2]s](../%[1]s/object-%[2]s.md)\n", builder.For.SelfRef.ReferredPkg, jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind))
 	}
 
 	return *codejen.NewFile(fmt.Sprintf("docs/Reference/%s/builder-%s.md", builder.Package, builderName), buffer.Bytes(), jenny), nil

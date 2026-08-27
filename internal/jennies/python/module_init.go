@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 var _ codejen.OneToMany[languages.Context] = ModuleInit{}

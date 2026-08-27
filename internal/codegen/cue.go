@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"cuelang.org/go/cue"
-	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/simplecue"
 	"github.com/grafana/cog/internal/tools"
 	cogcue "github.com/grafana/cog/pkg/cue"
+	"github.com/grafana/cog/pkg/ir"
 )
 
 type genericCueLoader struct {

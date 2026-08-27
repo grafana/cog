@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ir"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 type shape struct {

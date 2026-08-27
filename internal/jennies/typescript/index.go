@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 type Index struct {
@@ -46,8 +46,8 @@ func (jenny Index) generateIndex(refs []string) []byte {
 	output := strings.Builder{}
 
 	for _, ref := range refs {
-		output.WriteString(fmt.Sprintf("export * from './%s';\n", ref))
-		output.WriteString(fmt.Sprintf("export type * from './%s';\n", ref))
+		fmt.Fprintf(&output, "export * from './%s';\n", ref)
+		fmt.Fprintf(&output, "export type * from './%s';\n", ref)
 	}
 
 	return []byte(output.String())
