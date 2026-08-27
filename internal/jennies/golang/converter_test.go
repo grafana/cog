@@ -3,6 +3,7 @@ package golang
 import (
 	"testing"
 
+	"github.com/grafana/cog/internal/builders"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/logs"
@@ -37,7 +38,7 @@ func TestConverter_Generate(t *testing.T) {
 		req := require.New(tc)
 
 		context := tc.UnmarshalJSONInput(testutils.BuildersContextInputFile)
-		context, err = languages.GenerateBuilderNilChecks(language, context)
+		context.Builders, err = builders.GenerateNilChecks(language.NullableKinds(), context.Schemas, context.Builders)
 		req.NoError(err)
 
 		files, err := jenny.Generate(context)

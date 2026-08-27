@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/builders"
 	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
@@ -77,7 +78,7 @@ func filterDataqueryObjects(schema *ir.Schema) *orderedmap.Map[string, ir.Object
 }
 
 func (jenny *Converter) generateConverter(context languages.Context, builder ir.Builder) ([]byte, error) {
-	converter := languages.NewConverterGenerator(jenny.nullableConfig, context.ConverterConfig).FromBuilder(context, builder)
+	converter := builders.NewConverterGenerator(jenny.nullableConfig, context.ConverterConfig).FromBuilder(context, builder)
 
 	schema, schemaFound := context.Schemas.Get(builder.Package)
 	isPanel := schemaFound && schema.Metadata.Variant == ir.SchemaVariantPanel && builder.Name == "Panel"
