@@ -9,8 +9,8 @@ import (
 
 var _ Transform = (*DuplicateObject)(nil)
 
-// DuplicateObject duplicates the source object. The duplicate is created under
-// a different name, possibly in a different package.
+// DuplicateObject duplicates the source object under a different name,
+// possibly in a different package.
 //
 // Note: if the source object isn't found, this pass does nothing.
 type DuplicateObject struct {

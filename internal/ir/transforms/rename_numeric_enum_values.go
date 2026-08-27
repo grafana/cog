@@ -15,13 +15,13 @@ var _ Transform = (*RenameNumericEnumValues)(nil)
 // Example:
 //
 //	```
-//	Position enum(0: 0, 1: 1, 2: 2)
+//	Position enum(0: 0, 1: 1, 2: 2, -3: -3, Empty: empty)
 //	```
 //
 // Will become:
 //
 //	```
-//	Position enum(N0: 0, N1: 1, N2: 2)
+//	Position enum(N0: 0, N1: 1, N2: 2, Negative3: -3, Empty: empty)
 //	```
 type RenameNumericEnumValues struct {
 }

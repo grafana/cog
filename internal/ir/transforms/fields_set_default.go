@@ -10,6 +10,8 @@ import (
 var _ Transform = (*FieldsSetDefault)(nil)
 
 // FieldsSetDefault sets the default value for the given fields.
+// Invalid field references will be ignored and existing default values will be
+// overridden.
 type FieldsSetDefault struct {
 	DefaultValues map[FieldReference]any
 	fieldsFound   []string

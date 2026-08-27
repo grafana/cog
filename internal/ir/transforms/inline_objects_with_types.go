@@ -13,29 +13,29 @@ var _ Transform = (*InlineObjectsWithTypes)(nil)
 // This compiler pass is meant to be used to generate code in languages that
 // don't support type aliases on scalars, top-level disjunctions, ...
 //
-// Note: constants are not impacted.
+// Note: constants are not inlined.
 //
 // Example:
 //
 //	```
-//	TimeZone string
-//	Details map[string, any]
-//	Targets []string
+//	TimeZone: string
+//	Details: map[string, any]
+//	Targets: []string
 //
-//	Foo struct {
-//	  TimezoneField TimeZone
-//	  DetailsField Details
-//	  TargetsField Targets
+//	Foo: {
+//	  TimezoneField: TimeZone
+//	  DetailsField: Details
+//	  TargetsField: Targets
 //	}
 //	```
 //
 // Will become:
 //
 //	```
-//	Foo struct {
-//	  TimezoneField string
-//	  DetailsField map[string, any]
-//	  TargetsField []string
+//	Foo: {
+//	  TimezoneField: string
+//	  DetailsField: map[string, any]
+//	  TargetsField: []string
 //	}
 //	```
 type InlineObjectsWithTypes struct {

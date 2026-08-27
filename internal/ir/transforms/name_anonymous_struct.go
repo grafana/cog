@@ -10,6 +10,35 @@ var _ Transform = (*NameAnonymousStruct)(nil)
 
 // NameAnonymousStruct rewrites the definition of a struct field typed as an
 // anonymous struct to instead refer to a named type.
+//
+// Example:
+//
+//	```
+//	Field = Panel.DataSource
+//	As = DataSourceRef
+//	```
+//
+//	```
+//	Panel: {
+//		DataSource: {
+//			Type: string
+//			name: string
+//		}
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	Panel: {
+//		DataSource: DataSourceRef
+//	}
+//
+//	DataSourceRef: {
+//		Type: string
+//		name: string
+//	}
+//	```
 type NameAnonymousStruct struct {
 	Field      FieldReference
 	As         string
