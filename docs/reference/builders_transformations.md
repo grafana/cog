@@ -133,7 +133,7 @@ N/A
 
 ```yaml
 properties:
-  set: []ast.StructField
+  set: []ir.StructField
 ```
 
 ## `rename`
