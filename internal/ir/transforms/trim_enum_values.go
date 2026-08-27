@@ -10,6 +10,18 @@ var _ Transform = (*TrimEnumValues)(nil)
 
 // TrimEnumValues removes leading and trailing spaces from string values.
 // It could happen when they add them by mistake in jsonschema/openapi when they define the enums
+//
+// Example:
+//
+//	```
+//	Position enum('Foo': 'foo', 'Bar': ' bar', 'Baz': 'baz ')
+//	```
+//
+// Will become:
+//
+//	```
+//	Position enum('Foo': 'foo', 'Bar': 'bar', 'Baz': 'baz')
+//	```
 type TrimEnumValues struct {
 }
 

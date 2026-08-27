@@ -7,6 +7,27 @@ import (
 )
 
 // ReplaceReference replaces any usage of the `From` reference by the one given in `To`.
+//
+// Example:
+//
+//	```
+//	From = { Package: common, Object: DataSourceRef }
+//	To = { Package: common, Object: DataSourceDescriptor }
+//	```
+//
+//	```
+//	Panel: {
+//		DataSource: common.DataSourceRef
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	Panel: {
+//		DataSource: common.DataSourceDescriptor
+//	}
+//	```
 type ReplaceReference struct {
 	From     ObjectReference
 	To       ObjectReference

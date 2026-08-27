@@ -9,6 +9,21 @@ import (
 
 var _ Transform = (*SanitizeEnumMemberNames)(nil)
 
+// SanitizeEnumMemberNames cleans up enum member names that might cause issues
+// for language jennies.
+// Especially empty member names, or member names starting with a +/- operator.
+//
+// Example:
+//
+//	```
+//	Position enum('': '', '+1': '+1', '-2': -2)
+//	```
+//
+// Will become:
+//
+//	```
+//	Position enum(None: '', Positive1: '+1', Negative2: '-2')
+//	```
 type SanitizeEnumMemberNames struct {
 }
 

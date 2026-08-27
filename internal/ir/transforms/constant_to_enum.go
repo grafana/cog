@@ -13,6 +13,20 @@ var _ Transform = (*ConstantToEnum)(nil)
 // single member.
 // This is useful to "future-proof" a schema where a type can have a single
 // value for now but is expected to allow more in the future.
+//
+// Example:
+//
+//	```
+//	ElementType: "thing"
+//	```
+//
+// Will become:
+//
+//	```
+//	ElementType enum {
+//		thing = "thing"
+//	}
+//	```
 type ConstantToEnum struct {
 	Objects      ObjectReferences
 	objectsFound []string
