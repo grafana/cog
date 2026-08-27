@@ -7,6 +7,17 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
+type ConverterConfig struct {
+	RuntimeConfig []RuntimeConfig
+}
+
+type RuntimeConfig struct {
+	Package            string
+	Name               string
+	NameFunc           string `yaml:"name_func"`
+	DiscriminatorField string `yaml:"discriminator_field"`
+}
+
 //nolint:musttag
 type Context struct {
 	Schemas         ir.Schemas

@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/builders"
 	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
@@ -92,7 +93,7 @@ func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schema
 	}
 
 	// from schemas, derive builders
-	jenniesInput.Builders = (&ir.BuilderGenerator{}).FromAST(jenniesInput.Schemas)
+	jenniesInput.Builders = (&builders.Generator{}).FromSchemas(jenniesInput.Schemas)
 
 	// apply veneers to builders
 	veneersRewriter, err := pipeline.veneers()
@@ -106,7 +107,16 @@ func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schema
 	}
 
 	// with the veneers applied, generate "nil-checks" for assignments
-	jenniesInput, err = languages.GenerateBuilderNilChecks(language, jenniesInput)
+	nullableKinds := languages.NullableConfig{
+		Kinds:              nil,
+		ProtectArrayAppend: false,
+		AnyIsNullable:      true,
+	}
+	if nilTypesProvider, ok := language.(languages.NullableKindsProvider); ok {
+		nullableKinds = nilTypesProvider.NullableKinds()
+	}
+
+	jenniesInput.Builders, err = builders.GenerateNilChecks(nullableKinds, jenniesInput.Schemas, jenniesInput.Builders)
 	if err != nil {
 		return languages.Context{}, err
 	}

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/builders"
 	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/languages"
@@ -156,10 +157,10 @@ func inspectConvertersIR(codegenCtx languages.Context, language languages.Langua
 	}
 
 	// select builders within a package
-	builders := tools.Filter(codegenCtx.Builders, func(b ir.Builder) bool {
+	selectedBuilder := tools.Filter(codegenCtx.Builders, func(b ir.Builder) bool {
 		return strings.EqualFold(b.Package, selectorParts[0]) && strings.EqualFold(b.Name, selectorParts[1])
 	})
-	if len(builders) == 0 {
+	if len(selectedBuilder) == 0 {
 		return fmt.Errorf("builder '%s' not found", selector)
 	}
 
@@ -168,7 +169,7 @@ func inspectConvertersIR(codegenCtx languages.Context, language languages.Langua
 		return fmt.Errorf("language '%s' does not appear to support converters", language.Name())
 	}
 
-	converter := languages.NewConverterGenerator(nullableConfig.NullableKinds(), codegenCtx.ConverterConfig).FromBuilder(codegenCtx, builders[0])
+	converter := builders.NewConverterGenerator(nullableConfig.NullableKinds(), codegenCtx.ConverterConfig).FromBuilder(codegenCtx, selectedBuilder[0])
 
 	return prettyPrintJSON(converter)
 }
