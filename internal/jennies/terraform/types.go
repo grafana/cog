@@ -99,7 +99,7 @@ func (formatter *typeFormatter) formatScalarType(scalar ir.ScalarType) string {
 }
 
 func (formatter *typeFormatter) formatReference(ref ir.RefType) string {
-	obj, ok := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	obj, ok := formatter.context.GetObject(ref.ReferredPkg, ref.ReferredType)
 	if !ok {
 		return "unknown" // We don't find the referenced object, so we assume it's a generic object
 	}

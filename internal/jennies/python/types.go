@@ -226,7 +226,7 @@ func (formatter *typeFormatter) formatRef(def ir.RefType) string {
 }
 
 func (formatter *typeFormatter) formatFullyQualifiedRef(def ir.RefType, escapeForwardRef bool) string {
-	referredObject, found := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	referredObject, found := formatter.context.GetObject(def.ReferredPkg, def.ReferredType)
 	if found && referredObject.Type.IsConcreteScalar() {
 		return formatter.formatType(referredObject.Type)
 	}
@@ -325,7 +325,7 @@ func (formatter *typeFormatter) formatComments(comments []string) string {
 }
 
 func (formatter *typeFormatter) formatConstantReference(def ir.ConstantReferenceType, shouldSetValue bool) string {
-	referredObject, found := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	referredObject, found := formatter.context.GetObject(def.ReferredPkg, def.ReferredType)
 	if !found {
 		return "unknown"
 	}

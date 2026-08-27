@@ -159,7 +159,7 @@ func (formatter *typeFormatter) formatField(def ir.StructField) string {
 	// we need to use the constant's type instead.
 	// ie: `SomeField string` instead of `SomeField MyStringConstant`
 	if def.Type.IsRef() {
-		referredType, found := formatter.context.LocateObject(def.Type.AsRef().ReferredPkg, def.Type.AsRef().ReferredType)
+		referredType, found := formatter.context.GetObject(def.Type.AsRef().ReferredPkg, def.Type.AsRef().ReferredType)
 		if found && referredType.Type.IsConcreteScalar() {
 			fieldType = referredType.Type
 		}
@@ -234,7 +234,7 @@ func (formatter *typeFormatter) formatConstantReference(def ir.Type) string {
 	ref := def.AsConstantRef()
 	referredPkg := formatPackageName(ref.ReferredPkg)
 
-	obj, ok := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	obj, ok := formatter.context.GetObject(ref.ReferredPkg, ref.ReferredType)
 	if !ok {
 		return "unknown"
 	}
@@ -251,7 +251,7 @@ func (formatter *typeFormatter) formatConstantReference(def ir.Type) string {
 }
 
 func (formatter *typeFormatter) constantRefValue(def ir.ConstantReferenceType) string {
-	obj, ok := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	obj, ok := formatter.context.GetObject(def.ReferredPkg, def.ReferredType)
 	if !ok {
 		return "unknown"
 	}

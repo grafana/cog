@@ -151,7 +151,7 @@ func (constructor *Constructor) DeepCopy() Constructor {
 
 type Builders []Builder
 
-func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool) {
+func (builders Builders) GetByObject(pkg string, name string) (Builder, bool) {
 	for _, builder := range builders {
 		if builder.For.SelfRef.ReferredPkg == pkg && builder.For.SelfRef.ReferredType == name {
 			return builder, true
@@ -161,7 +161,7 @@ func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool)
 	return Builder{}, false
 }
 
-func (builders Builders) LocateByName(pkg string, name string) (Builder, bool) {
+func (builders Builders) GetByName(pkg string, name string) (Builder, bool) {
 	for _, builder := range builders {
 		if builder.Package == pkg && builder.Name == name {
 			return builder, true
@@ -171,20 +171,20 @@ func (builders Builders) LocateByName(pkg string, name string) (Builder, bool) {
 	return Builder{}, false
 }
 
-func (builders Builders) ByPackage(pkg string) Builders {
+func (builders Builders) GetByPackage(pkg string) Builders {
 	return tools.Filter(builders, func(builder Builder) bool {
 		return builder.Package == pkg
 	})
 }
 
-func (builders Builders) LocateAllByObject(pkg string, name string) Builders {
+func (builders Builders) GetAllByObject(pkg string, name string) Builders {
 	return tools.Filter(builders, func(builder Builder) bool {
 		return builder.For.SelfRef.ReferredPkg == pkg && builder.For.SelfRef.ReferredType == name
 	})
 }
 
-func (builders Builders) LocateAllByRef(ref RefType) Builders {
-	return builders.LocateAllByObject(ref.ReferredPkg, ref.ReferredType)
+func (builders Builders) GetAllByRef(ref RefType) Builders {
+	return builders.GetAllByObject(ref.ReferredPkg, ref.ReferredType)
 }
 
 func (builders Builders) HaveConstantConstructorAssignment() bool {

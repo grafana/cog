@@ -498,7 +498,7 @@ func (generator *ConverterGenerator) isAssignmentFromDisjunctionStruct(context C
 	var getEnvelopedType func(envelopedType ir.Type) ir.Type
 	getEnvelopedType = func(envelopedType ir.Type) ir.Type {
 		if envelopedType.IsRef() {
-			referredObject, _ := context.LocateObject(envelopedType.Ref.ReferredPkg, envelopedType.Ref.ReferredType)
+			referredObject, _ := context.GetObject(envelopedType.Ref.ReferredPkg, envelopedType.Ref.ReferredType)
 			envelopedType = referredObject.Type
 		}
 

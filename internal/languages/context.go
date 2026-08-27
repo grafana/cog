@@ -14,11 +14,11 @@ type Context struct {
 	ConverterConfig ConverterConfig
 }
 
-func (context *Context) LocateObject(pkg string, name string) (ir.Object, bool) {
+func (context *Context) GetObject(pkg string, name string) (ir.Object, bool) {
 	return context.Schemas.GetObject(pkg, name)
 }
 
-func (context *Context) LocateObjectByRef(ref ir.RefType) (ir.Object, bool) {
+func (context *Context) GetObjectByRef(ref ir.RefType) (ir.Object, bool) {
 	return context.Schemas.GetObjectByRef(ref)
 }
 
@@ -50,7 +50,7 @@ func (context *Context) ResolveToBuilder(def ir.Type) bool {
 		return context.ResolveToBuilder(resolvedRef)
 	}
 
-	return len(context.Builders.LocateAllByRef(def.AsRef())) != 0
+	return len(context.Builders.GetAllByRef(def.AsRef())) != 0
 }
 
 func (context *Context) IsDisjunctionOfBuilders(def ir.Type) bool {
@@ -105,7 +105,7 @@ func (context *Context) ResolveToComposableSlot(def ir.Type) (ir.Type, bool) {
 	}
 
 	if def.IsRef() {
-		referredObj, found := context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		referredObj, found := context.GetObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if !found {
 			return ir.Type{}, false
 		}
@@ -125,7 +125,7 @@ func (context *Context) ResolveToStruct(def ir.Type) bool {
 		return false
 	}
 
-	referredObj, found := context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+	referredObj, found := context.GetObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 	if !found {
 		return false
 	}
@@ -138,7 +138,7 @@ func (context *Context) ResolveRefsChain(def ir.Type) ir.Type {
 		return def
 	}
 
-	referredObj, found := context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+	referredObj, found := context.GetObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 	if !found {
 		return def
 	}
@@ -155,7 +155,7 @@ func (context *Context) ResolveRefs(def ir.Type) ir.Type {
 		return def
 	}
 
-	referredObj, found := context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+	referredObj, found := context.GetObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 	if !found {
 		return def
 	}
@@ -189,7 +189,7 @@ func (context *Context) BuildersForType(typeDef ir.Type) ir.Builders {
 			return
 		}
 
-		candidateBuilders = append(candidateBuilders, context.Builders.LocateAllByRef(def.AsRef())...)
+		candidateBuilders = append(candidateBuilders, context.Builders.GetAllByRef(def.AsRef())...)
 	}
 
 	search(typeDef)

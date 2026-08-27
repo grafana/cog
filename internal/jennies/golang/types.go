@@ -281,7 +281,7 @@ func (formatter *typeFormatter) formatRef(def ir.Type, resolveBuilders bool) str
 func (formatter *typeFormatter) formatConstantRef(def ir.Type) string {
 	constRef := def.AsConstantRef()
 
-	obj, ok := formatter.context.LocateObject(constRef.ReferredPkg, constRef.ReferredType)
+	obj, ok := formatter.context.GetObject(constRef.ReferredPkg, constRef.ReferredType)
 	if !ok {
 		return "unknown"
 	}
@@ -325,7 +325,7 @@ func (formatter *typeFormatter) formatIntersection(def ir.IntersectionType) stri
 	refFieldNames := make(map[string]bool)
 	for _, ref := range refs {
 		if ref.IsRef() {
-			if obj, found := formatter.context.LocateObjectByRef(ref.AsRef()); found {
+			if obj, found := formatter.context.GetObjectByRef(ref.AsRef()); found {
 				if obj.Type.IsStruct() {
 					for _, field := range obj.Type.AsStruct().Fields {
 						refFieldNames[field.Name] = true
