@@ -2,10 +2,11 @@ package php
 
 import (
 	"io/fs"
+	"log/slog"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ir"
-	compiler2 "github.com/grafana/cog/internal/ir/transforms"
+	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -84,12 +85,14 @@ func (config Config) MergeWithGlobal(global languages.Config) Config {
 }
 
 type Language struct {
+	logger          *slog.Logger
 	config          Config
 	apiRefCollector *common.APIReferenceCollector
 }
 
-func New(config Config) *Language {
+func New(logger *slog.Logger, config Config) *Language {
 	return &Language{
+		logger:          logger,
 		config:          config,
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
@@ -156,23 +159,25 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	return jenny
 }
 
-func (language *Language) CompilerPasses() compiler2.Transforms {
-	return compiler2.Transforms{
-		&compiler2.AnonymousStructsToNamed{},
-		&compiler2.NotRequiredFieldAsNullableType{},
-		&compiler2.DisjunctionWithNullToOptional{},
-		&compiler2.DisjunctionOfConstantsToEnum{},
-		&compiler2.AnonymousEnumToExplicitType{},
-		&compiler2.SanitizeEnumMemberNames{},
-		&compiler2.FlattenDisjunctions{},
-		&compiler2.DisjunctionInferMapping{},
-		&compiler2.UndiscriminatedDisjunctionToAny{},
-		&compiler2.RemoveIntersections{},
-		&compiler2.DisjunctionPropagateVariant{},
-		&compiler2.InlineObjectsWithTypes{
+func (language *Language) Transform(schemas ir.Schemas) (ir.Schemas, error) {
+	passes := transforms.Transforms{
+		&transforms.AnonymousStructsToNamed{},
+		&transforms.NotRequiredFieldAsNullableType{},
+		&transforms.DisjunctionWithNullToOptional{},
+		&transforms.DisjunctionOfConstantsToEnum{},
+		&transforms.AnonymousEnumToExplicitType{},
+		&transforms.SanitizeEnumMemberNames{},
+		&transforms.FlattenDisjunctions{},
+		&transforms.DisjunctionInferMapping{},
+		&transforms.UndiscriminatedDisjunctionToAny{},
+		&transforms.RemoveIntersections{},
+		&transforms.DisjunctionPropagateVariant{},
+		&transforms.InlineObjectsWithTypes{
 			InlineTypes: []ir.Kind{ir.KindScalar, ir.KindArray, ir.KindMap, ir.KindDisjunction},
 		},
 	}
+
+	return passes.Process(language.logger, schemas)
 }
 
 func (language *Language) NullableKinds() languages.NullableConfig {

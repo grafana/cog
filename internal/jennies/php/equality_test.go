@@ -45,7 +45,7 @@ func TestEquality_PHP_GeneratesEqualsMethods(t *testing.T) {
 	schema := equalitySchema()
 
 	// Run PHP compiler passes so nullable types are handled correctly
-	processedSchemas, err := New(config).CompilerPasses().Process(logs.NoopLogger(), ir.Schemas{schema})
+	processedSchemas, err := New(logs.NoopLogger(), config).Transform(ir.Schemas{schema})
 	req.NoError(err)
 
 	context := languages.Context{Schemas: processedSchemas}

@@ -36,7 +36,7 @@ func TestRawTypes_Generate(t *testing.T) {
 		tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
-	compilerPasses := New(config).CompilerPasses()
+	transforms := New(logs.NoopLogger(), config).Transform
 
 	test.Run(t, func(tc *testutils.Test[ir.Schema]) {
 		req := require.New(tc)
@@ -45,7 +45,7 @@ func TestRawTypes_Generate(t *testing.T) {
 		// might not be able to translate some of the IR's semantics into Go.
 		// Example: disjunctions.
 		schema := tc.UnmarshalJSONInput(testutils.RawTypesIRInputFile)
-		processedAsts, err := compilerPasses.Process(logs.NoopLogger(), ir.Schemas{&schema})
+		processedAsts, err := transforms(ir.Schemas{&schema})
 		req.NoError(err)
 
 		req.Len(processedAsts, 1, "we somehow got more ast.Schema than we put in")
@@ -104,13 +104,13 @@ func TestRawTypes_Generate_WithUndiscriminatedDisjunctions(t *testing.T) {
 		tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
-	compilerPasses := New(config).CompilerPasses()
+	transforms := New(logs.NoopLogger(), config).Transform
 
 	test.Run(t, func(tc *testutils.Test[ir.Schema]) {
 		req := require.New(tc)
 
 		schema := tc.UnmarshalJSONInput(testutils.RawTypesIRInputFile)
-		processedAsts, err := compilerPasses.Process(logs.NoopLogger(), ir.Schemas{&schema})
+		processedAsts, err := transforms(ir.Schemas{&schema})
 		req.NoError(err)
 
 		req.Len(processedAsts, 1, "we somehow got more ast.Schema than we put in")
@@ -136,7 +136,7 @@ func TestRawTypes_Generate_AllowMarshalEmptyDisjunctions(t *testing.T) {
 		tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
-	compilerPasses := New(config).CompilerPasses()
+	transforms := New(logs.NoopLogger(), config).Transform
 
 	schema := &ir.Schema{
 		Package: "tests",
@@ -144,7 +144,7 @@ func TestRawTypes_Generate_AllowMarshalEmptyDisjunctions(t *testing.T) {
 			ir.NewObject("tests", "DisjunctionOfScalars", ir.NewDisjunction(ir.Types{ir.String(), ir.Bool()})),
 		),
 	}
-	schemas, err := compilerPasses.Process(logs.NoopLogger(), ir.Schemas{schema})
+	schemas, err := transforms(ir.Schemas{schema})
 	req.NoError(err)
 
 	context := languages.Context{
@@ -185,9 +185,9 @@ func (resource {{ .Object.Name }}) CustomMethod() string {
 			tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
 			apiRefCollector: common.NewAPIReferenceCollector(),
 		}
-		compilerPasses := New(config).CompilerPasses()
+		transforms := New(logs.NoopLogger(), config).Transform
 
-		schemas, err := compilerPasses.Process(logs.NoopLogger(), ir.Schemas{schema})
+		schemas, err := transforms(ir.Schemas{schema})
 		req.NoError(err)
 
 		files, err := jenny.Generate(languages.Context{Schemas: schemas})

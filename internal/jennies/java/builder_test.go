@@ -5,6 +5,7 @@ import (
 
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +19,7 @@ func TestBuilder_Generate(t *testing.T) {
 		},
 	}
 
-	language := New(Config{
+	language := New(logs.NoopLogger(), Config{
 		GenerateBuilders: true,
 	})
 	jenny := Builder{

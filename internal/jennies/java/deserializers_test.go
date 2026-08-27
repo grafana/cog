@@ -23,7 +23,7 @@ func TestDeserializers_Generate(t *testing.T) {
 		config: cfg,
 		tmpl:   initTemplates(cfg, common.NewAPIReferenceCollector()),
 	}
-	compilerPasses := New(cfg).CompilerPasses()
+	transforms := New(logs.NoopLogger(), cfg).Transform
 
 	test.Run(t, func(tc *testutils.Test[ir.Schema]) {
 		req := require.New(tc)
@@ -32,7 +32,7 @@ func TestDeserializers_Generate(t *testing.T) {
 		// might not be able to translate some of the IR's semantics into Java.
 		// Example: disjunctions.
 		schema := tc.UnmarshalJSONInput(testutils.RawTypesIRInputFile)
-		processedAsts, err := compilerPasses.Process(logs.NoopLogger(), ir.Schemas{&schema})
+		processedAsts, err := transforms(ir.Schemas{&schema})
 		req.NoError(err)
 
 		req.Len(processedAsts, 1, "we somehow got more ast.Schema than we put in")

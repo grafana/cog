@@ -2,11 +2,12 @@ package typescript
 
 import (
 	"io/fs"
+	"log/slog"
 	"path/filepath"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ir"
-	compiler2 "github.com/grafana/cog/internal/ir/transforms"
+	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -97,12 +98,14 @@ func (config *Config) applyDefaults() {
 }
 
 type Language struct {
+	logger          *slog.Logger
 	config          Config
 	apiRefCollector *common.APIReferenceCollector
 }
 
-func New(config Config) *Language {
+func New(logger *slog.Logger, config Config) *Language {
 	return &Language{
+		logger:          logger,
 		config:          config,
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
@@ -152,11 +155,13 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	return jenny
 }
 
-func (language *Language) CompilerPasses() compiler2.Transforms {
-	return compiler2.Transforms{
-		&compiler2.RenameNumericEnumValues{},
-		&compiler2.DisjunctionPropagateVariant{},
+func (language *Language) Transform(schemas ir.Schemas) (ir.Schemas, error) {
+	passes := transforms.Transforms{
+		&transforms.RenameNumericEnumValues{},
+		&transforms.DisjunctionPropagateVariant{},
 	}
+
+	return passes.Process(language.logger, schemas)
 }
 
 func (language *Language) NullableKinds() languages.NullableConfig {
