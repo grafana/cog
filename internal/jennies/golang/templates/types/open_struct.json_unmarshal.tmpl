@@ -1,0 +1,34 @@
+{{- $json := importStdPkg "encoding/json" -}}
+{{- $errors := importStdPkg "errors" -}}
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `{{ .def.Name|formatObjectName }}` from JSON.
+func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+
+    var data map[string]json.RawMessage
+    if err := json.Unmarshal(raw, &data); err != nil {
+        return err
+    }
+    
+    {{- range .def.Type.Struct.Fields }}
+    // {{ .Name | upperCamelCase }}
+    if v, ok := data["{{ .Name }}"]; ok {
+        if err := json.Unmarshal(v, &resource.{{ .Name | upperCamelCase }}); err != nil {
+            return err
+        }
+        delete(data, "{{ .Name }}")
+    }
+    {{- end }}
+
+    resource.ExtraFields = make(map[string]any)
+    for key, value := range data {
+		var v any
+		if err := json.Unmarshal(value, &v); err != nil {
+			return err
+		}
+        resource.ExtraFields[key] = v
+    }
+    
+	return nil
+}

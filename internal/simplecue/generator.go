@@ -16,6 +16,7 @@ const cogAnnotationName = "cog"
 const cuetsyAnnotationName = "cuetsy"
 const hintKindEnum = "enum"
 const annotationKindFieldName = "kind"
+const annotationOpen = "open"
 const enumMembersAttr = "memberNames"
 
 type LibraryInclude struct {
