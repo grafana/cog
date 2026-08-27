@@ -311,21 +311,21 @@ func (pipeline *Pipeline) OutputLanguages() (languages.Languages, error) {
 	for _, output := range pipeline.Output.Languages {
 		switch {
 		case output.Go != nil:
-			outputs[golang.LanguageRef] = golang.New(*output.Go)
+			outputs[golang.LanguageRef] = golang.New(pipeline.logger.With(slog.String("language", "golang")), *output.Go)
 		case output.Java != nil:
-			outputs[java.LanguageRef] = java.New(*output.Java)
+			outputs[java.LanguageRef] = java.New(pipeline.logger.With(slog.String("language", "java")), *output.Java)
 		case output.JSONSchema != nil:
-			outputs[jsonschema.LanguageRef] = jsonschema.New(*output.JSONSchema)
+			outputs[jsonschema.LanguageRef] = jsonschema.New(pipeline.logger.With(slog.String("language", "jsonschema")), *output.JSONSchema)
 		case output.OpenAPI != nil:
-			outputs[openapi.LanguageRef] = openapi.New(*output.OpenAPI)
+			outputs[openapi.LanguageRef] = openapi.New(pipeline.logger.With(slog.String("language", "openapi")), *output.OpenAPI)
 		case output.PHP != nil:
-			outputs[php.LanguageRef] = php.New(*output.PHP)
+			outputs[php.LanguageRef] = php.New(pipeline.logger.With(slog.String("language", "php")), *output.PHP)
 		case output.Python != nil:
-			outputs[python.LanguageRef] = python.New(*output.Python)
+			outputs[python.LanguageRef] = python.New(pipeline.logger.With(slog.String("language", "python")), *output.Python)
 		case output.Typescript != nil:
-			outputs[typescript.LanguageRef] = typescript.New(*output.Typescript)
+			outputs[typescript.LanguageRef] = typescript.New(pipeline.logger.With(slog.String("language", "typescript")), *output.Typescript)
 		case output.Terraform != nil:
-			outputs[terraform.LanguageRef] = terraform.New(*output.Terraform)
+			outputs[terraform.LanguageRef] = terraform.New(pipeline.logger.With(slog.String("language", "terraform")), *output.Terraform)
 		default:
 			return nil, fmt.Errorf("empty language configuration")
 		}

@@ -3,11 +3,12 @@ package java
 import (
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ir"
-	compiler2 "github.com/grafana/cog/internal/ir/transforms"
+	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -92,12 +93,14 @@ func (config *Config) MergeWithGlobal(global languages.Config) Config {
 }
 
 type Language struct {
+	logger          *slog.Logger
 	config          Config
 	apiRefCollector *common.APIReferenceCollector
 }
 
-func New(config Config) *Language {
+func New(logger *slog.Logger, config Config) *Language {
 	return &Language{
+		logger:          logger,
 		config:          config,
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
@@ -148,20 +151,22 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	return jenny
 }
 
-func (language *Language) CompilerPasses() compiler2.Transforms {
-	return compiler2.Transforms{
-		&compiler2.AnonymousStructsToNamed{},
-		&compiler2.NotRequiredFieldAsNullableType{},
-		&compiler2.DisjunctionWithNullToOptional{},
-		&compiler2.DisjunctionOfConstantsToEnum{},
-		&compiler2.AnonymousEnumToExplicitType{},
-		&compiler2.FlattenDisjunctions{},
-		&compiler2.DisjunctionInferMapping{},
-		&compiler2.UndiscriminatedDisjunctionToAny{},
-		&compiler2.DisjunctionToType{},
-		&compiler2.RemoveIntersections{},
-		&compiler2.InlineObjectsWithTypes{InlineTypes: []ir.Kind{ir.KindScalar, ir.KindMap, ir.KindArray}},
+func (language *Language) Transform(schemas ir.Schemas) (ir.Schemas, error) {
+	passes := transforms.Transforms{
+		&transforms.AnonymousStructsToNamed{},
+		&transforms.NotRequiredFieldAsNullableType{},
+		&transforms.DisjunctionWithNullToOptional{},
+		&transforms.DisjunctionOfConstantsToEnum{},
+		&transforms.AnonymousEnumToExplicitType{},
+		&transforms.FlattenDisjunctions{},
+		&transforms.DisjunctionInferMapping{},
+		&transforms.UndiscriminatedDisjunctionToAny{},
+		&transforms.DisjunctionToType{},
+		&transforms.RemoveIntersections{},
+		&transforms.InlineObjectsWithTypes{InlineTypes: []ir.Kind{ir.KindScalar, ir.KindMap, ir.KindArray}},
 	}
+
+	return passes.Process(language.logger, schemas)
 }
 
 func (language *Language) NullableKinds() languages.NullableConfig {

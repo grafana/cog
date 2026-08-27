@@ -2,10 +2,12 @@ package jsonschema
 
 import (
 	"bytes"
+	"log/slog"
 	"strings"
 
 	"github.com/grafana/codejen"
-	compiler2 "github.com/grafana/cog/internal/ir/transforms"
+	"github.com/grafana/cog/internal/ir"
+	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/languages"
 	schemaparser "github.com/santhosh-tekuri/jsonschema/v6"
 )
@@ -28,11 +30,13 @@ func (config Config) MergeWithGlobal(global languages.Config) Config {
 }
 
 type Language struct {
+	logger *slog.Logger
 	config Config
 }
 
-func New(config Config) *Language {
+func New(logger *slog.Logger, config Config) *Language {
 	return &Language{
+		logger: logger,
 		config: config,
 	}
 }
@@ -56,11 +60,13 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	return jenny
 }
 
-func (language *Language) CompilerPasses() compiler2.Transforms {
-	return compiler2.Transforms{
-		&compiler2.DisjunctionWithNullToOptional{},
-		&compiler2.InferEntrypoint{},
+func (language *Language) Transform(schemas ir.Schemas) (ir.Schemas, error) {
+	passes := transforms.Transforms{
+		&transforms.DisjunctionWithNullToOptional{},
+		&transforms.InferEntrypoint{},
 	}
+
+	return passes.Process(language.logger, schemas)
 }
 
 func ValidateSchemas(file codejen.File) (codejen.File, error) {

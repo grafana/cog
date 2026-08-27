@@ -1,8 +1,11 @@
 package openapi
 
 import (
+	"log/slog"
+
 	"github.com/grafana/codejen"
-	compiler2 "github.com/grafana/cog/internal/ir/transforms"
+	"github.com/grafana/cog/internal/ir"
+	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/languages"
 )
 
@@ -24,11 +27,13 @@ func (config Config) MergeWithGlobal(global languages.Config) Config {
 }
 
 type Language struct {
+	logger *slog.Logger
 	config Config
 }
 
-func New(config Config) *Language {
+func New(logger *slog.Logger, config Config) *Language {
 	return &Language{
+		logger: logger,
 		config: config,
 	}
 }
@@ -48,10 +53,12 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	return jenny
 }
 
-func (language *Language) CompilerPasses() compiler2.Transforms {
-	return compiler2.Transforms{
+func (language *Language) Transform(schemas ir.Schemas) (ir.Schemas, error) {
+	passes := transforms.Transforms{
 		// should be a superset of the compiler passes defined for jsonschema jennies
-		&compiler2.DisjunctionWithNullToOptional{},
-		&compiler2.InferEntrypoint{},
+		&transforms.DisjunctionWithNullToOptional{},
+		&transforms.InferEntrypoint{},
 	}
+
+	return passes.Process(language.logger, schemas)
 }

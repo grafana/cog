@@ -11,7 +11,6 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/ir"
-	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
@@ -271,6 +270,6 @@ func (language dummyLanguage) Jennies(_ languages.Config) *codejen.JennyList[lan
 	return nil
 }
 
-func (language dummyLanguage) CompilerPasses() transforms.Transforms {
-	return nil
+func (language dummyLanguage) Transform(schemas ir.Schemas) (ir.Schemas, error) {
+	return schemas, nil
 }
