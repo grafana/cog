@@ -205,7 +205,7 @@ func (context Context) PackagesForVariant(variant string) []string {
 
 func (context Context) SchemasForVariant(variant string) []*ir.Schema {
 	schemas := tools.Filter(context.Schemas, func(schema *ir.Schema) bool {
-		return schema.Metadata.Kind == ir.SchemaKindComposable && string(schema.Metadata.Variant) == variant && schema.Metadata.Identifier != ""
+		return schema.IsComposableVariant(variant) && schema.Metadata.Identifier != ""
 	})
 
 	sort.Slice(schemas, func(i int, j int) bool {
