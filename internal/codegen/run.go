@@ -7,9 +7,9 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/builders"
-	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {

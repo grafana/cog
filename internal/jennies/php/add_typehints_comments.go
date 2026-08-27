@@ -1,9 +1,9 @@
 package php
 
 import (
-	"github.com/grafana/cog/internal/ir"
-	"github.com/grafana/cog/internal/ir/transforms"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/ir/transforms"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 var _ transforms.Transform = (*AddTypehintsComments)(nil)

@@ -2,7 +2,7 @@ package typescript
 
 import (
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 type Runtime struct {

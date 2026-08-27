@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/grafana/cog/internal/httputil"
-	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jsonschema"
+	"github.com/grafana/cog/pkg/ir"
 )
 
 type JSONSchemaInput struct {

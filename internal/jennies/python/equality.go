@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ir"
+	"github.com/grafana/cog/pkg/ir"
 )
 
 type equalityMethods struct{}

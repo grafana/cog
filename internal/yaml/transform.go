@@ -3,8 +3,8 @@ package yaml
 import (
 	"fmt"
 
-	"github.com/grafana/cog/internal/ir"
-	"github.com/grafana/cog/internal/ir/transforms"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/ir/transforms"
 )
 
 type Transform struct {

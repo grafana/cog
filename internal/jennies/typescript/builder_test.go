@@ -5,9 +5,9 @@ import (
 
 	"github.com/grafana/cog/internal/builders"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/testutils"
+	"github.com/grafana/cog/pkg/languages"
 	"github.com/stretchr/testify/require"
 )
 

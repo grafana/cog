@@ -5,8 +5,8 @@ import (
 	"io"
 	"strings"
 
-	"github.com/grafana/cog/internal/ir"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 type attributes struct {
