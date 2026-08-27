@@ -200,7 +200,7 @@ func (a *attributes) formatMapAttributes(def ir.Type, comments []string) string 
 }
 
 func (a *attributes) formatReferenceAttribute(def ir.Type, comments []string) string {
-	obj, ok := a.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+	obj, ok := a.context.GetObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 	if !ok {
 		return "unknown"
 	}

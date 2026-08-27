@@ -64,7 +64,7 @@ func (jenny Schema) GenerateSchema(context languages.Context, schema *ir.Schema)
 		return ref.ReferredPkg != schema.Package
 	}
 	jenny.referenceResolver = func(ref ir.RefType) (ir.Object, bool) {
-		return context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+		return context.GetObject(ref.ReferredPkg, ref.ReferredType)
 	}
 
 	jsonSchema := orderedmap.New[string, any]()

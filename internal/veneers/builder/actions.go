@@ -76,7 +76,7 @@ func mergeBuilderInto(fromBuilder ir.Builder, intoBuilder ir.Builder, underPath 
 
 func MergeIntoAction(sourceBuilderName string, underPath string, excludeOptions []string, renameOptions map[string]string) ActionRunner {
 	return mapToSelected(func(ctx RuleCtx, destinationBuilder ir.Builder) (ir.Builder, error) {
-		sourceBuilder, found := ctx.Builders.LocateByName(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
+		sourceBuilder, found := ctx.Builders.GetByName(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
 		if !found {
 			// We couldn't find the source builder: let's return the selected builder untouched.
 			ctx.Logger.Warn("source builder not found")
@@ -221,7 +221,7 @@ func composeBuilderForType(schemas ir.Schemas, config CompositionConfig, typeDis
 				newBuilder.Options = append(newBuilder.Options, branchOpt)
 			}
 		case resolvedEntrypointType.IsStruct():
-			entrypointBuilder, found := composableBuilders.LocateByObject(schema.Package, schema.EntryPoint)
+			entrypointBuilder, found := composableBuilders.GetByObject(schema.Package, schema.EntryPoint)
 			if !found {
 				return nil, fmt.Errorf("builder for schema entrypoint '%s.%s' not found", schema.Package, schema.EntryPoint)
 			} else {
@@ -310,7 +310,7 @@ func ComposeBuildersAction(config CompositionConfig) ActionRunner {
 			return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: SourceBuilderName '%s' is incorrect: no package found", sourceBuilderPkg)
 		}
 
-		sourceBuilder, found := ctx.Builders.LocateByObject(sourceBuilderPkg, sourceBuilderNameWithoutPkg)
+		sourceBuilder, found := ctx.Builders.GetByObject(sourceBuilderPkg, sourceBuilderNameWithoutPkg)
 		if !found {
 			ctx.Logger.Warn("source builder not found")
 			return builders, nil
@@ -489,7 +489,7 @@ func AddFactoryAction(factory ir.BuilderFactory) ActionRunner {
 				factory.BuilderRef.ReferredType = builders[i].Name
 			}
 
-			targetBuilder, found := ctx.Builders.LocateByName(factory.BuilderRef.ReferredPkg, factory.BuilderRef.ReferredType)
+			targetBuilder, found := ctx.Builders.GetByName(factory.BuilderRef.ReferredPkg, factory.BuilderRef.ReferredType)
 			if !found {
 				return nil, fmt.Errorf("could not find target builder for factory: %s", factory.BuilderRef.String())
 			}

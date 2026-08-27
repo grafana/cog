@@ -199,7 +199,7 @@ func (jenny RawTypes) formatIntersection(pkg string, identifier string, object i
 	extendedFieldNames := make(map[string]bool)
 	for _, branch := range intersection.Branches {
 		if branch.IsRef() {
-			if obj, found := jenny.typeFormatter.context.LocateObjectByRef(branch.AsRef()); found {
+			if obj, found := jenny.typeFormatter.context.GetObjectByRef(branch.AsRef()); found {
 				if obj.Type.IsStruct() {
 					for _, field := range obj.Type.AsStruct().Fields {
 						extendedFieldNames[field.Name] = true
@@ -356,7 +356,7 @@ func (jenny RawTypes) formatReferenceDefaults(ref ir.Type, value any) string {
 		return jenny.typeFormatter.formatRefType(ref, value)
 	}
 
-	obj, ok := jenny.typeFormatter.context.LocateObjectByRef(ref.AsRef())
+	obj, ok := jenny.typeFormatter.context.GetObjectByRef(ref.AsRef())
 	if !ok {
 		return ""
 	}

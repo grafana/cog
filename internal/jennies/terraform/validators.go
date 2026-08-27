@@ -199,7 +199,7 @@ func (v *validators) validateList(def ir.Type) string {
 	var buffer strings.Builder
 	switch def.Kind {
 	case ir.KindRef:
-		obj, ok := v.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		obj, ok := v.context.GetObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if !ok {
 			return "unknown validator"
 		}
