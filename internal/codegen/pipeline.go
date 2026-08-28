@@ -17,13 +17,13 @@ import (
 	"github.com/grafana/cog/internal/jennies/python"
 	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
-	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/rewrite"
 	cogyaml "github.com/grafana/cog/internal/yaml"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/ir/transforms"
 	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/logs"
 )
 
 type ParametersInterpolator func(input string) string

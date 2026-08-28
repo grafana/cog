@@ -3,10 +3,10 @@ package jsonschema
 import (
 	"testing"
 
-	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/logs"
 	"github.com/stretchr/testify/require"
 )
 

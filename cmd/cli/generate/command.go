@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/grafana/cog/internal/codegen"
-	"github.com/grafana/cog/internal/logs"
+	"github.com/grafana/cog/pkg/logs"
 	"github.com/spf13/cobra"
 )
 
