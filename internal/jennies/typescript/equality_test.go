@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/testutils"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/languages"
 	"github.com/stretchr/testify/require"
 )
 

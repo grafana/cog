@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/grafana/cog/internal/ir"
-	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/tools"
 	cogyaml "github.com/grafana/cog/internal/yaml"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/ir/transforms"
 )
 
 type interpolable interface {

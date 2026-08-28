@@ -1,7 +1,7 @@
 package builders
 
 import (
-	"github.com/grafana/cog/internal/ir"
+	"github.com/grafana/cog/pkg/ir"
 )
 
 type Generator struct {

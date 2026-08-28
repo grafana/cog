@@ -52,6 +52,9 @@ func main() {
 		if err := reflector.AddGoComments("github.com/grafana/cog", "./internal"); err != nil {
 			panic(fmt.Errorf("could not add Go comments to reflector: %w", err))
 		}
+		if err := reflector.AddGoComments("github.com/grafana/cog", "./pkg"); err != nil {
+			panic(fmt.Errorf("could not add Go comments to reflector: %w", err))
+		}
 
 		schema := reflector.Reflect(t.input)
 		schema.ID = jsonschema.ID(fmt.Sprintf("https://raw.githubusercontent.com/grafana/cog/main/schemas/%s.json", t.name))

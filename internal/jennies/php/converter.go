@@ -6,9 +6,9 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/builders"
-	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/template"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 type Converter struct {

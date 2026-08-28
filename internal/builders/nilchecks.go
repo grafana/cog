@@ -1,8 +1,8 @@
 package builders
 
 import (
-	"github.com/grafana/cog/internal/ir"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 func GenerateNilChecks(nullableKinds languages.NullableConfig, schemas ir.Schemas, builders ir.Builders) (ir.Builders, error) {

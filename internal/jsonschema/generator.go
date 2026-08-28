@@ -9,9 +9,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/ir"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	schemaparser "github.com/santhosh-tekuri/jsonschema/v6"
 )

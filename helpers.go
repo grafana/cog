@@ -8,12 +8,12 @@ import (
 	"cuelang.org/go/cue"
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/codegen"
-	compiler2 "github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/openapi"
 	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/simplecue"
+	"github.com/grafana/cog/pkg/ir/transforms"
 )
 
 // SchemaToTypesPipeline represents a simplified codegen.Pipeline, meant to
@@ -22,7 +22,7 @@ import (
 type SchemaToTypesPipeline struct {
 	debug       bool
 	input       *codegen.Input
-	finalPasses compiler2.Transforms
+	finalPasses transforms.Transforms
 	output      *codegen.OutputLanguage
 }
 
@@ -156,22 +156,22 @@ func (pipeline *SchemaToTypesPipeline) CUEValue(pkgName string, value cue.Value,
  *******************/
 
 // AppendCommentToObjects adds the given comment to every object definition.
-func AppendCommentToObjects(comment string) compiler2.Transform {
-	return &compiler2.AppendCommentObjects{
+func AppendCommentToObjects(comment string) transforms.Transform {
+	return &transforms.AppendCommentObjects{
 		Comment: comment,
 	}
 }
 
 // PrefixObjectsNames adds the given prefix to every object's name.
-func PrefixObjectsNames(prefix string) compiler2.Transform {
-	return &compiler2.PrefixObjectNames{
+func PrefixObjectsNames(prefix string) transforms.Transform {
+	return &transforms.PrefixObjectNames{
 		Prefix: prefix,
 	}
 }
 
 // SchemaTransformations adds the given transformations to the set of
 // transformations that will be applied to the input schema.
-func (pipeline *SchemaToTypesPipeline) SchemaTransformations(passes ...compiler2.Transform) *SchemaToTypesPipeline {
+func (pipeline *SchemaToTypesPipeline) SchemaTransformations(passes ...transforms.Transform) *SchemaToTypesPipeline {
 	pipeline.finalPasses = append(pipeline.finalPasses, passes...)
 
 	return pipeline
