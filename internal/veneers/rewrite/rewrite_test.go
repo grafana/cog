@@ -5,10 +5,10 @@ import (
 	"log/slog"
 	"testing"
 
-	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/veneers/builder"
 	"github.com/grafana/cog/internal/veneers/option"
 	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/logs"
 	"github.com/stretchr/testify/require"
 )
 

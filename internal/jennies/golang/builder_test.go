@@ -5,11 +5,11 @@ import (
 
 	"github.com/grafana/cog/internal/builders"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/logs"
 	"github.com/stretchr/testify/require"
 )
 
