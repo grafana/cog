@@ -15,6 +15,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/openapi"
 	"github.com/grafana/cog/internal/jennies/php"
 	"github.com/grafana/cog/internal/jennies/python"
+	"github.com/grafana/cog/internal/jennies/remote"
 	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/tools"
@@ -329,6 +330,15 @@ func (pipeline *Pipeline) OutputLanguages() (languages.Languages, error) {
 		default:
 			return nil, fmt.Errorf("empty language configuration")
 		}
+	}
+
+	for name, config := range pipeline.Output.LanguagePlugins {
+		languagePlugin, err := remote.New(pipeline.logger.With(slog.String("language", name)), name, config)
+		if err != nil {
+			return nil, fmt.Errorf("could not initialize '%s' language plugin: %w", name, err)
+		}
+
+		outputs[name] = languagePlugin
 	}
 
 	return outputs, nil

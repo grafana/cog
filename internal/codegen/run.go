@@ -47,6 +47,12 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 		if err := runJenny(languageJennies, jenniesInput, generatedFS); err != nil {
 			return nil, err
 		}
+
+		// if the language can be terminated, let's do it
+		// ie: plugins
+		if j, ok := target.(interface{ Terminate() }); ok {
+			j.Terminate()
+		}
 	}
 
 	if pipeline.Output.RepositoryTemplates != "" {
