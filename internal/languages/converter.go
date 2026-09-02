@@ -5,14 +5,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type MappingGuard struct {
-	Path  ast.Path
-	Op    ast.Op
+	Path  ir.Path
+	Op    ir.Op
 	Value any
 }
 
@@ -21,14 +21,14 @@ func (guard MappingGuard) String() string {
 }
 
 type DirectArgMapping struct {
-	ValuePath ast.Path // direct mapping between a JSON value and an argument
-	ValueType ast.Type
+	ValuePath ir.Path // direct mapping between a JSON value and an argument
+	ValueType ir.Type
 }
 
 // BuilderArgMapping mapping between a JSON value and an argument delegated to a builder
 type BuilderArgMapping struct {
-	ValuePath   ast.Path
-	ValueType   ast.Type
+	ValuePath   ir.Path
+	ValueType   ir.Type
 	BuilderPkg  string
 	BuilderName string
 }
@@ -39,20 +39,20 @@ type BuilderChoiceMapping struct {
 }
 
 type ArrayArgMapping struct {
-	For       ast.Path
-	ForType   ast.Type
+	For       ir.Path
+	ForType   ir.Type
 	ForArg    *ArgumentMapping
-	ValueAs   ast.Path
-	ValueType ast.Type
+	ValueAs   ir.Path
+	ValueType ir.Type
 }
 
 type MapArgMapping struct {
-	For       ast.Path
-	ForType   ast.Type
+	For       ir.Path
+	ForType   ir.Type
 	ForArg    *ArgumentMapping
-	ValueAs   ast.Path
-	IndexType ast.Type
-	ValueType ast.Type
+	ValueAs   ir.Path
+	IndexType ir.Type
+	ValueType ir.Type
 }
 
 type RuntimeArgMapping struct {
@@ -61,7 +61,7 @@ type RuntimeArgMapping struct {
 }
 
 type DisjunctionBranchArgMapping struct {
-	Type ast.Type
+	Type ir.Type
 	Of   *DirectArgMapping
 	Arg  *ArgumentMapping
 }
@@ -85,15 +85,15 @@ type ArgumentMapping struct {
 
 type ConversionMapping struct {
 	// for i, panel := range input.Panels { WithPanel(panel) }
-	RepeatFor   ast.Path // `input.Panels`
-	RepeatAs    string   // `panel`
-	RepeatIndex string   // `i`
+	RepeatFor   ir.Path // `input.Panels`
+	RepeatAs    string  // `panel`
+	RepeatIndex string  // `i`
 
 	Options []OptionMapping
 }
 
 type OptionMapping struct {
-	Option ast.Option // option in the builder
+	Option ir.Option // option in the builder
 
 	Guards []MappingGuard
 	Args   []ArgumentMapping
@@ -111,7 +111,7 @@ func (optMapping OptionMapping) ArgumentGuards() []MappingGuard {
 
 type ConverterInput struct {
 	ArgName string
-	TypeRef ast.RefType
+	TypeRef ir.RefType
 }
 
 type Converter struct {
@@ -126,8 +126,8 @@ type Converter struct {
 	Mappings []ConversionMapping
 }
 
-func (converter Converter) inputRootPath() ast.Path {
-	return ast.Path{
+func (converter Converter) inputRootPath() ir.Path {
+	return ir.Path{
 		{
 			Identifier: converter.Input.ArgName,
 			Type:       converter.Input.TypeRef.AsType(),
@@ -154,7 +154,7 @@ type ConverterGenerator struct {
 	// Since several options can represent with a single path, it allows us to not have "duplicates".
 	generatedPaths map[string]struct{}
 
-	listOfDisjunctionOptions map[string][]ast.Option
+	listOfDisjunctionOptions map[string][]ir.Option
 
 	config ConverterConfig
 }
@@ -163,12 +163,12 @@ func NewConverterGenerator(nullableTypes NullableConfig, config ConverterConfig)
 	return &ConverterGenerator{
 		nullableTypes:            nullableTypes,
 		generatedPaths:           make(map[string]struct{}),
-		listOfDisjunctionOptions: make(map[string][]ast.Option),
+		listOfDisjunctionOptions: make(map[string][]ir.Option),
 		config:                   config,
 	}
 }
 
-func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Builder) Converter {
+func (generator *ConverterGenerator) FromBuilder(context Context, builder ir.Builder) Converter {
 	converter := Converter{
 		Package:     builder.Package,
 		BuilderName: builder.Name,
@@ -181,7 +181,7 @@ func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Bu
 
 	converter.ConstructorArgs = generator.constructorArgs(converter, builder)
 
-	converter.Mappings = tools.Map(builder.Options, func(option ast.Option) ConversionMapping {
+	converter.Mappings = tools.Map(builder.Options, func(option ir.Option) ConversionMapping {
 		return generator.convertOption(context, converter, option)
 	})
 
@@ -201,14 +201,14 @@ func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Bu
 	return converter
 }
 
-func (generator *ConverterGenerator) constructorArgs(converter Converter, builder ast.Builder) []DirectArgMapping {
+func (generator *ConverterGenerator) constructorArgs(converter Converter, builder ir.Builder) []DirectArgMapping {
 	// we're only interested in assignments made from a constructor argument
 	// (as opposed to constant initializations for example)
-	argAssignments := tools.Filter(builder.Constructor.Assignments, func(assignment ast.Assignment) bool {
+	argAssignments := tools.Filter(builder.Constructor.Assignments, func(assignment ir.Assignment) bool {
 		return assignment.Value.Argument != nil
 	})
 
-	return tools.Map(argAssignments, func(assignment ast.Assignment) DirectArgMapping {
+	return tools.Map(argAssignments, func(assignment ir.Assignment) DirectArgMapping {
 		return DirectArgMapping{
 			ValuePath: converter.inputRootPath().Append(assignment.Path),
 			ValueType: assignment.Path.Last().Type,
@@ -216,9 +216,9 @@ func (generator *ConverterGenerator) constructorArgs(converter Converter, builde
 	})
 }
 
-func (generator *ConverterGenerator) convertListOfDisjunctionOptions(context Context, converter Converter, options []ast.Option) ConversionMapping {
+func (generator *ConverterGenerator) convertListOfDisjunctionOptions(context Context, converter Converter, options []ir.Option) ConversionMapping {
 	mapping := generator.setupMappings(converter, options[0].Assignments)
-	mapping.Options = tools.Map(options, func(option ast.Option) OptionMapping {
+	mapping.Options = tools.Map(options, func(option ir.Option) OptionMapping {
 		return generator.mappingForOption(context, converter, mapping, option)
 	})
 
@@ -229,8 +229,8 @@ func (generator *ConverterGenerator) convertListOfDisjunctionOptions(context Con
 	return mapping
 }
 
-func (generator *ConverterGenerator) convertOption(context Context, converter Converter, option ast.Option) ConversionMapping {
-	assignments := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
+func (generator *ConverterGenerator) convertOption(context Context, converter Converter, option ir.Option) ConversionMapping {
+	assignments := tools.Filter(option.Assignments, func(assignment ir.Assignment) bool {
 		_, pathAlreadyGenerated := generator.generatedPaths[generator.assignmentKey(assignment)]
 		return !pathAlreadyGenerated
 	})
@@ -258,13 +258,13 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 	return mapping
 }
 
-func (generator *ConverterGenerator) mappingForOption(context Context, converter Converter, mapping ConversionMapping, option ast.Option) OptionMapping {
+func (generator *ConverterGenerator) mappingForOption(context Context, converter Converter, mapping ConversionMapping, option ir.Option) OptionMapping {
 	optMapping := OptionMapping{
 		Option: option,
 		Guards: generator.guardForAssignments(converter.inputRootPath(), option.Assignments),
 	}
 
-	assignments := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
+	assignments := tools.Filter(option.Assignments, func(assignment ir.Assignment) bool {
 		_, pathAlreadyGenerated := generator.generatedPaths[generator.assignmentKey(assignment)]
 		return !pathAlreadyGenerated
 	})
@@ -288,21 +288,21 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 		valuePath := converter.inputRootPath().Append(assignment.Path)
 		if mapping.RepeatFor != nil && valueType.IsArray() {
 			valueType = valueType.AsArray().ValueType
-			valuePath = ast.Path{
-				ast.PathItem{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
+			valuePath = ir.Path{
+				ir.PathItem{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
 			}
-		} else if mapping.RepeatFor != nil && assignment.Method == ast.IndexAssignment {
+		} else if mapping.RepeatFor != nil && assignment.Method == ir.IndexAssignment {
 			// index
-			indexPath := ast.Path{
-				ast.PathItem{Identifier: mapping.RepeatIndex, Type: valueType, Root: true},
+			indexPath := ir.Path{
+				ir.PathItem{Identifier: mapping.RepeatIndex, Type: valueType, Root: true},
 			}
 			indexType := assignment.Path.Last().Index.Argument.Type
 			argument := generator.argumentForType(context, converter, mapping.RepeatIndex, indexPath, indexType)
 			optMapping.Args = append(optMapping.Args, argument)
 			// If it isn't a disjunction, we have to put the value in the second argument
 			// value
-			valuePath = ast.Path{
-				ast.PathItem{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
+			valuePath = ir.Path{
+				ir.PathItem{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
 			}
 			if !generator.isAssignmentFromDisjunctionStruct(context, assignment) {
 				argument = generator.argumentForType(context, converter, argName, valuePath, valueType)
@@ -334,7 +334,7 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 	return optMapping
 }
 
-func (generator *ConverterGenerator) argumentsForEnvelope(context Context, converter Converter, argName string, valuePath ast.Path, assignment ast.Assignment) []ArgumentMapping {
+func (generator *ConverterGenerator) argumentsForEnvelope(context Context, converter Converter, argName string, valuePath ir.Path, assignment ir.Assignment) []ArgumentMapping {
 	var mappings []ArgumentMapping
 	for _, envelopeField := range assignment.Value.Envelope.Values {
 		fieldValuePath := valuePath.Append(envelopeField.Path)
@@ -343,7 +343,7 @@ func (generator *ConverterGenerator) argumentsForEnvelope(context Context, conve
 	return mappings
 }
 
-func (generator *ConverterGenerator) argumentForType(context Context, converter Converter, argName string, valuePath ast.Path, typeDef ast.Type) ArgumentMapping {
+func (generator *ConverterGenerator) argumentForType(context Context, converter Converter, argName string, valuePath ir.Path, typeDef ir.Type) ArgumentMapping {
 	if typeDef.IsComposableSlot() {
 		return ArgumentMapping{
 			Runtime: &RuntimeArgMapping{
@@ -358,7 +358,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 	if typeDef.IsDisjunction() {
 		return ArgumentMapping{
 			Disjunction: &DisjunctionArgMapping{
-				Branches: tools.Map(typeDef.Disjunction.Branches, func(branch ast.Type) DisjunctionBranchArgMapping {
+				Branches: tools.Map(typeDef.Disjunction.Branches, func(branch ir.Type) DisjunctionBranchArgMapping {
 					arg := generator.argumentForType(context, converter, argName, valuePath, branch)
 					return DisjunctionBranchArgMapping{
 						Type: branch,
@@ -371,7 +371,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 	}
 
 	if typeDef.IsArray() {
-		valueAs := ast.Path{
+		valueAs := ir.Path{
 			{Identifier: argName, Type: typeDef.Array.ValueType, Root: true},
 		}
 
@@ -389,7 +389,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 	}
 
 	if typeDef.IsMap() {
-		valueAs := ast.Path{
+		valueAs := ir.Path{
 			{Identifier: argName, Type: typeDef.Map.ValueType, Root: true},
 		}
 
@@ -433,7 +433,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 	if len(possibleBuilders) > 1 && possibleBuilders.HaveConstantConstructorAssignment() {
 		choices := make([]BuilderChoiceMapping, 0, len(possibleBuilders))
 		for _, possibleBuilder := range possibleBuilders {
-			constantAssignments := tools.Filter(possibleBuilder.Constructor.Assignments, func(assignment ast.Assignment) bool {
+			constantAssignments := tools.Filter(possibleBuilder.Constructor.Assignments, func(assignment ir.Assignment) bool {
 				return assignment.HasConstantValue()
 			})
 
@@ -471,7 +471,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 	}
 }
 
-func (generator *ConverterGenerator) argumentFromTypeHintReference(converter Converter, path ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
+func (generator *ConverterGenerator) argumentFromTypeHintReference(converter Converter, path ir.Path, assignment ir.Assignment) (ArgumentMapping, bool) {
 	if assignment.Value.Argument == nil || assignment.Path.Last().TypeHint == nil {
 		return ArgumentMapping{}, false
 	}
@@ -490,13 +490,13 @@ func (generator *ConverterGenerator) argumentFromTypeHintReference(converter Con
 	}, true
 }
 
-func (generator *ConverterGenerator) isAssignmentFromDisjunctionStruct(context Context, assignment ast.Assignment) bool {
+func (generator *ConverterGenerator) isAssignmentFromDisjunctionStruct(context Context, assignment ir.Assignment) bool {
 	if assignment.Value.Envelope == nil {
 		return false
 	}
 
-	var getEnvelopedType func(envelopedType ast.Type) ast.Type
-	getEnvelopedType = func(envelopedType ast.Type) ast.Type {
+	var getEnvelopedType func(envelopedType ir.Type) ir.Type
+	getEnvelopedType = func(envelopedType ir.Type) ir.Type {
 		if envelopedType.IsRef() {
 			referredObject, _ := context.LocateObject(envelopedType.Ref.ReferredPkg, envelopedType.Ref.ReferredType)
 			envelopedType = referredObject.Type
@@ -512,7 +512,7 @@ func (generator *ConverterGenerator) isAssignmentFromDisjunctionStruct(context C
 	return getEnvelopedType(assignment.Value.Envelope.Type).IsStructGeneratedFromDisjunction()
 }
 
-func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Context, converter Converter, argName string, valuePath ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
+func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Context, converter Converter, argName string, valuePath ir.Path, assignment ir.Assignment) (ArgumentMapping, bool) {
 	if !generator.isAssignmentFromDisjunctionStruct(context, assignment) {
 		return ArgumentMapping{}, false
 	}
@@ -520,10 +520,10 @@ func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Conte
 	envelopeValues := assignment.Value.Envelope.Values
 
 	arg := generator.argumentForType(context, converter, argName, valuePath.Append(envelopeValues[0].Path), envelopeValues[0].Path.Last().Type)
-	arg.Guards = tools.Map(envelopeValues, func(envelopedField ast.EnvelopeFieldValue) MappingGuard {
+	arg.Guards = tools.Map(envelopeValues, func(envelopedField ir.EnvelopeFieldValue) MappingGuard {
 		return MappingGuard{
 			Path:  valuePath.Append(envelopedField.Path),
-			Op:    ast.NotEqualOp,
+			Op:    ir.NotEqualOp,
 			Value: nil,
 		}
 	})
@@ -531,7 +531,7 @@ func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Conte
 	return arg, true
 }
 
-func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path, assignments []ast.Assignment) []MappingGuard {
+func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ir.Path, assignments []ir.Assignment) []MappingGuard {
 	// conditions safeguarding the conversion of the current option
 	guards := orderedmap.New[string, MappingGuard]()
 
@@ -544,14 +544,14 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path
 			guards.Set(guard.String(), guard)
 		}
 
-		if assignment.Method == ast.IndexAssignment {
+		if assignment.Method == ir.IndexAssignment {
 			continue
 		}
 
 		if assignment.Value.Constant != nil {
 			guard := MappingGuard{
 				Path:  valuesRootPath.Append(assignment.Path),
-				Op:    ast.EqualOp,
+				Op:    ir.EqualOp,
 				Value: assignment.Value.Constant,
 			}
 			guards.Set(guard.String(), guard)
@@ -564,7 +564,7 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path
 		if assignmentType.IsArray() {
 			guard := MappingGuard{
 				Path:  valuesRootPath.Append(assignment.Path),
-				Op:    ast.MinLengthOp,
+				Op:    ir.MinLengthOp,
 				Value: 1,
 			}
 			guards.Set(guard.String(), guard)
@@ -572,10 +572,10 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path
 
 		// For strings: ensure they're not empty
 		// TODO: deal with datetime strings
-		if assignmentType.IsScalar() && assignmentType.AsScalar().ScalarKind == ast.KindString && !assignmentType.HasHint(ast.HintStringFormatDateTime) && !assignmentType.HasHint(ast.HintStringFormatDuration) {
+		if assignmentType.IsScalar() && assignmentType.AsScalar().ScalarKind == ir.KindString && !assignmentType.HasHint(ir.HintStringFormatDateTime) && !assignmentType.HasHint(ir.HintStringFormatDuration) {
 			guard := MappingGuard{
 				Path:  valuesRootPath.Append(assignment.Path),
-				Op:    ast.NotEqualOp,
+				Op:    ir.NotEqualOp,
 				Value: "",
 			}
 			guards.Set(guard.String(), guard)
@@ -590,7 +590,7 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path
 			if !defaultIsMap && !defaultIsSlice {
 				guard := MappingGuard{
 					Path:  valuesRootPath.Append(assignment.Path),
-					Op:    ast.NotEqualOp,
+					Op:    ir.NotEqualOp,
 					Value: assignmentType.Default,
 				}
 				guards.Set(guard.String(), guard)
@@ -598,11 +598,11 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path
 		}
 
 		// TODO: is that correct/needed?
-		if assignment.Method != ast.AppendAssignment && assignment.Value.Envelope != nil {
+		if assignment.Method != ir.AppendAssignment && assignment.Value.Envelope != nil {
 			for _, envelopePath := range assignment.Value.Envelope.Values {
 				guard := MappingGuard{
 					Path:  valuesRootPath.Append(assignment.Path.Append(envelopePath.Path)),
-					Op:    ast.NotEqualOp,
+					Op:    ir.NotEqualOp,
 					Value: nil,
 				}
 				guards.Set(guard.String(), guard)
@@ -614,7 +614,7 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path
 			assignment.Path[len(assignment.Path)-1].TypeHint = &assignment.Value.Argument.Type
 			guard := MappingGuard{
 				Path:  valuesRootPath.Append(assignment.Path),
-				Op:    ast.NotEqualOp,
+				Op:    ir.NotEqualOp,
 				Value: nil,
 			}
 			guards.Set(guard.String(), guard)
@@ -624,7 +624,7 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path
 	return guards.Values()
 }
 
-func (generator *ConverterGenerator) pathNotNullGuards(rootPath ast.Path, path ast.Path) []MappingGuard {
+func (generator *ConverterGenerator) pathNotNullGuards(rootPath ir.Path, path ir.Path) []MappingGuard {
 	var guards []MappingGuard
 
 	for i, chunk := range path {
@@ -634,7 +634,7 @@ func (generator *ConverterGenerator) pathNotNullGuards(rootPath ast.Path, path a
 
 		guards = append(guards, MappingGuard{
 			Path:  rootPath.Append(path[:i+1]),
-			Op:    ast.NotEqualOp,
+			Op:    ir.NotEqualOp,
 			Value: nil,
 		})
 	}
@@ -642,7 +642,7 @@ func (generator *ConverterGenerator) pathNotNullGuards(rootPath ast.Path, path a
 	return guards
 }
 
-func (generator *ConverterGenerator) assignmentKey(assignment ast.Assignment) string {
+func (generator *ConverterGenerator) assignmentKey(assignment ir.Assignment) string {
 	path := assignment.Path.String()
 
 	if assignment.Value.Constant != nil {
@@ -664,14 +664,14 @@ func (generator *ConverterGenerator) assignmentKey(assignment ast.Assignment) st
 	return path
 }
 
-func (generator *ConverterGenerator) setupMappings(converter Converter, assignments []ast.Assignment) ConversionMapping {
+func (generator *ConverterGenerator) setupMappings(converter Converter, assignments []ir.Assignment) ConversionMapping {
 	mapping := ConversionMapping{}
-	if len(assignments) == 1 && assignments[0].Method == ast.AppendAssignment {
+	if len(assignments) == 1 && assignments[0].Method == ir.AppendAssignment {
 		mapping.RepeatFor = converter.inputRootPath().Append(assignments[0].Path)
 		mapping.RepeatAs = "item"
 	}
 
-	if len(assignments) == 1 && assignments[0].Method == ast.IndexAssignment {
+	if len(assignments) == 1 && assignments[0].Method == ir.IndexAssignment {
 		assignmentPath := assignments[0].Path
 		mapping.RepeatFor = converter.inputRootPath().Append(assignmentPath[:len(assignmentPath)-1])
 		mapping.RepeatAs = "value"

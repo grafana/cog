@@ -1,12 +1,12 @@
 package testutils
 
 import (
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/orderedmap"
 )
 
-func ObjectsMap(objects ...ast.Object) *orderedmap.Map[string, ast.Object] {
-	ordered := orderedmap.New[string, ast.Object]()
+func ObjectsMap(objects ...ir.Object) *orderedmap.Map[string, ir.Object] {
+	ordered := orderedmap.New[string, ir.Object]()
 	for _, object := range objects {
 		ordered.Set(object.Name, object)
 	}

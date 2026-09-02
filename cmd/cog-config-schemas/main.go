@@ -18,7 +18,7 @@ func main() {
 		name  string
 		input any
 	}{
-		{name: "compiler_passes", input: &yaml.Compiler{}},
+		{name: "compiler_passes", input: &yaml.Transforms{}},
 		{name: "veneers", input: &yaml.Veneers{}},
 		{name: "pipeline", input: &codegen.Pipeline{}},
 		{name: "unit", input: &codegen.Unit{}},

@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	"cuelang.org/go/cue"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/simplecue"
 )
 
-func kindsysComposableLoader(input CueInput) (ast.Schemas, error) {
+func kindsysComposableLoader(input CueInput) (ir.Schemas, error) {
 	schemaRootValue, libraries, err := input.schemaRootValue(context.Background())
 	if err != nil {
 		return nil, err
@@ -27,15 +27,15 @@ func kindsysComposableLoader(input CueInput) (ast.Schemas, error) {
 	}
 
 	var forceNamedEnvelope string
-	if variant == ast.SchemaVariantDataQuery {
+	if variant == ir.SchemaVariantDataQuery {
 		forceNamedEnvelope = string(variant)
 	}
 
 	schema, err := simplecue.GenerateAST(schemaFromThemaLineage(schemaRootValue), simplecue.Config{
 		Package:            input.Package,
 		ForceNamedEnvelope: forceNamedEnvelope,
-		SchemaMetadata: ast.SchemaMeta{
-			Kind:       ast.SchemaKindComposable,
+		SchemaMetadata: ir.SchemaMeta{
+			Kind:       ir.SchemaKindComposable,
 			Variant:    variant,
 			Identifier: kindIdentifier,
 		},
@@ -48,7 +48,7 @@ func kindsysComposableLoader(input CueInput) (ast.Schemas, error) {
 	return input.filterSchema(schema)
 }
 
-func schemaVariant(kindRoot cue.Value) (ast.SchemaVariant, error) {
+func schemaVariant(kindRoot cue.Value) (ir.SchemaVariant, error) {
 	schemaInterface, err := kindRoot.LookupPath(cue.ParsePath("schemaInterface")).String()
 	if err != nil {
 		return "", err
@@ -56,9 +56,9 @@ func schemaVariant(kindRoot cue.Value) (ast.SchemaVariant, error) {
 
 	switch schemaInterface {
 	case "PanelCfg":
-		return ast.SchemaVariantPanel, nil
+		return ir.SchemaVariantPanel, nil
 	case "DataQuery":
-		return ast.SchemaVariantDataQuery, nil
+		return ir.SchemaVariantDataQuery, nil
 	default:
 		return "", fmt.Errorf("unknown schema variant '%s'", schemaInterface)
 	}

@@ -3,20 +3,20 @@ package option
 import (
 	"testing"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/stretchr/testify/require"
 )
 
 func TestByName(t *testing.T) {
 	req := require.New(t)
 
-	dashboardBuilder := ast.Builder{
-		For: ast.NewObject("dashboard", "Dashboard", ast.NewStruct()),
+	dashboardBuilder := ir.Builder{
+		For: ir.NewObject("dashboard", "Dashboard", ir.NewStruct()),
 	}
-	panelBuilder := ast.Builder{
-		For: ast.NewObject("dashboard", "Panel", ast.NewStruct()),
+	panelBuilder := ir.Builder{
+		For: ir.NewObject("dashboard", "Panel", ir.NewStruct()),
 	}
-	options := []ast.Option{
+	options := []ir.Option{
 		{Name: "Editable"},
 		{Name: "Refresh"},
 		{Name: "TimePicker"},
@@ -39,13 +39,13 @@ func TestByName(t *testing.T) {
 func TestByName_withSeveralOptions(t *testing.T) {
 	req := require.New(t)
 
-	dashboardBuilder := ast.Builder{
-		For: ast.NewObject("dashboard", "Dashboard", ast.NewStruct()),
+	dashboardBuilder := ir.Builder{
+		For: ir.NewObject("dashboard", "Dashboard", ir.NewStruct()),
 	}
-	panelBuilder := ast.Builder{
-		For: ast.NewObject("dashboard", "Panel", ast.NewStruct()),
+	panelBuilder := ir.Builder{
+		For: ir.NewObject("dashboard", "Panel", ir.NewStruct()),
 	}
-	options := []ast.Option{
+	options := []ir.Option{
 		{Name: "Editable"},
 		{Name: "Refresh"},
 		{Name: "TimePicker"},
@@ -71,12 +71,12 @@ func TestByName_withSeveralOptions(t *testing.T) {
 func TestByBuilder(t *testing.T) {
 	req := require.New(t)
 
-	dashboardBuilder := ast.Builder{
+	dashboardBuilder := ir.Builder{
 		Name:    "Panel",
 		Package: "heatmap",
-		For:     ast.NewObject("dashboard", "Panel", ast.NewStruct()),
+		For:     ir.NewObject("dashboard", "Panel", ir.NewStruct()),
 	}
-	options := []ast.Option{
+	options := []ir.Option{
 		{Name: "Editable"},
 		{Name: "Refresh"},
 		{Name: "TimePicker"},
@@ -92,8 +92,8 @@ func TestByBuilder(t *testing.T) {
 	req.Len(filter(notFoundSelector, dashboardBuilder, options), 0)
 }
 
-func filter(selector *Selector, builder ast.Builder, opts []ast.Option) []ast.Option {
-	var selected []ast.Option
+func filter(selector *Selector, builder ir.Builder, opts []ir.Option) []ir.Option {
+	var selected []ir.Option
 
 	for _, opt := range opts {
 		if selector.Matches(builder, opt) {

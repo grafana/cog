@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -15,7 +15,7 @@ type typehints struct {
 	resolveBuilders bool
 }
 
-func (generator *typehints) requiresHint(def ast.Type) bool {
+func (generator *typehints) requiresHint(def ir.Type) bool {
 	if def.IsAny() {
 		return true
 	}
@@ -24,10 +24,10 @@ func (generator *typehints) requiresHint(def ast.Type) bool {
 		return true
 	}
 
-	return !def.IsAnyOf(ast.KindScalar, ast.KindStruct, ast.KindRef, ast.KindEnum, ast.KindConstantRef)
+	return !def.IsAnyOf(ir.KindScalar, ir.KindStruct, ir.KindRef, ir.KindEnum, ir.KindConstantRef)
 }
 
-func (generator *typehints) paramAnnotationForType(paramName string, def ast.Type) string {
+func (generator *typehints) paramAnnotationForType(paramName string, def ir.Type) string {
 	hintText := generator.forType(def, generator.resolveBuilders)
 	if hintText == "" {
 		return ""
@@ -36,7 +36,7 @@ func (generator *typehints) paramAnnotationForType(paramName string, def ast.Typ
 	return fmt.Sprintf("@param %s $%s", hintText, formatArgName(paramName))
 }
 
-func (generator *typehints) varAnnotationForType(def ast.Type) string {
+func (generator *typehints) varAnnotationForType(def ir.Type) string {
 	hintText := generator.forType(def, generator.resolveBuilders)
 	if hintText == "" {
 		return ""
@@ -45,7 +45,7 @@ func (generator *typehints) varAnnotationForType(def ast.Type) string {
 	return "@var " + hintText
 }
 
-func (generator *typehints) forType(def ast.Type, resolveBuilders bool) string {
+func (generator *typehints) forType(def ir.Type, resolveBuilders bool) string {
 	hint := ""
 
 	switch {
@@ -76,20 +76,20 @@ func (generator *typehints) forType(def ast.Type, resolveBuilders bool) string {
 	return hint
 }
 
-func (generator *typehints) arrayHint(def ast.Type, resolveBuilders bool) string {
+func (generator *typehints) arrayHint(def ir.Type, resolveBuilders bool) string {
 	valueType := generator.forType(def.Array.ValueType, resolveBuilders)
 
 	return fmt.Sprintf("array<%s>", valueType)
 }
 
-func (generator *typehints) mapHint(def ast.Type, resolveBuilders bool) string {
+func (generator *typehints) mapHint(def ir.Type, resolveBuilders bool) string {
 	indexType := generator.forType(def.Map.IndexType, resolveBuilders)
 	valueType := generator.forType(def.Map.ValueType, resolveBuilders)
 
 	return fmt.Sprintf("array<%s, %s>", indexType, valueType)
 }
 
-func scalarHint(def ast.Type) string {
+func scalarHint(def ir.Type) string {
 	scalarKind := def.AsScalar().ScalarKind
 	/*
 		if def.HasHint(ast.HintStringFormatDateTime) {
@@ -98,31 +98,31 @@ func scalarHint(def ast.Type) string {
 	*/
 
 	switch scalarKind {
-	case ast.KindNull:
+	case ir.KindNull:
 		return "null"
-	case ast.KindAny:
+	case ir.KindAny:
 		return "mixed"
 
-	case ast.KindBytes:
+	case ir.KindBytes:
 		return "string"
-	case ast.KindString:
+	case ir.KindString:
 		return "string"
 
-	case ast.KindFloat32, ast.KindFloat64:
+	case ir.KindFloat32, ir.KindFloat64:
 		return "float"
-	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
+	case ir.KindUint8, ir.KindUint16, ir.KindUint32, ir.KindUint64:
 		return "int"
-	case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
+	case ir.KindInt8, ir.KindInt16, ir.KindInt32, ir.KindInt64:
 		return "int"
 
-	case ast.KindBool:
+	case ir.KindBool:
 		return "bool"
 	default:
 		return string(scalarKind)
 	}
 }
 
-func (generator *typehints) refHint(def ast.Type, resolveBuilders bool) string {
+func (generator *typehints) refHint(def ir.Type, resolveBuilders bool) string {
 	referredPkg := formatPackageName(def.AsRef().ReferredPkg)
 	typeName := formatObjectName(def.AsRef().ReferredType)
 
@@ -135,7 +135,7 @@ func (generator *typehints) refHint(def ast.Type, resolveBuilders bool) string {
 	return fmt.Sprintf("%s<%s>", generator.config.fullNamespaceRef("Cog\\Builder"), fqcn)
 }
 
-func (generator *typehints) composableSlotHint(def ast.Type, resolveBuilders bool) string {
+func (generator *typehints) composableSlotHint(def ir.Type, resolveBuilders bool) string {
 	fqcn := generator.config.fullNamespaceRef("Cog\\" + formatObjectName(string(def.ComposableSlot.Variant)))
 	if !resolveBuilders {
 		return fqcn
@@ -144,15 +144,15 @@ func (generator *typehints) composableSlotHint(def ast.Type, resolveBuilders boo
 	return fmt.Sprintf("%s<%s>", generator.config.fullNamespaceRef("Cog\\Builder"), fqcn)
 }
 
-func (generator *typehints) disjunctionHint(def ast.Type, resolveBuilders bool) string {
-	branches := tools.Map(def.Disjunction.Branches, func(branch ast.Type) string {
+func (generator *typehints) disjunctionHint(def ir.Type, resolveBuilders bool) string {
+	branches := tools.Map(def.Disjunction.Branches, func(branch ir.Type) string {
 		return generator.forType(branch, resolveBuilders)
 	})
 
 	return strings.Join(branches, "|")
 }
 
-func (generator *typehints) constantRefHint(def ast.Type) string {
+func (generator *typehints) constantRefHint(def ir.Type) string {
 	referredPkg := formatPackageName(def.AsConstantRef().ReferredPkg)
 	typeName := formatObjectName(def.AsConstantRef().ReferredType)
 

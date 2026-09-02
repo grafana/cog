@@ -1,7 +1,7 @@
 package java
 
 import (
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/template"
 )
 
@@ -23,7 +23,7 @@ func (j JSONMarshaller) genToJSONFunction() string {
 	return rendered
 }
 
-func (j JSONMarshaller) annotation(t ast.Type) string {
+func (j JSONMarshaller) annotation(t ir.Type) string {
 	if !j.config.GenerateJSONMarshaller || !j.config.GenerateBuilders || j.config.SkipRuntime {
 		return ""
 	}

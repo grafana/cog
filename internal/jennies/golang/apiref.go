@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
-	builderName := func(builder ast.Builder) string {
+	builderName := func(builder ir.Builder) string {
 		return formatObjectName(builder.Name) + "Builder"
 	}
 	methodSignature := func(context languages.Context, method common.MethodReference) string {
@@ -51,7 +51,7 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 	}
 
 	return common.APIReferenceFormatter{
-		KindName: func(kind ast.Kind) string {
+		KindName: func(kind ir.Kind) string {
 			return string(kind)
 		},
 
@@ -60,10 +60,10 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 		},
 		FunctionSignature: functionSignature,
 
-		ObjectName: func(object ast.Object) string {
+		ObjectName: func(object ir.Object) string {
 			return formatObjectName(object.Name)
 		},
-		ObjectDefinition: func(context languages.Context, object ast.Object) string {
+		ObjectDefinition: func(context languages.Context, object ir.Object) string {
 			dummyImports := NewImportMap("")
 			typesFormatter := defaultTypeFormatter(config, context, dummyImports, func(pkg string) string {
 				return pkg
@@ -77,12 +77,12 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 		MethodSignature: methodSignature,
 
 		BuilderName: builderName,
-		ConstructorSignature: func(context languages.Context, builder ast.Builder) string {
+		ConstructorSignature: func(context languages.Context, builder ir.Builder) string {
 			dummyImports := NewImportMap("")
 			typesFormatter := builderTypeFormatter(config, context, dummyImports, func(pkg string) string {
 				return pkg
 			})
-			args := tools.Map(builder.Constructor.Args, func(arg ast.Argument) common.ArgumentReference {
+			args := tools.Map(builder.Constructor.Args, func(arg ir.Argument) common.ArgumentReference {
 				return common.ArgumentReference{
 					Name: formatArgName(arg.Name),
 					Type: strings.TrimPrefix(typesFormatter.formatType(arg.Type), "*"),
@@ -95,15 +95,15 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 				Return:    "*" + builderName(builder),
 			})
 		},
-		OptionName: func(option ast.Option) string {
+		OptionName: func(option ir.Option) string {
 			return formatFunctionName(option.Name)
 		},
-		OptionSignature: func(context languages.Context, builder ast.Builder, option ast.Option) string {
+		OptionSignature: func(context languages.Context, builder ir.Builder, option ir.Option) string {
 			dummyImports := NewImportMap("")
 			typesFormatter := builderTypeFormatter(config, context, dummyImports, func(pkg string) string {
 				return pkg
 			})
-			args := tools.Map(option.Args, func(arg ast.Argument) common.ArgumentReference {
+			args := tools.Map(option.Args, func(arg ir.Argument) common.ArgumentReference {
 				return common.ArgumentReference{
 					Name: formatArgName(arg.Name),
 					Type: strings.TrimPrefix(typesFormatter.formatType(arg.Type), "*"),

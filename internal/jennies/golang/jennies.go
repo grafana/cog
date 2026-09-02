@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/ir"
+	compiler2 "github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -154,21 +154,21 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	return jenny
 }
 
-func (language *Language) CompilerPasses() compiler.Passes {
-	return compiler.Passes{
-		&compiler.AnonymousStructsToNamed{},
-		&compiler.NotRequiredFieldAsNullableType{},
-		&compiler.DisjunctionWithNullToOptional{},
-		&compiler.DisjunctionOfConstantsToEnum{},
-		&compiler.AnonymousEnumToExplicitType{},
-		&compiler.PrefixEnumValues{},
-		&compiler.FlattenDisjunctions{},
-		&compiler.DisjunctionOfAnonymousStructsToExplicit{},
-		&compiler.DisjunctionInferMapping{},
-		&compiler.UndiscriminatedDisjunctionToAny{
+func (language *Language) CompilerPasses() compiler2.Transforms {
+	return compiler2.Transforms{
+		&compiler2.AnonymousStructsToNamed{},
+		&compiler2.NotRequiredFieldAsNullableType{},
+		&compiler2.DisjunctionWithNullToOptional{},
+		&compiler2.DisjunctionOfConstantsToEnum{},
+		&compiler2.AnonymousEnumToExplicitType{},
+		&compiler2.PrefixEnumValues{},
+		&compiler2.FlattenDisjunctions{},
+		&compiler2.DisjunctionOfAnonymousStructsToExplicit{},
+		&compiler2.DisjunctionInferMapping{},
+		&compiler2.UndiscriminatedDisjunctionToAny{
 			GenerateUndiscriminatedDisjunctions: language.config.GenerateUndiscriminatedDisjunctions,
 		},
-		&compiler.DisjunctionToType{
+		&compiler2.DisjunctionToType{
 			GenerateUndiscriminatedDisjunctions: language.config.GenerateUndiscriminatedDisjunctions,
 		},
 	}
@@ -176,7 +176,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 
 func (language *Language) NullableKinds() languages.NullableConfig {
 	return languages.NullableConfig{
-		Kinds:              []ast.Kind{ast.KindMap, ast.KindArray},
+		Kinds:              []ir.Kind{ir.KindMap, ir.KindArray},
 		ProtectArrayAppend: false,
 		AnyIsNullable:      true,
 	}

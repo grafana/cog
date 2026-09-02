@@ -6,28 +6,28 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers"
 )
 
-type ActionRunner func(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error)
+type ActionRunner func(ctx RuleCtx, builder ir.Builder, option ir.Option) ([]ir.Option, error)
 
 func RenameAction(newName string) ActionRunner {
-	return func(_ RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(_ RuleCtx, _ ir.Builder, option ir.Option) ([]ir.Option, error) {
 		oldName := option.Name
 		option.Name = newName
 		option.AddToVeneerTrail(fmt.Sprintf("Rename[%s → %s]", oldName, newName))
 
-		return []ast.Option{option}, nil
+		return []ir.Option{option}, nil
 	}
 }
 
 func RenameArgumentsAction(newNames []string) ActionRunner {
-	return func(ctx RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(ctx RuleCtx, _ ir.Builder, option ir.Option) ([]ir.Option, error) {
 		if len(newNames) != len(option.Args) {
 			ctx.Logger.Warn("the number of new argument names does not match the number of arguments: skipping transformation", slog.Int("new_names_count", len(newNames)), slog.Int("args_count", len(option.Args)))
-			return []ast.Option{option}, nil
+			return []ir.Option{option}, nil
 		}
 
 		for i, arg := range option.Args {
@@ -43,20 +43,20 @@ func RenameArgumentsAction(newNames []string) ActionRunner {
 
 		option.AddToVeneerTrail("RenameArguments")
 
-		return []ast.Option{option}, nil
+		return []ir.Option{option}, nil
 	}
 }
 
 func ArrayToAppendAction() ActionRunner {
-	return func(ctx RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(ctx RuleCtx, _ ir.Builder, option ir.Option) ([]ir.Option, error) {
 		if len(option.Args) != 1 {
 			ctx.Logger.Warn("expecting a single argument: skipping transformation", slog.Int("args_count", len(option.Args)))
-			return []ast.Option{option}, nil
+			return []ir.Option{option}, nil
 		}
 
 		if !option.Args[0].Type.IsArray() {
-			ctx.Logger.Warn("first argument is not an array: skipping transformation", slog.String("type", ast.TypeName(option.Args[0].Type)))
-			return []ast.Option{option}, nil
+			ctx.Logger.Warn("first argument is not an array: skipping transformation", slog.String("type", ir.TypeName(option.Args[0].Type)))
+			return []ir.Option{option}, nil
 		}
 
 		// Update the argument type from list to a single value
@@ -70,7 +70,7 @@ func ArrayToAppendAction() ActionRunner {
 		oldAssignments := option.Assignments
 
 		newFirstAssignment := option.Assignments[0]
-		newFirstAssignment.Method = ast.AppendAssignment
+		newFirstAssignment.Method = ir.AppendAssignment
 		// TODO: what if there is an envelope in the value assignment?
 		if newFirstAssignment.Value.Argument != nil {
 			newFirstAssignment.Value.Argument.Name = newFirstArg.Name
@@ -78,8 +78,8 @@ func ArrayToAppendAction() ActionRunner {
 		}
 
 		newOpt := option
-		newOpt.Args = []ast.Argument{newFirstArg}
-		newOpt.Assignments = []ast.Assignment{newFirstAssignment}
+		newOpt.Args = []ir.Argument{newFirstArg}
+		newOpt.Assignments = []ir.Assignment{newFirstAssignment}
 		newOpt.AddToVeneerTrail("ArrayToAppend")
 
 		if len(oldArgs) > 1 {
@@ -89,20 +89,20 @@ func ArrayToAppendAction() ActionRunner {
 			newOpt.Assignments = append(newOpt.Assignments, oldAssignments[1:]...)
 		}
 
-		return []ast.Option{newOpt}, nil
+		return []ir.Option{newOpt}, nil
 	}
 }
 
 func MapToIndexAction() ActionRunner {
-	return func(ctx RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(ctx RuleCtx, _ ir.Builder, option ir.Option) ([]ir.Option, error) {
 		if len(option.Args) != 1 {
 			ctx.Logger.Warn("expecting a single argument: skipping transformation", slog.Int("args_count", len(option.Args)))
-			return []ast.Option{option}, nil
+			return []ir.Option{option}, nil
 		}
 
 		if !option.Args[0].Type.IsMap() {
-			ctx.Logger.Warn("first argument is not a map: skipping transformation", slog.String("type", ast.TypeName(option.Args[0].Type)))
-			return []ast.Option{option}, nil
+			ctx.Logger.Warn("first argument is not a map: skipping transformation", slog.String("type", ir.TypeName(option.Args[0].Type)))
+			return []ir.Option{option}, nil
 		}
 
 		oldArgs := option.Args
@@ -119,9 +119,9 @@ func MapToIndexAction() ActionRunner {
 		oldAssignments := option.Assignments
 
 		newFirstAssignment := option.Assignments[0]
-		newFirstAssignment.Method = ast.IndexAssignment
-		newFirstAssignment.Path = newFirstAssignment.Path.Append(ast.Path{{
-			Index: &ast.PathIndex{Argument: &newFirstArg},
+		newFirstAssignment.Method = ir.IndexAssignment
+		newFirstAssignment.Path = newFirstAssignment.Path.Append(ir.Path{{
+			Index: &ir.PathIndex{Argument: &newFirstArg},
 			Type:  option.Args[0].Type.Map.ValueType,
 		}})
 		// TODO: what if there is an envelope in the value assignment?
@@ -131,8 +131,8 @@ func MapToIndexAction() ActionRunner {
 		}
 
 		newOpt := option
-		newOpt.Args = []ast.Argument{newFirstArg, newSecondArg}
-		newOpt.Assignments = []ast.Assignment{newFirstAssignment}
+		newOpt.Args = []ir.Argument{newFirstArg, newSecondArg}
+		newOpt.Assignments = []ir.Assignment{newFirstAssignment}
 		newOpt.AddToVeneerTrail("MapToIndex")
 
 		if len(oldArgs) > 1 {
@@ -142,39 +142,39 @@ func MapToIndexAction() ActionRunner {
 			newOpt.Assignments = append(newOpt.Assignments, oldAssignments[1:]...)
 		}
 
-		return []ast.Option{newOpt}, nil
+		return []ir.Option{newOpt}, nil
 	}
 }
 
 func OmitAction() ActionRunner {
-	return func(_ RuleCtx, _ ast.Builder, _ ast.Option) ([]ast.Option, error) {
+	return func(_ RuleCtx, _ ir.Builder, _ ir.Option) ([]ir.Option, error) {
 		return nil, nil
 	}
 }
 
 func VeneerTrailAsCommentsAction() ActionRunner {
-	return func(_ RuleCtx, _ ast.Builder, opt ast.Option) ([]ast.Option, error) {
+	return func(_ RuleCtx, _ ir.Builder, opt ir.Option) ([]ir.Option, error) {
 		veneerTrail := tools.Map(opt.VeneerTrail, func(veneer string) string {
 			return fmt.Sprintf("Modified by veneer '%s'", veneer)
 		})
 
 		opt.Comments = append(opt.Comments, veneerTrail...)
 
-		return []ast.Option{opt}, nil
+		return []ir.Option{opt}, nil
 	}
 }
 
 func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
-	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(ctx RuleCtx, builder ir.Builder, option ir.Option) ([]ir.Option, error) {
 		if len(option.Args) == 0 {
 			ctx.Logger.Warn("option has no arguments: skipping transformation")
-			return []ast.Option{option}, nil
+			return []ir.Option{option}, nil
 		}
 
-		firstArgType := ctx.Schemas.ResolveToType(option.Args[0].Type)
+		firstArgType := ctx.Schemas.Resolve(option.Args[0].Type)
 		if !firstArgType.IsStruct() {
-			ctx.Logger.Warn("first argument does not resolve to a struct: skipping transformation", slog.String("type", ast.TypeName(firstArgType)))
-			return []ast.Option{option}, nil
+			ctx.Logger.Warn("first argument does not resolve to a struct: skipping transformation", slog.String("type", ir.TypeName(firstArgType)))
+			return []ir.Option{option}, nil
 		}
 
 		oldArgs := option.Args
@@ -190,8 +190,8 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 
 		assignIntoList := assignmentPathPrefix.Last().Type.IsArray()
 
-		newAssignments := make([]ast.Assignment, 0, len(structType.Fields))
-		valuesForEnvelope := make([]ast.EnvelopeFieldValue, 0, len(structType.Fields))
+		newAssignments := make([]ir.Assignment, 0, len(structType.Fields))
+		valuesForEnvelope := make([]ir.EnvelopeFieldValue, 0, len(structType.Fields))
 		defaults := make(map[string]any)
 		if option.Default != nil && len(option.Default.ArgsValues) == 1 {
 			if defs, ok := option.Default.ArgsValues[0].(map[string]any); ok {
@@ -204,7 +204,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 				continue
 			}
 
-			var constraints []ast.TypeConstraint
+			var constraints []ir.TypeConstraint
 			if field.Type.IsScalar() {
 				constraints = field.Type.AsScalar().Constraints
 			}
@@ -215,7 +215,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 				field.Type.Default = def
 			}
 
-			newArg := ast.Argument{
+			newArg := ir.Argument{
 				Name: field.Name,
 				Type: field.Type,
 			}
@@ -227,38 +227,38 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 			}
 
 			if !assignIntoList {
-				var newAssignment ast.Assignment
+				var newAssignment ir.Assignment
 				if isConstant {
-					newAssignment = ast.ConstantAssignment(
-						assignmentPathPrefix.Append(ast.PathFromStructField(field)),
+					newAssignment = ir.ConstantAssignment(
+						assignmentPathPrefix.Append(ir.PathFromStructField(field)),
 						field.Type.AsScalar().Value,
 					)
 				} else {
-					newAssignment = ast.ArgumentAssignment(
-						assignmentPathPrefix.Append(ast.PathFromStructField(field)),
+					newAssignment = ir.ArgumentAssignment(
+						assignmentPathPrefix.Append(ir.PathFromStructField(field)),
 						newArg,
-						ast.WithTypeConstraints(constraints),
-						ast.Method(oldAssignments[0].Method),
+						ir.WithTypeConstraints(constraints),
+						ir.Method(oldAssignments[0].Method),
 					)
 				}
 
 				newAssignments = append(newAssignments, newAssignment)
 			} else {
-				var assignmentValue ast.AssignmentValue
+				var assignmentValue ir.AssignmentValue
 				if isConstant {
-					assignmentValue = ast.AssignmentValue{Constant: field.Type.AsScalar().Value}
+					assignmentValue = ir.AssignmentValue{Constant: field.Type.AsScalar().Value}
 				} else {
-					assignmentValue = ast.AssignmentValue{Argument: &newArg}
+					assignmentValue = ir.AssignmentValue{Argument: &newArg}
 				}
-				valuesForEnvelope = append(valuesForEnvelope, ast.EnvelopeFieldValue{
-					Path:  ast.PathFromStructField(field),
+				valuesForEnvelope = append(valuesForEnvelope, ir.EnvelopeFieldValue{
+					Path:  ir.PathFromStructField(field),
 					Value: assignmentValue,
 				})
 			}
 
 			if defaults[field.Name] != nil {
 				if newOpt.Default == nil {
-					newOpt.Default = &ast.OptionDefault{}
+					newOpt.Default = &ir.OptionDefault{}
 				}
 
 				newOpt.Default.ArgsValues = append(newOpt.Default.ArgsValues, defaults[field.Name])
@@ -268,12 +268,12 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 		if !assignIntoList {
 			newOpt.Assignments = newAssignments
 		} else {
-			newOpt.Assignments = []ast.Assignment{
+			newOpt.Assignments = []ir.Assignment{
 				{
-					Method: ast.AppendAssignment,
+					Method: ir.AppendAssignment,
 					Path:   assignmentPathPrefix,
-					Value: ast.AssignmentValue{
-						Envelope: &ast.AssignmentEnvelope{
+					Value: ir.AssignmentValue{
+						Envelope: &ir.AssignmentEnvelope{
 							Type:   assignmentPathPrefix.Last().Type.AsArray().ValueType,
 							Values: valuesForEnvelope,
 						},
@@ -287,24 +287,24 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 			newOpt.Assignments = append(newOpt.Assignments, oldAssignments[1:]...)
 		}
 
-		return []ast.Option{newOpt}, nil
+		return []ir.Option{newOpt}, nil
 	}
 }
 
 func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
-	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(ctx RuleCtx, builder ir.Builder, option ir.Option) ([]ir.Option, error) {
 		if len(option.Args) == 0 {
 			ctx.Logger.Warn("option has no arguments: skipping transformation")
-			return []ast.Option{option}, nil
+			return []ir.Option{option}, nil
 		}
 
-		firstArgType := ctx.Schemas.ResolveToType(option.Args[0].Type)
+		firstArgType := ctx.Schemas.Resolve(option.Args[0].Type)
 		if !firstArgType.IsStruct() {
-			ctx.Logger.Warn("first argument does not resolve to a struct: skipping transformation", slog.String("type", ast.TypeName(firstArgType)))
-			return []ast.Option{option}, nil
+			ctx.Logger.Warn("first argument does not resolve to a struct: skipping transformation", slog.String("type", ir.TypeName(firstArgType)))
+			return []ir.Option{option}, nil
 		}
 
-		var newOptions []ast.Option
+		var newOptions []ir.Option
 
 		structType := firstArgType.AsStruct()
 		oldAssignments := option.Assignments
@@ -315,14 +315,14 @@ func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
 				continue
 			}
 
-			newOpt := ast.Option{
+			newOpt := ir.Option{
 				Name:     field.Name,
 				Comments: field.Comments,
-				Args: []ast.Argument{
+				Args: []ir.Argument{
 					{Name: field.Name, Type: field.Type},
 				},
-				Assignments: []ast.Assignment{
-					ast.FieldAssignment(field),
+				Assignments: []ir.Assignment{
+					ir.FieldAssignment(field),
 				},
 			}
 			newOpt.AddToVeneerTrail("StructFieldsAsOptions")
@@ -330,7 +330,7 @@ func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
 			newOpt.Assignments[0].Path = assignmentPathPrefix.Append(newOpt.Assignments[0].Path)
 
 			if field.Type.Default != nil {
-				newOpt.Default = &ast.OptionDefault{
+				newOpt.Default = &ir.OptionDefault{
 					ArgsValues: []any{field.Type.Default},
 				}
 			}
@@ -342,10 +342,10 @@ func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
 	}
 }
 func DisjunctionAsOptionsAction(argumentIndex int) ActionRunner {
-	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(ctx RuleCtx, builder ir.Builder, option ir.Option) ([]ir.Option, error) {
 		if len(option.Args) == 0 {
 			ctx.Logger.Warn("option has no arguments: skipping transformation")
-			return []ast.Option{option}, nil
+			return []ir.Option{option}, nil
 		}
 
 		targetArgType := option.Args[argumentIndex].Type
@@ -357,26 +357,26 @@ func DisjunctionAsOptionsAction(argumentIndex int) ActionRunner {
 
 		// or maybe a reference to a struct that was created to simulate a disjunction?
 		if targetArgType.IsRef() {
-			referredType := ctx.Schemas.ResolveToType(targetArgType)
+			referredType := ctx.Schemas.Resolve(targetArgType)
 			if !referredType.IsStructGeneratedFromDisjunction() {
-				ctx.Logger.Warn("argument is not a ref to a disjunction: skipping transformation", slog.String("type", ast.TypeName(referredType)))
-				return []ast.Option{option}, nil
+				ctx.Logger.Warn("argument is not a ref to a disjunction: skipping transformation", slog.String("type", ir.TypeName(referredType)))
+				return []ir.Option{option}, nil
 			}
 
 			return disjunctionStructAsOptions(option, referredType, argumentIndex)
 		}
 
-		ctx.Logger.Warn("argument is not a disjunction: skipping transformation", slog.String("type", ast.TypeName(targetArgType)))
-		return []ast.Option{option}, nil
+		ctx.Logger.Warn("argument is not a disjunction: skipping transformation", slog.String("type", ir.TypeName(targetArgType)))
+		return []ir.Option{option}, nil
 	}
 }
 
-func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Type, argIndex int) ([]ast.Option, error) {
-	newOpts := make([]ast.Option, 0, len(disjunctionStruct.AsStruct().Fields))
+func disjunctionStructAsOptions(option ir.Option, disjunctionStruct ir.Type, argIndex int) ([]ir.Option, error) {
+	newOpts := make([]ir.Option, 0, len(disjunctionStruct.AsStruct().Fields))
 	for _, field := range disjunctionStruct.AsStruct().Fields {
 		optClone := option.DeepCopy()
 
-		arg := ast.Argument{Name: field.Name, Type: field.Type}
+		arg := ir.Argument{Name: field.Name, Type: field.Type}
 		args := optClone.Args[0:argIndex]
 		args = append(args, arg)
 		if len(option.Args) > argIndex+1 {
@@ -389,15 +389,15 @@ func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Type, a
 				continue
 			}
 
-			assignments[i] = ast.Assignment{
+			assignments[i] = ir.Assignment{
 				Path: assignments[i].Path,
-				Value: ast.AssignmentValue{
-					Envelope: &ast.AssignmentEnvelope{
+				Value: ir.AssignmentValue{
+					Envelope: &ir.AssignmentEnvelope{
 						Type: option.Args[argIndex].Type,
-						Values: []ast.EnvelopeFieldValue{
+						Values: []ir.EnvelopeFieldValue{
 							{
-								Path:  ast.PathFromStructField(field),
-								Value: ast.AssignmentValue{Argument: &arg},
+								Path:  ir.PathFromStructField(field),
+								Value: ir.AssignmentValue{Argument: &arg},
 							},
 						},
 					},
@@ -407,7 +407,7 @@ func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Type, a
 			break
 		}
 
-		opt := ast.Option{
+		opt := ir.Option{
 			Name:        field.Name,
 			Args:        args,
 			Assignments: assignments,
@@ -415,7 +415,7 @@ func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Type, a
 		opt.AddToVeneerTrail("DisjunctionAsOptions")
 
 		if field.Type.Default != nil {
-			opt.Default = &ast.OptionDefault{
+			opt.Default = &ir.OptionDefault{
 				ArgsValues: []any{field.Type.Default},
 			}
 		}
@@ -426,15 +426,15 @@ func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Type, a
 	return newOpts, nil
 }
 
-func disjunctionAsOptions(option ast.Option, argIndex int) ([]ast.Option, error) {
+func disjunctionAsOptions(option ir.Option, argIndex int) ([]ir.Option, error) {
 	disjunction := option.Args[argIndex].Type.AsDisjunction()
 
-	newOpts := make([]ast.Option, 0, len(disjunction.Branches))
+	newOpts := make([]ir.Option, 0, len(disjunction.Branches))
 	for _, branch := range disjunction.Branches {
 		optClone := option.DeepCopy()
-		typeName := tools.LowerCamelCase(ast.TypeName(branch))
+		typeName := tools.LowerCamelCase(ir.TypeName(branch))
 
-		arg := ast.Argument{Name: typeName, Type: branch}
+		arg := ir.Argument{Name: typeName, Type: branch}
 
 		args := optClone.Args[0:argIndex]
 		args = append(args, arg)
@@ -448,15 +448,15 @@ func disjunctionAsOptions(option ast.Option, argIndex int) ([]ast.Option, error)
 				continue
 			}
 
-			assignments[i] = ast.ArgumentAssignment(
+			assignments[i] = ir.ArgumentAssignment(
 				assignments[i].Path,
 				arg,
-				ast.Method(assignments[i].Method),
+				ir.Method(assignments[i].Method),
 			)
 			break
 		}
 
-		opt := ast.Option{
+		opt := ir.Option{
 			Name:        typeName,
 			Args:        args,
 			Assignments: assignments,
@@ -464,7 +464,7 @@ func disjunctionAsOptions(option ast.Option, argIndex int) ([]ast.Option, error)
 		opt.AddToVeneerTrail("DisjunctionAsOptions")
 
 		if branch.Default != nil {
-			opt.Default = &ast.OptionDefault{
+			opt.Default = &ir.OptionDefault{
 				ArgsValues: []any{branch.Default},
 			}
 		}
@@ -481,20 +481,20 @@ type BooleanUnfold struct {
 }
 
 func UnfoldBooleanAction(unfoldOpts BooleanUnfold) ActionRunner {
-	return func(ctx RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(ctx RuleCtx, _ ir.Builder, option ir.Option) ([]ir.Option, error) {
 		intoType := option.Assignments[0].Path.Last().Type
 
-		if !intoType.IsScalar() || intoType.Scalar.ScalarKind != ast.KindBool {
-			ctx.Logger.Warn("first assignment is not an boolean: skipping transformation", slog.String("type", ast.TypeName(intoType)))
-			return []ast.Option{option}, nil
+		if !intoType.IsScalar() || intoType.Scalar.ScalarKind != ir.KindBool {
+			ctx.Logger.Warn("first assignment is not an boolean: skipping transformation", slog.String("type", ir.TypeName(intoType)))
+			return []ir.Option{option}, nil
 		}
 
-		newOpts := []ast.Option{
+		newOpts := []ir.Option{
 			{
 				Name:     unfoldOpts.OptionTrue,
 				Comments: option.Comments,
-				Assignments: []ast.Assignment{
-					ast.ConstantAssignment(option.Assignments[0].Path, true),
+				Assignments: []ir.Assignment{
+					ir.ConstantAssignment(option.Assignments[0].Path, true),
 				},
 				VeneerTrail: append([]string{}, option.VeneerTrail...),
 			},
@@ -502,8 +502,8 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) ActionRunner {
 			{
 				Name:     unfoldOpts.OptionFalse,
 				Comments: option.Comments,
-				Assignments: []ast.Assignment{
-					ast.ConstantAssignment(option.Assignments[0].Path, false),
+				Assignments: []ir.Assignment{
+					ir.ConstantAssignment(option.Assignments[0].Path, false),
 				},
 				VeneerTrail: append([]string{}, option.VeneerTrail...),
 			},
@@ -511,9 +511,9 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) ActionRunner {
 
 		if option.Default != nil {
 			if val, ok := option.Default.ArgsValues[0].(bool); ok && val {
-				newOpts[0].Default = &ast.OptionDefault{}
+				newOpts[0].Default = &ir.OptionDefault{}
 			} else {
-				newOpts[1].Default = &ast.OptionDefault{}
+				newOpts[1].Default = &ir.OptionDefault{}
 			}
 		}
 
@@ -525,17 +525,17 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) ActionRunner {
 }
 
 func DuplicateAction(duplicateName string) ActionRunner {
-	return func(_ RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(_ RuleCtx, builder ir.Builder, option ir.Option) ([]ir.Option, error) {
 		duplicateOpt := option.DeepCopy()
 		duplicateOpt.Name = duplicateName
 		duplicateOpt.AddToVeneerTrail(fmt.Sprintf("Duplicate[%s]", option.Name))
 
-		return []ast.Option{option, duplicateOpt}, nil
+		return []ir.Option{option, duplicateOpt}, nil
 	}
 }
 
 func AddAssignmentAction(assignment veneers.Assignment) ActionRunner {
-	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(ctx RuleCtx, builder ir.Builder, option ir.Option) ([]ir.Option, error) {
 		irAssignment, err := assignment.AsIR(ctx.Schemas, builder)
 		if err != nil {
 			return nil, err
@@ -544,21 +544,21 @@ func AddAssignmentAction(assignment veneers.Assignment) ActionRunner {
 		option.Assignments = append(option.Assignments, irAssignment)
 		option.AddToVeneerTrail(fmt.Sprintf("AddAssignment[%s]", irAssignment.Path.String()))
 
-		return []ast.Option{option}, nil
+		return []ir.Option{option}, nil
 	}
 }
 
 func AddCommentsAction(comments []string) ActionRunner {
-	return func(_ RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(_ RuleCtx, builder ir.Builder, option ir.Option) ([]ir.Option, error) {
 		option.Comments = append(option.Comments, comments...)
 		option.AddToVeneerTrail(fmt.Sprintf("AddComments[%s]", strings.Join(comments, " ")))
 
-		return []ast.Option{option}, nil
+		return []ir.Option{option}, nil
 	}
 }
 
 func DebugAction() ActionRunner {
-	return func(_ RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(_ RuleCtx, builder ir.Builder, option ir.Option) ([]ir.Option, error) {
 		marshaled, err := json.MarshalIndent(option, "", "  ")
 		if err != nil {
 			return nil, err
@@ -567,6 +567,6 @@ func DebugAction() ActionRunner {
 		fmt.Printf("[debug] option %s.%s.%s:\n", builder.Package, builder.Name, option.Name)
 		fmt.Println(string(marshaled))
 
-		return []ast.Option{option}, nil
+		return []ir.Option{option}, nil
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
@@ -16,14 +16,14 @@ type Definition = *orderedmap.Map[string, any]
 
 type Schema struct {
 	Config             Config
-	ReferenceFormatter func(ref ast.RefType) string
+	ReferenceFormatter func(ref ir.RefType) string
 	// OpenAPI3Compatible dictates whether the generated JSONSchema will be compatible with OpenAPI 3.0,
 	// rather than JSONSchema (OpenAPI 3.1 is fully compatible with JSON Schema)
 	OpenAPI3Compatible bool
 
-	foreignObjects     *orderedmap.Map[string, ast.Object]
-	referenceResolver  func(ref ast.RefType) (ast.Object, bool)
-	isForeignReference func(ref ast.RefType) bool
+	foreignObjects     *orderedmap.Map[string, ir.Object]
+	referenceResolver  func(ref ir.RefType) (ir.Object, bool)
+	isForeignReference func(ref ir.RefType) bool
 }
 
 func (jenny Schema) JennyName() string {
@@ -57,13 +57,13 @@ func (jenny Schema) toJSON(input any) ([]byte, error) {
 	return json.Marshal(input)
 }
 
-func (jenny Schema) GenerateSchema(context languages.Context, schema *ast.Schema) Definition {
-	jenny.foreignObjects = orderedmap.New[string, ast.Object]()
+func (jenny Schema) GenerateSchema(context languages.Context, schema *ir.Schema) Definition {
+	jenny.foreignObjects = orderedmap.New[string, ir.Object]()
 
-	jenny.isForeignReference = func(ref ast.RefType) bool {
+	jenny.isForeignReference = func(ref ir.RefType) bool {
 		return ref.ReferredPkg != schema.Package
 	}
-	jenny.referenceResolver = func(ref ast.RefType) (ast.Object, bool) {
+	jenny.referenceResolver = func(ref ir.RefType) (ir.Object, bool) {
 		return context.LocateObject(ref.ReferredPkg, ref.ReferredType)
 	}
 
@@ -71,14 +71,14 @@ func (jenny Schema) GenerateSchema(context languages.Context, schema *ast.Schema
 	jsonSchema.Set("$schema", "http://json-schema.org/draft-07/schema#")
 
 	if schema.EntryPoint != "" {
-		jsonSchema.Set("$ref", jenny.ReferenceFormatter(ast.RefType{
+		jsonSchema.Set("$ref", jenny.ReferenceFormatter(ir.RefType{
 			ReferredPkg:  schema.Package,
 			ReferredType: schema.EntryPoint,
 		}))
 	}
 
 	definitions := orderedmap.New[string, Definition]()
-	schema.Objects.Iterate(func(_ string, object ast.Object) {
+	schema.Objects.Iterate(func(_ string, object ir.Object) {
 		definitions.Set(object.Name, jenny.objectToDefinition(object))
 	})
 
@@ -88,9 +88,9 @@ func (jenny Schema) GenerateSchema(context languages.Context, schema *ast.Schema
 		}
 
 		foreignObjects := jenny.foreignObjects
-		jenny.foreignObjects = orderedmap.New[string, ast.Object]()
+		jenny.foreignObjects = orderedmap.New[string, ir.Object]()
 
-		foreignObjects.Iterate(func(_ string, foreignObject ast.Object) {
+		foreignObjects.Iterate(func(_ string, foreignObject ir.Object) {
 			definitions.Set(foreignObject.Name, jenny.objectToDefinition(foreignObject))
 		})
 	}
@@ -100,7 +100,7 @@ func (jenny Schema) GenerateSchema(context languages.Context, schema *ast.Schema
 	return jsonSchema
 }
 
-func (jenny Schema) objectToDefinition(object ast.Object) Definition {
+func (jenny Schema) objectToDefinition(object ir.Object) Definition {
 	definition := jenny.formatType(object.Type)
 
 	if comments := jenny.objectComments(object); len(comments) != 0 {
@@ -114,28 +114,28 @@ func (jenny Schema) objectToDefinition(object ast.Object) Definition {
 	return definition
 }
 
-func (jenny Schema) formatType(typeDef ast.Type) Definition {
+func (jenny Schema) formatType(typeDef ir.Type) Definition {
 	var definition Definition
 	switch typeDef.Kind {
-	case ast.KindStruct:
+	case ir.KindStruct:
 		definition = jenny.formatStruct(typeDef)
-	case ast.KindScalar:
+	case ir.KindScalar:
 		definition = jenny.formatScalar(typeDef)
-	case ast.KindRef:
+	case ir.KindRef:
 		definition = jenny.formatRef(typeDef)
-	case ast.KindEnum:
+	case ir.KindEnum:
 		definition = jenny.formatEnum(typeDef)
-	case ast.KindArray:
+	case ir.KindArray:
 		definition = jenny.formatArray(typeDef)
-	case ast.KindMap:
+	case ir.KindMap:
 		definition = jenny.formatMap(typeDef)
-	case ast.KindDisjunction:
+	case ir.KindDisjunction:
 		definition = jenny.formatDisjunction(typeDef)
-	case ast.KindIntersection:
+	case ir.KindIntersection:
 		definition = jenny.formatIntersection(typeDef)
-	case ast.KindComposableSlot:
+	case ir.KindComposableSlot:
 		definition = jenny.formatComposableSlot()
-	case ast.KindConstantRef:
+	case ir.KindConstantRef:
 		definition = jenny.formatConstantRef(typeDef)
 	default:
 		definition = orderedmap.New[string, any]()
@@ -152,11 +152,11 @@ func (jenny Schema) formatType(typeDef ast.Type) Definition {
 // Ref-like kinds need special treatment in OpenAPI 3.0 because $ref replaces the whole object
 // and cannot be combined with other keywords — those use allOf as a wrapper.
 // All other kinds can carry nullable: true inline (OpenAPI 3.0) or use anyOf (JSON Schema).
-func (jenny Schema) applyNullable(kind ast.Kind, definition Definition) Definition {
+func (jenny Schema) applyNullable(kind ir.Kind, definition Definition) Definition {
 	nullDef := orderedmap.New[string, any]()
 	nullDef.Set("type", "null")
 
-	refLike := kind == ast.KindRef || kind == ast.KindConstantRef
+	refLike := kind == ir.KindRef || kind == ir.KindConstantRef
 
 	if jenny.OpenAPI3Compatible {
 		nullable := orderedmap.New[string, any]()
@@ -179,31 +179,31 @@ func (jenny Schema) applyNullable(kind ast.Kind, definition Definition) Definiti
 	return wrapper
 }
 
-func (jenny Schema) formatScalar(typeDef ast.Type) Definition {
+func (jenny Schema) formatScalar(typeDef ir.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	switch typeDef.AsScalar().ScalarKind {
-	case ast.KindNull:
+	case ir.KindNull:
 		definition.Set("type", "null")
-	case ast.KindAny:
+	case ir.KindAny:
 		definition.Set("type", "object")
 		definition.Set("additionalProperties", map[string]any{})
-	case ast.KindBytes:
+	case ir.KindBytes:
 		definition.Set("type", "string")
 		jenny.addStringConstraints(definition, typeDef)
-	case ast.KindString:
+	case ir.KindString:
 		definition.Set("type", "string")
 		jenny.addStringConstraints(definition, typeDef)
-		if typeDef.HasHint(ast.HintStringFormatDateTime) {
+		if typeDef.HasHint(ir.HintStringFormatDateTime) {
 			definition.Set("format", "date-time")
 		}
-	case ast.KindBool:
+	case ir.KindBool:
 		definition.Set("type", "boolean")
-	case ast.KindFloat32, ast.KindFloat64:
+	case ir.KindFloat32, ir.KindFloat64:
 		definition.Set("type", "number")
 		jenny.addNumberConstraints(definition, typeDef)
-	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64,
-		ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
+	case ir.KindUint8, ir.KindUint16, ir.KindUint32, ir.KindUint64,
+		ir.KindInt8, ir.KindInt16, ir.KindInt32, ir.KindInt64:
 		definition.Set("type", "integer")
 		jenny.addNumberConstraints(definition, typeDef)
 	}
@@ -216,16 +216,16 @@ func (jenny Schema) formatScalar(typeDef ast.Type) Definition {
 	return definition
 }
 
-func (jenny Schema) addStringConstraints(definition *orderedmap.Map[string, any], typeDef ast.Type) {
+func (jenny Schema) addStringConstraints(definition *orderedmap.Map[string, any], typeDef ir.Type) {
 	for _, constraint := range typeDef.AsScalar().Constraints {
 		switch constraint.Op {
-		case ast.MinLengthOp:
+		case ir.MinLengthOp:
 			definition.Set("minLength", constraint.Args[0])
-		case ast.MaxLengthOp:
+		case ir.MaxLengthOp:
 			definition.Set("maxLength", constraint.Args[0])
-		case ast.RegexMatchOp:
+		case ir.RegexMatchOp:
 			definition.Set("pattern", constraint.Args[0])
-		case ast.NotRegexMatchOp:
+		case ir.NotRegexMatchOp:
 			notDef := orderedmap.New[string, any]()
 			notDef.Set("pattern", constraint.Args[0])
 			definition.Set("not", notDef)
@@ -233,40 +233,40 @@ func (jenny Schema) addStringConstraints(definition *orderedmap.Map[string, any]
 	}
 }
 
-func (jenny Schema) addNumberConstraints(definition *orderedmap.Map[string, any], typeDef ast.Type) {
+func (jenny Schema) addNumberConstraints(definition *orderedmap.Map[string, any], typeDef ir.Type) {
 	for _, constraint := range typeDef.AsScalar().Constraints {
 		switch constraint.Op {
-		case ast.LessThanOp:
+		case ir.LessThanOp:
 			if jenny.OpenAPI3Compatible {
 				definition.Set("maximum", constraint.Args[0])
 				definition.Set("exclusiveMaximum", true)
 			} else {
 				definition.Set("exclusiveMaximum", constraint.Args[0])
 			}
-		case ast.LessThanEqualOp:
+		case ir.LessThanEqualOp:
 			definition.Set("maximum", constraint.Args[0])
-		case ast.GreaterThanOp:
+		case ir.GreaterThanOp:
 			if jenny.OpenAPI3Compatible {
 				definition.Set("minimum", constraint.Args[0])
 				definition.Set("exclusiveMinimum", true)
 			} else {
 				definition.Set("exclusiveMinimum", constraint.Args[0])
 			}
-		case ast.GreaterThanEqualOp:
+		case ir.GreaterThanEqualOp:
 			definition.Set("minimum", constraint.Args[0])
-		case ast.MultipleOfOp:
+		case ir.MultipleOfOp:
 			definition.Set("multipleOf", constraint.Args[0])
 		}
 	}
 }
 
-func (jenny Schema) formatStruct(typeDef ast.Type) Definition {
+func (jenny Schema) formatStruct(typeDef ir.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	definition.Set("type", "object")
 	definition.Set("additionalProperties", false)
-	if typeDef.HasHint(ast.HintOpenStruct) {
-		if val, _ := typeDef.Hints[ast.HintOpenStruct].(string); strings.ToLower(val)[0] == 't' {
+	if typeDef.HasHint(ir.HintOpenStruct) {
+		if val, _ := typeDef.Hints[ir.HintOpenStruct].(string); strings.ToLower(val)[0] == 't' {
 			definition.Set("additionalProperties", map[string]any{})
 		}
 	}
@@ -302,7 +302,7 @@ func (jenny Schema) formatStruct(typeDef ast.Type) Definition {
 	return definition
 }
 
-func (jenny Schema) formatRef(typeDef ast.Type) Definition {
+func (jenny Schema) formatRef(typeDef ir.Type) Definition {
 	definition := orderedmap.New[string, any]()
 	ref := typeDef.AsRef()
 
@@ -320,10 +320,10 @@ func (jenny Schema) formatRef(typeDef ast.Type) Definition {
 	return definition
 }
 
-func (jenny Schema) formatConstantRef(typeDef ast.Type) Definition {
+func (jenny Schema) formatConstantRef(typeDef ir.Type) Definition {
 	definition := orderedmap.New[string, any]()
 	constRef := typeDef.AsConstantRef()
-	ref := ast.NewRef(constRef.ReferredPkg, constRef.ReferredType).AsRef()
+	ref := ir.NewRef(constRef.ReferredPkg, constRef.ReferredType).AsRef()
 
 	if jenny.isForeignReference(ref) {
 		referredObject, found := jenny.referenceResolver(ref)
@@ -353,14 +353,14 @@ func (jenny Schema) formatConstantRef(typeDef ast.Type) Definition {
 	return definition
 }
 
-func (jenny Schema) defaultRefFormatter(ref ast.RefType) string {
+func (jenny Schema) defaultRefFormatter(ref ir.RefType) string {
 	return fmt.Sprintf("#/definitions/%s", ref.ReferredType)
 }
 
-func (jenny Schema) formatEnum(typeDef ast.Type) Definition {
+func (jenny Schema) formatEnum(typeDef ir.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
-	values := tools.Map(typeDef.AsEnum().Values, func(value ast.EnumValue) any {
+	values := tools.Map(typeDef.AsEnum().Values, func(value ir.EnumValue) any {
 		return value.Value
 	})
 
@@ -374,7 +374,7 @@ func (jenny Schema) formatEnum(typeDef ast.Type) Definition {
 	return definition
 }
 
-func (jenny Schema) formatArray(typeDef ast.Type) Definition {
+func (jenny Schema) formatArray(typeDef ir.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	definition.Set("type", "array")
@@ -384,20 +384,20 @@ func (jenny Schema) formatArray(typeDef ast.Type) Definition {
 	return definition
 }
 
-func (jenny Schema) addArrayConstraints(definition *orderedmap.Map[string, any], typeDef ast.Type) {
+func (jenny Schema) addArrayConstraints(definition *orderedmap.Map[string, any], typeDef ir.Type) {
 	for _, constraint := range typeDef.AsArray().Constraints {
 		switch constraint.Op {
-		case ast.MinItemsOp:
+		case ir.MinItemsOp:
 			definition.Set("minItems", constraint.Args[0])
-		case ast.MaxItemsOp:
+		case ir.MaxItemsOp:
 			definition.Set("maxItems", constraint.Args[0])
-		case ast.UniqueItemsOp:
+		case ir.UniqueItemsOp:
 			definition.Set("uniqueItems", true)
 		}
 	}
 }
 
-func (jenny Schema) formatMap(typeDef ast.Type) Definition {
+func (jenny Schema) formatMap(typeDef ir.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	definition.Set("type", "object")
@@ -412,7 +412,7 @@ func (jenny Schema) formatMap(typeDef ast.Type) Definition {
 	return definition
 }
 
-func (jenny Schema) formatDisjunction(typeDef ast.Type) Definition {
+func (jenny Schema) formatDisjunction(typeDef ir.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	branches := tools.UniqueFormattedBy(
@@ -429,7 +429,7 @@ func (jenny Schema) formatDisjunction(typeDef ast.Type) Definition {
 	return definition
 }
 
-func (jenny Schema) formatIntersection(typeDef ast.Type) Definition {
+func (jenny Schema) formatIntersection(typeDef ir.Type) Definition {
 	definition := orderedmap.New[string, any]()
 	branches := tools.Map(typeDef.AsIntersection().Branches, jenny.formatType)
 
@@ -448,7 +448,7 @@ func (jenny Schema) formatComposableSlot() Definition {
 	return definition
 }
 
-func (jenny Schema) objectComments(object ast.Object) string {
+func (jenny Schema) objectComments(object ir.Object) string {
 	comments := object.Comments
 	if jenny.Config.Debug {
 		passesTrail := tools.Map(object.PassesTrail, func(trail string) string {
@@ -460,7 +460,7 @@ func (jenny Schema) objectComments(object ast.Object) string {
 	return strings.Join(comments, "\n")
 }
 
-func (jenny Schema) fieldComments(field ast.StructField) string {
+func (jenny Schema) fieldComments(field ir.StructField) string {
 	comments := field.Comments
 	if jenny.Config.Debug {
 		comments = append(comments, tools.Map(field.PassesTrail, jenny.passTrailFormatter)...)

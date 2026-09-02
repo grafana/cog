@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -45,7 +45,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	return files, nil
 }
 
-func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Schema) ([]byte, error) {
+func (jenny RawTypes) generateSchema(context languages.Context, schema *ir.Schema) ([]byte, error) {
 	var buffer strings.Builder
 	var err error
 
@@ -71,19 +71,19 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		Funcs(template.FuncMap{
 			"importModule": jenny.importModule,
 			"importPkg":    jenny.importPkg,
-			"formatFullyQualifiedRef": func(typeDef ast.RefType) string {
+			"formatFullyQualifiedRef": func(typeDef ir.RefType) string {
 				return jenny.typeFormatter.formatFullyQualifiedRef(typeDef, false)
 			},
-			"unmarshalForType": func(typeDef ast.Type, inputVar string, hint string) fromJSONCode {
+			"unmarshalForType": func(typeDef ir.Type, inputVar string, hint string) fromJSONCode {
 				return jenny.fromJSONForType(context, typeDef, inputVar, hint)
 			},
-			"defaultForType": func(typeDef ast.Type) string {
+			"defaultForType": func(typeDef ir.Type) string {
 				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.importModule, nil))
 			},
 		})
 
 	i := 0
-	schema.Objects.Iterate(func(_ string, object ast.Object) {
+	schema.Objects.Iterate(func(_ string, object ir.Object) {
 		objectOutput, innerErr := jenny.typeFormatter.formatObject(object)
 		if innerErr != nil {
 			err = innerErr
@@ -168,7 +168,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	}
 
 	customSchemaVariant := template.CustomSchemaVariantBlock(schema)
-	if schema.Metadata.Kind == ast.SchemaKindComposable && jenny.tmpl.Exists(customSchemaVariant) {
+	if schema.Metadata.Kind == ir.SchemaKindComposable && jenny.tmpl.Exists(customSchemaVariant) {
 		buffer.WriteString("\n\n\n")
 
 		if err := jenny.tmpl.RenderInBuffer(&buffer, customSchemaVariant, map[string]any{
@@ -188,7 +188,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	return []byte(importStatements + buffer.String()), nil
 }
 
-func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object) string {
+func (jenny RawTypes) generateInitMethod(schemas ir.Schemas, object ir.Object) string {
 	var buffer strings.Builder
 
 	var args []string
@@ -217,7 +217,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 		if field.Type.IsConcreteScalar() {
 			assignments = append(assignments, fmt.Sprintf("        self.%s = %s", fieldName, formatValue(field.Type.AsScalar().Value)))
 			continue
-		} else if field.Type.IsAnyOf(ast.KindStruct, ast.KindRef, ast.KindEnum, ast.KindMap, ast.KindArray, ast.KindDisjunction) {
+		} else if field.Type.IsAnyOf(ir.KindStruct, ir.KindRef, ir.KindEnum, ir.KindMap, ir.KindArray, ir.KindDisjunction) {
 			if !field.Type.Nullable {
 				typingPkg := jenny.importPkg("typing", "typing")
 				fieldType = fmt.Sprintf("%s.Optional[%s]", typingPkg, fieldType)
@@ -243,7 +243,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 	return strings.TrimSuffix(buffer.String(), "\n")
 }
 
-func (jenny RawTypes) generateToJSONMethod(object ast.Object) string {
+func (jenny RawTypes) generateToJSONMethod(object ir.Object) string {
 	var buffer strings.Builder
 
 	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
@@ -283,7 +283,7 @@ func (jenny RawTypes) generateToJSONMethod(object ast.Object) string {
 	return buffer.String()
 }
 
-func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object ast.Object) (string, error) {
+func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object ir.Object) (string, error) {
 	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
 		Name: "from_json",
 		Comments: []string{
@@ -358,7 +358,7 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 	return buffer.String(), nil
 }
 
-func (jenny RawTypes) fromJSONForType(context languages.Context, typeDef ast.Type, inputVar string, hint string) fromJSONCode {
+func (jenny RawTypes) fromJSONForType(context languages.Context, typeDef ir.Type, inputVar string, hint string) fromJSONCode {
 	if typeDef.IsRef() { //nolint:gocritic
 		resolvedType := context.ResolveRefs(typeDef)
 		if resolvedType.IsStruct() {
@@ -371,7 +371,7 @@ func (jenny RawTypes) fromJSONForType(context languages.Context, typeDef ast.Typ
 
 		return jenny.fromJSONForType(context, resolvedType, inputVar, hint+"_ref")
 	} else if typeDef.IsArray() {
-		if typeDef.Array.IsArrayOf(ast.KindScalar) {
+		if typeDef.Array.IsArrayOf(ir.KindScalar) {
 			return fromJSONCode{DecodingCall: inputVar}
 		}
 
@@ -383,7 +383,7 @@ func (jenny RawTypes) fromJSONForType(context languages.Context, typeDef ast.Typ
 			DecodingCall: fmt.Sprintf(`[%[2]s for item in %[1]s]`, inputVar, valueTypeFromJSON.DecodingCall),
 		}
 	} else if typeDef.IsMap() {
-		if typeDef.Map.IsMapOf(ast.KindScalar) {
+		if typeDef.Map.IsMapOf(ir.KindScalar) {
 			return fromJSONCode{DecodingCall: inputVar}
 		}
 
@@ -406,7 +406,7 @@ type fromJSONCode struct {
 	DecodingCall string
 }
 
-func (jenny RawTypes) disjunctionFromJSON(context languages.Context, typeDef ast.Type, inputVar string, hint string) fromJSONCode {
+func (jenny RawTypes) disjunctionFromJSON(context languages.Context, typeDef ir.Type, inputVar string, hint string) fromJSONCode {
 	disjunction := context.ResolveRefs(typeDef).AsDisjunction()
 
 	// this potentially generates incorrect code, but there isn't much we can do without more information.
@@ -422,7 +422,7 @@ func (jenny RawTypes) disjunctionFromJSON(context languages.Context, typeDef ast
 	discriminators := tools.Keys(disjunction.DiscriminatorMapping)
 	sort.Strings(discriminators) // to ensure a deterministic output
 	for _, discriminator := range discriminators {
-		if discriminator == ast.DiscriminatorCatchAll {
+		if discriminator == ir.DiscriminatorCatchAll {
 			continue
 		}
 
@@ -439,7 +439,7 @@ func (jenny RawTypes) disjunctionFromJSON(context languages.Context, typeDef ast
 	decodingMap = fmt.Sprintf("%s: %s = %s", decodingMapName, typeDecl, decodingMap)
 	decodingCall := fmt.Sprintf(`%[3]s[%[2]s["%[1]s"]].from_json(%[2]s)`, disjunction.Discriminator, inputVar, decodingMapName)
 
-	if defaultBranchType, ok := disjunction.DiscriminatorMapping[ast.DiscriminatorCatchAll]; ok {
+	if defaultBranchType, ok := disjunction.DiscriminatorMapping[ir.DiscriminatorCatchAll]; ok {
 		defaultBranch = fmt.Sprintf(`, %s`, defaultBranchType)
 
 		decodingCall = fmt.Sprintf(`%[4]s.get(%[3]s["%[1]s"]%[2]s).from_json(%[3]s)`, disjunction.Discriminator, defaultBranch, inputVar, decodingMapName)
@@ -451,7 +451,7 @@ func (jenny RawTypes) disjunctionFromJSON(context languages.Context, typeDef ast
 	}
 }
 
-func (jenny RawTypes) composableSlotFromJSON(context languages.Context, parentObject ast.Object, field ast.StructField) (string, error) {
+func (jenny RawTypes) composableSlotFromJSON(context languages.Context, parentObject ir.Object, field ir.StructField) (string, error) {
 	slot, _ := context.ResolveToComposableSlot(field.Type)
 	variant := string(slot.AsComposableSlot().Variant)
 	unmarshalVariantBlock := template.VariantFieldUnmarshalBlock(variant)

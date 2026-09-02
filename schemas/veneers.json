@@ -3,26 +3,26 @@
   "$id": "https://raw.githubusercontent.com/grafana/cog/main/schemas/veneers.json",
   "$ref": "#/$defs/YamlVeneers",
   "$defs": {
-    "AstArgument": {
+    "IrArgument": {
       "properties": {
         "name": {
           "type": "string"
         },
         "type": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         }
       },
       "additionalProperties": false,
       "type": "object"
     },
-    "AstArrayType": {
+    "IrArrayType": {
       "properties": {
         "value_type": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         },
         "constraints": {
           "items": {
-            "$ref": "#/$defs/AstTypeConstraint"
+            "$ref": "#/$defs/IrTypeConstraint"
           },
           "type": "array"
         }
@@ -30,13 +30,13 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstBuilderFactory": {
+    "IrBuilderFactory": {
       "properties": {
         "name": {
           "type": "string"
         },
         "builder_ref": {
-          "$ref": "#/$defs/AstRefType"
+          "$ref": "#/$defs/IrRefType"
         },
         "comments": {
           "items": {
@@ -46,13 +46,13 @@
         },
         "arguments": {
           "items": {
-            "$ref": "#/$defs/AstArgument"
+            "$ref": "#/$defs/IrArgument"
           },
           "type": "array"
         },
         "options": {
           "items": {
-            "$ref": "#/$defs/AstOptionCall"
+            "$ref": "#/$defs/IrOptionCall"
           },
           "type": "array"
         }
@@ -60,7 +60,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstComposableSlotType": {
+    "IrComposableSlotType": {
       "properties": {
         "variant": {
           "type": "string"
@@ -69,7 +69,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstConstantReferenceType": {
+    "IrConstantReferenceType": {
       "properties": {
         "referred_pkg": {
           "type": "string"
@@ -82,10 +82,10 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstDisjunctionType": {
+    "IrDisjunctionType": {
       "properties": {
         "branches": {
-          "$ref": "#/$defs/AstTypes"
+          "$ref": "#/$defs/IrTypes"
         },
         "discriminator": {
           "type": "string",
@@ -101,11 +101,11 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstEnumType": {
+    "IrEnumType": {
       "properties": {
         "values": {
           "items": {
-            "$ref": "#/$defs/AstEnumValue"
+            "$ref": "#/$defs/IrEnumValue"
           },
           "type": "array",
           "description": "possible values. Value types might be different"
@@ -114,10 +114,10 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstEnumValue": {
+    "IrEnumValue": {
       "properties": {
         "type": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         },
         "name": {
           "type": "string"
@@ -127,14 +127,14 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstFactoryCall": {
+    "IrFactoryCall": {
       "properties": {
         "ref": {
-          "$ref": "#/$defs/AstFactoryRef"
+          "$ref": "#/$defs/IrFactoryRef"
         },
         "parameters": {
           "items": {
-            "$ref": "#/$defs/AstOptionCallParameter"
+            "$ref": "#/$defs/IrOptionCallParameter"
           },
           "type": "array"
         }
@@ -142,7 +142,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstFactoryRef": {
+    "IrFactoryRef": {
       "properties": {
         "package": {
           "type": "string"
@@ -157,11 +157,11 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstIntersectionType": {
+    "IrIntersectionType": {
       "properties": {
         "branches": {
           "items": {
-            "$ref": "#/$defs/AstType"
+            "$ref": "#/$defs/IrType"
           },
           "type": "array"
         }
@@ -169,30 +169,30 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstJenniesHints": {
+    "IrJenniesHints": {
       "type": "object",
       "description": "JenniesHints meant to be used by jennies, to gain a finer control on the codegen from schemas"
     },
-    "AstMapType": {
+    "IrMapType": {
       "properties": {
         "indextype": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         },
         "valuetype": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         }
       },
       "additionalProperties": false,
       "type": "object"
     },
-    "AstOptionCall": {
+    "IrOptionCall": {
       "properties": {
         "name": {
           "type": "string"
         },
         "parameters": {
           "items": {
-            "$ref": "#/$defs/AstOptionCallParameter"
+            "$ref": "#/$defs/IrOptionCallParameter"
           },
           "type": "array"
         }
@@ -200,34 +200,34 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstOptionCallParameter": {
+    "IrOptionCallParameter": {
       "properties": {
         "argument": {
-          "$ref": "#/$defs/AstArgument"
+          "$ref": "#/$defs/IrArgument"
         },
         "force_build": {
           "type": "boolean"
         },
         "constant": {
-          "$ref": "#/$defs/AstTypedConstant"
+          "$ref": "#/$defs/IrTypedConstant"
         },
         "factory": {
-          "$ref": "#/$defs/AstFactoryCall"
+          "$ref": "#/$defs/IrFactoryCall"
         }
       },
       "additionalProperties": false,
       "type": "object"
     },
-    "AstPath": {
+    "IrPath": {
       "items": {
-        "$ref": "#/$defs/AstPathItem"
+        "$ref": "#/$defs/IrPathItem"
       },
       "type": "array"
     },
-    "AstPathIndex": {
+    "IrPathIndex": {
       "properties": {
         "argument": {
-          "$ref": "#/$defs/AstArgument"
+          "$ref": "#/$defs/IrArgument"
         },
         "constant": {
           "description": "string or int"
@@ -236,20 +236,20 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstPathItem": {
+    "IrPathItem": {
       "properties": {
         "identifier": {
           "type": "string"
         },
         "index": {
-          "$ref": "#/$defs/AstPathIndex"
+          "$ref": "#/$defs/IrPathIndex"
         },
         "type": {
-          "$ref": "#/$defs/AstType",
+          "$ref": "#/$defs/IrType",
           "description": "any"
         },
         "typehint": {
-          "$ref": "#/$defs/AstType",
+          "$ref": "#/$defs/IrType",
           "description": "useful mostly for composability purposes, when a field Type is \"any\"\nand we're trying to \"compose in\" something of a known type."
         },
         "root": {
@@ -260,7 +260,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstRefType": {
+    "IrRefType": {
       "properties": {
         "referred_pkg": {
           "type": "string"
@@ -272,7 +272,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstScalarType": {
+    "IrScalarType": {
       "properties": {
         "scalar_kind": {
           "type": "string",
@@ -283,7 +283,7 @@
         },
         "constraints": {
           "items": {
-            "$ref": "#/$defs/AstTypeConstraint"
+            "$ref": "#/$defs/IrTypeConstraint"
           },
           "type": "array"
         }
@@ -291,7 +291,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstStructField": {
+    "IrStructField": {
       "properties": {
         "name": {
           "type": "string"
@@ -303,7 +303,7 @@
           "type": "array"
         },
         "type": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         },
         "required": {
           "type": "boolean"
@@ -318,11 +318,11 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstStructType": {
+    "IrStructType": {
       "properties": {
         "fields": {
           "items": {
-            "$ref": "#/$defs/AstStructField"
+            "$ref": "#/$defs/IrStructField"
           },
           "type": "array"
         }
@@ -330,7 +330,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstType": {
+    "IrType": {
       "properties": {
         "kind": {
           "type": "string"
@@ -340,37 +340,37 @@
         },
         "default": true,
         "disjunction": {
-          "$ref": "#/$defs/AstDisjunctionType"
+          "$ref": "#/$defs/IrDisjunctionType"
         },
         "array": {
-          "$ref": "#/$defs/AstArrayType"
+          "$ref": "#/$defs/IrArrayType"
         },
         "enum": {
-          "$ref": "#/$defs/AstEnumType"
+          "$ref": "#/$defs/IrEnumType"
         },
         "map": {
-          "$ref": "#/$defs/AstMapType"
+          "$ref": "#/$defs/IrMapType"
         },
         "struct": {
-          "$ref": "#/$defs/AstStructType"
+          "$ref": "#/$defs/IrStructType"
         },
         "ref": {
-          "$ref": "#/$defs/AstRefType"
+          "$ref": "#/$defs/IrRefType"
         },
         "constant_ref": {
-          "$ref": "#/$defs/AstConstantReferenceType"
+          "$ref": "#/$defs/IrConstantReferenceType"
         },
         "scalar": {
-          "$ref": "#/$defs/AstScalarType"
+          "$ref": "#/$defs/IrScalarType"
         },
         "intersection": {
-          "$ref": "#/$defs/AstIntersectionType"
+          "$ref": "#/$defs/IrIntersectionType"
         },
         "composable_slot": {
-          "$ref": "#/$defs/AstComposableSlotType"
+          "$ref": "#/$defs/IrComposableSlotType"
         },
         "hints": {
-          "$ref": "#/$defs/AstJenniesHints"
+          "$ref": "#/$defs/IrJenniesHints"
         },
         "passestrail": {
           "items": {
@@ -383,7 +383,7 @@
       "type": "object",
       "description": "Type representing every type defined by the IR."
     },
-    "AstTypeConstraint": {
+    "IrTypeConstraint": {
       "properties": {
         "op": {
           "type": "string"
@@ -396,19 +396,19 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstTypedConstant": {
+    "IrTypedConstant": {
       "properties": {
         "type": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         },
         "value": true
       },
       "additionalProperties": false,
       "type": "object"
     },
-    "AstTypes": {
+    "IrTypes": {
       "items": {
-        "$ref": "#/$defs/AstType"
+        "$ref": "#/$defs/IrType"
       },
       "type": "array"
     },
@@ -418,7 +418,7 @@
           "type": "string"
         },
         "path_obj": {
-          "$ref": "#/$defs/AstPath"
+          "$ref": "#/$defs/IrPath"
         },
         "method": {
           "type": "string"
@@ -445,7 +445,7 @@
     "VeneersAssignmentValue": {
       "properties": {
         "argument": {
-          "$ref": "#/$defs/AstArgument"
+          "$ref": "#/$defs/IrArgument"
         },
         "constant": true,
         "envelope": {
@@ -482,7 +482,7 @@
         },
         "arguments": {
           "items": {
-            "$ref": "#/$defs/AstArgument"
+            "$ref": "#/$defs/IrArgument"
           },
           "type": "array"
         },
@@ -555,7 +555,7 @@
           "description": "noop?"
         },
         "factory": {
-          "$ref": "#/$defs/AstBuilderFactory"
+          "$ref": "#/$defs/IrBuilderFactory"
         }
       },
       "additionalProperties": false,
@@ -1018,7 +1018,7 @@
         },
         "set": {
           "items": {
-            "$ref": "#/$defs/AstStructField"
+            "$ref": "#/$defs/IrStructField"
           },
           "type": "array"
         }

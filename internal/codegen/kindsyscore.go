@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"cuelang.org/go/cue"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/simplecue"
 )
 
-func kindsysCoreLoader(input CueInput) (ast.Schemas, error) {
+func kindsysCoreLoader(input CueInput) (ir.Schemas, error) {
 	schemaRootValue, libraries, err := input.schemaRootValue(context.Background())
 	if err != nil {
 		return nil, err
@@ -21,8 +21,8 @@ func kindsysCoreLoader(input CueInput) (ast.Schemas, error) {
 
 	schema, err := simplecue.GenerateAST(schemaFromThemaLineage(schemaRootValue), simplecue.Config{
 		Package: input.Package,
-		SchemaMetadata: ast.SchemaMeta{
-			Kind:       ast.SchemaKindCore,
+		SchemaMetadata: ir.SchemaMeta{
+			Kind:       ir.SchemaKindCore,
 			Identifier: kindIdentifier,
 		},
 		Libraries: libraries,

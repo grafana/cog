@@ -1,16 +1,16 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/grafana/cog/main/schemas/compiler_passes.json",
-  "$ref": "#/$defs/YamlCompiler",
+  "$ref": "#/$defs/YamlTransforms",
   "$defs": {
-    "AstArrayType": {
+    "IrArrayType": {
       "properties": {
         "value_type": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         },
         "constraints": {
           "items": {
-            "$ref": "#/$defs/AstTypeConstraint"
+            "$ref": "#/$defs/IrTypeConstraint"
           },
           "type": "array"
         }
@@ -18,7 +18,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstComposableSlotType": {
+    "IrComposableSlotType": {
       "properties": {
         "variant": {
           "type": "string"
@@ -27,7 +27,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstConstantReferenceType": {
+    "IrConstantReferenceType": {
       "properties": {
         "referred_pkg": {
           "type": "string"
@@ -40,10 +40,10 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstDisjunctionType": {
+    "IrDisjunctionType": {
       "properties": {
         "branches": {
-          "$ref": "#/$defs/AstTypes"
+          "$ref": "#/$defs/IrTypes"
         },
         "discriminator": {
           "type": "string",
@@ -59,11 +59,11 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstEnumType": {
+    "IrEnumType": {
       "properties": {
         "values": {
           "items": {
-            "$ref": "#/$defs/AstEnumValue"
+            "$ref": "#/$defs/IrEnumValue"
           },
           "type": "array",
           "description": "possible values. Value types might be different"
@@ -72,10 +72,10 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstEnumValue": {
+    "IrEnumValue": {
       "properties": {
         "type": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         },
         "name": {
           "type": "string"
@@ -85,11 +85,11 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstIntersectionType": {
+    "IrIntersectionType": {
       "properties": {
         "branches": {
           "items": {
-            "$ref": "#/$defs/AstType"
+            "$ref": "#/$defs/IrType"
           },
           "type": "array"
         }
@@ -97,23 +97,23 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstJenniesHints": {
+    "IrJenniesHints": {
       "type": "object",
       "description": "JenniesHints meant to be used by jennies, to gain a finer control on the codegen from schemas"
     },
-    "AstMapType": {
+    "IrMapType": {
       "properties": {
         "indextype": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         },
         "valuetype": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         }
       },
       "additionalProperties": false,
       "type": "object"
     },
-    "AstRefType": {
+    "IrRefType": {
       "properties": {
         "referred_pkg": {
           "type": "string"
@@ -125,7 +125,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstScalarType": {
+    "IrScalarType": {
       "properties": {
         "scalar_kind": {
           "type": "string",
@@ -136,7 +136,7 @@
         },
         "constraints": {
           "items": {
-            "$ref": "#/$defs/AstTypeConstraint"
+            "$ref": "#/$defs/IrTypeConstraint"
           },
           "type": "array"
         }
@@ -144,7 +144,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstStructField": {
+    "IrStructField": {
       "properties": {
         "name": {
           "type": "string"
@@ -156,7 +156,7 @@
           "type": "array"
         },
         "type": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         },
         "required": {
           "type": "boolean"
@@ -171,11 +171,11 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstStructType": {
+    "IrStructType": {
       "properties": {
         "fields": {
           "items": {
-            "$ref": "#/$defs/AstStructField"
+            "$ref": "#/$defs/IrStructField"
           },
           "type": "array"
         }
@@ -183,7 +183,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstType": {
+    "IrType": {
       "properties": {
         "kind": {
           "type": "string"
@@ -193,37 +193,37 @@
         },
         "default": true,
         "disjunction": {
-          "$ref": "#/$defs/AstDisjunctionType"
+          "$ref": "#/$defs/IrDisjunctionType"
         },
         "array": {
-          "$ref": "#/$defs/AstArrayType"
+          "$ref": "#/$defs/IrArrayType"
         },
         "enum": {
-          "$ref": "#/$defs/AstEnumType"
+          "$ref": "#/$defs/IrEnumType"
         },
         "map": {
-          "$ref": "#/$defs/AstMapType"
+          "$ref": "#/$defs/IrMapType"
         },
         "struct": {
-          "$ref": "#/$defs/AstStructType"
+          "$ref": "#/$defs/IrStructType"
         },
         "ref": {
-          "$ref": "#/$defs/AstRefType"
+          "$ref": "#/$defs/IrRefType"
         },
         "constant_ref": {
-          "$ref": "#/$defs/AstConstantReferenceType"
+          "$ref": "#/$defs/IrConstantReferenceType"
         },
         "scalar": {
-          "$ref": "#/$defs/AstScalarType"
+          "$ref": "#/$defs/IrScalarType"
         },
         "intersection": {
-          "$ref": "#/$defs/AstIntersectionType"
+          "$ref": "#/$defs/IrIntersectionType"
         },
         "composable_slot": {
-          "$ref": "#/$defs/AstComposableSlotType"
+          "$ref": "#/$defs/IrComposableSlotType"
         },
         "hints": {
-          "$ref": "#/$defs/AstJenniesHints"
+          "$ref": "#/$defs/IrJenniesHints"
         },
         "passestrail": {
           "items": {
@@ -236,7 +236,7 @@
       "type": "object",
       "description": "Type representing every type defined by the IR."
     },
-    "AstTypeConstraint": {
+    "IrTypeConstraint": {
       "properties": {
         "op": {
           "type": "string"
@@ -249,9 +249,9 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstTypes": {
+    "IrTypes": {
       "items": {
-        "$ref": "#/$defs/AstType"
+        "$ref": "#/$defs/IrType"
       },
       "type": "array"
     },
@@ -263,7 +263,7 @@
         },
         "fields": {
           "items": {
-            "$ref": "#/$defs/AstStructField"
+            "$ref": "#/$defs/IrStructField"
           },
           "type": "array"
         }
@@ -278,7 +278,7 @@
           "description": "Expected format: [package].[object]"
         },
         "as": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         },
         "comments": {
           "items": {
@@ -304,120 +304,6 @@
       "properties": {
         "prefix_to_remove": {
           "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "YamlCompiler": {
-      "properties": {
-        "passes": {
-          "items": {
-            "$ref": "#/$defs/YamlCompilerPass"
-          },
-          "type": "array"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "YamlCompilerPass": {
-      "properties": {
-        "entrypoint_identification": {
-          "$ref": "#/$defs/YamlEntrypointIdentification"
-        },
-        "dataquery_identification": {
-          "$ref": "#/$defs/YamlDataqueryIdentification"
-        },
-        "unspec": {
-          "$ref": "#/$defs/YamlUnspec"
-        },
-        "replace_reference": {
-          "$ref": "#/$defs/YamlReplaceReference"
-        },
-        "fields_set_default": {
-          "$ref": "#/$defs/YamlFieldsSetDefault"
-        },
-        "fields_set_required": {
-          "$ref": "#/$defs/YamlFieldsSetRequired"
-        },
-        "fields_set_not_required": {
-          "$ref": "#/$defs/YamlFieldsSetNotRequired"
-        },
-        "omit": {
-          "$ref": "#/$defs/YamlOmit"
-        },
-        "add_fields": {
-          "$ref": "#/$defs/YamlAddFields"
-        },
-        "name_anonymous_struct": {
-          "$ref": "#/$defs/YamlNameAnonymousStruct"
-        },
-        "add_object": {
-          "$ref": "#/$defs/YamlAddObject"
-        },
-        "rename_object": {
-          "$ref": "#/$defs/YamlRenameObject"
-        },
-        "retype_object": {
-          "$ref": "#/$defs/YamlRetypeObject"
-        },
-        "hint_object": {
-          "$ref": "#/$defs/YamlHintObject"
-        },
-        "deprecate_object": {
-          "$ref": "#/$defs/YamlDeprecateObject"
-        },
-        "retype_field": {
-          "$ref": "#/$defs/YamlRetypeField"
-        },
-        "omit_fields": {
-          "$ref": "#/$defs/YamlOmitFields"
-        },
-        "schema_set_identifier": {
-          "$ref": "#/$defs/YamlSchemaSetIdentifier"
-        },
-        "schema_set_entry_point": {
-          "$ref": "#/$defs/YamlSchemaSetEntryPoint"
-        },
-        "duplicate_object": {
-          "$ref": "#/$defs/YamlDuplicateObject"
-        },
-        "trim_enum_values": {
-          "$ref": "#/$defs/YamlTrimEnumValues"
-        },
-        "constant_to_enum": {
-          "$ref": "#/$defs/YamlConstantToEnum"
-        },
-        "cleanup_k8_resource_names": {
-          "$ref": "#/$defs/YamlCleanupK8ResourceNames"
-        },
-        "trim_object_name_prefix": {
-          "$ref": "#/$defs/YamlTrimObjectNamePrefix"
-        },
-        "sanitize_enum_member_names": {
-          "$ref": "#/$defs/YamlSanitizeEnumMemberNames"
-        },
-        "anonymous_structs_to_named": {
-          "$ref": "#/$defs/YamlAnonymousStructsToNamed"
-        },
-        "anonymous_enum_to_named": {
-          "$ref": "#/$defs/YamlAnonymousEnumsToNamed"
-        },
-        "disjunction_to_type": {
-          "$ref": "#/$defs/YamlDisjunctionToType"
-        },
-        "disjunction_of_anonymous_structs_to_explicit": {
-          "$ref": "#/$defs/YamlDisjunctionOfAnonymousStructsToExplicit"
-        },
-        "disjunction_infer_mapping": {
-          "$ref": "#/$defs/YamlDisjunctionInferMapping"
-        },
-        "undiscriminated_disjunction_to_any": {
-          "$ref": "#/$defs/YamlUndiscriminatedDisjunctionToAny"
-        },
-        "disjunction_with_constant_to_default": {
-          "$ref": "#/$defs/YamlDisjunctionWithConstantToDefault"
         }
       },
       "additionalProperties": false,
@@ -541,7 +427,7 @@
           "description": "Expected format: [package].[object]"
         },
         "hints": {
-          "$ref": "#/$defs/AstJenniesHints"
+          "$ref": "#/$defs/IrJenniesHints"
         }
       },
       "additionalProperties": false,
@@ -620,7 +506,7 @@
           "description": "Expected format: [package].[object].[field]"
         },
         "as": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         },
         "comments": {
           "items": {
@@ -639,7 +525,7 @@
           "description": "Expected format: [package].[object]"
         },
         "as": {
-          "$ref": "#/$defs/AstType"
+          "$ref": "#/$defs/IrType"
         },
         "comments": {
           "items": {
@@ -675,6 +561,120 @@
         },
         "identifier": {
           "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlTransform": {
+      "properties": {
+        "entrypoint_identification": {
+          "$ref": "#/$defs/YamlEntrypointIdentification"
+        },
+        "dataquery_identification": {
+          "$ref": "#/$defs/YamlDataqueryIdentification"
+        },
+        "unspec": {
+          "$ref": "#/$defs/YamlUnspec"
+        },
+        "replace_reference": {
+          "$ref": "#/$defs/YamlReplaceReference"
+        },
+        "fields_set_default": {
+          "$ref": "#/$defs/YamlFieldsSetDefault"
+        },
+        "fields_set_required": {
+          "$ref": "#/$defs/YamlFieldsSetRequired"
+        },
+        "fields_set_not_required": {
+          "$ref": "#/$defs/YamlFieldsSetNotRequired"
+        },
+        "omit": {
+          "$ref": "#/$defs/YamlOmit"
+        },
+        "add_fields": {
+          "$ref": "#/$defs/YamlAddFields"
+        },
+        "name_anonymous_struct": {
+          "$ref": "#/$defs/YamlNameAnonymousStruct"
+        },
+        "add_object": {
+          "$ref": "#/$defs/YamlAddObject"
+        },
+        "rename_object": {
+          "$ref": "#/$defs/YamlRenameObject"
+        },
+        "retype_object": {
+          "$ref": "#/$defs/YamlRetypeObject"
+        },
+        "hint_object": {
+          "$ref": "#/$defs/YamlHintObject"
+        },
+        "deprecate_object": {
+          "$ref": "#/$defs/YamlDeprecateObject"
+        },
+        "retype_field": {
+          "$ref": "#/$defs/YamlRetypeField"
+        },
+        "omit_fields": {
+          "$ref": "#/$defs/YamlOmitFields"
+        },
+        "schema_set_identifier": {
+          "$ref": "#/$defs/YamlSchemaSetIdentifier"
+        },
+        "schema_set_entry_point": {
+          "$ref": "#/$defs/YamlSchemaSetEntryPoint"
+        },
+        "duplicate_object": {
+          "$ref": "#/$defs/YamlDuplicateObject"
+        },
+        "trim_enum_values": {
+          "$ref": "#/$defs/YamlTrimEnumValues"
+        },
+        "constant_to_enum": {
+          "$ref": "#/$defs/YamlConstantToEnum"
+        },
+        "cleanup_k8_resource_names": {
+          "$ref": "#/$defs/YamlCleanupK8ResourceNames"
+        },
+        "trim_object_name_prefix": {
+          "$ref": "#/$defs/YamlTrimObjectNamePrefix"
+        },
+        "sanitize_enum_member_names": {
+          "$ref": "#/$defs/YamlSanitizeEnumMemberNames"
+        },
+        "anonymous_structs_to_named": {
+          "$ref": "#/$defs/YamlAnonymousStructsToNamed"
+        },
+        "anonymous_enum_to_named": {
+          "$ref": "#/$defs/YamlAnonymousEnumsToNamed"
+        },
+        "disjunction_to_type": {
+          "$ref": "#/$defs/YamlDisjunctionToType"
+        },
+        "disjunction_of_anonymous_structs_to_explicit": {
+          "$ref": "#/$defs/YamlDisjunctionOfAnonymousStructsToExplicit"
+        },
+        "disjunction_infer_mapping": {
+          "$ref": "#/$defs/YamlDisjunctionInferMapping"
+        },
+        "undiscriminated_disjunction_to_any": {
+          "$ref": "#/$defs/YamlUndiscriminatedDisjunctionToAny"
+        },
+        "disjunction_with_constant_to_default": {
+          "$ref": "#/$defs/YamlDisjunctionWithConstantToDefault"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlTransforms": {
+      "properties": {
+        "passes": {
+          "items": {
+            "$ref": "#/$defs/YamlTransform"
+          },
+          "type": "array"
         }
       },
       "additionalProperties": false,

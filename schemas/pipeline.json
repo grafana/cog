@@ -3,21 +3,6 @@
   "$id": "https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json",
   "$ref": "#/$defs/CodegenPipeline",
   "$defs": {
-    "AstSchemaMeta": {
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "variant": {
-          "type": "string"
-        },
-        "identifier": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
     "CodegenCueInput": {
       "properties": {
         "allowed_objects": {
@@ -35,7 +20,7 @@
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
         "metadata": {
-          "$ref": "#/$defs/AstSchemaMeta",
+          "$ref": "#/$defs/IrSchemaMeta",
           "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         },
         "entrypoint": {
@@ -56,7 +41,7 @@
         },
         "package": {
           "type": "string",
-          "description": "Package name to use for the input schema. If empty, it will be guessed\nfrom the entrypoint."
+          "description": "Package name to use for the input schema. If empty, it will be guessed."
         },
         "cue_imports": {
           "items": {
@@ -110,7 +95,7 @@
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
         "metadata": {
-          "$ref": "#/$defs/AstSchemaMeta",
+          "$ref": "#/$defs/IrSchemaMeta",
           "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         },
         "path": {
@@ -146,7 +131,7 @@
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
         "metadata": {
-          "$ref": "#/$defs/AstSchemaMeta",
+          "$ref": "#/$defs/IrSchemaMeta",
           "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         },
         "path": {
@@ -183,7 +168,7 @@
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
         "metadata": {
-          "$ref": "#/$defs/AstSchemaMeta",
+          "$ref": "#/$defs/IrSchemaMeta",
           "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         },
         "path": {
@@ -404,6 +389,21 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "IrSchemaMeta": {
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "variant": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "JavaConfig": {
       "properties": {
         "package_path": {
@@ -555,6 +555,10 @@
         "skip_post_formatting": {
           "type": "boolean",
           "description": "SkipPostFormatting disables formatting of Go files done with go imports\nafter code generation."
+        },
+        "skip_generated_header": {
+          "type": "boolean",
+          "description": "SkipGeneratedHeader disables the addition of a\n\"Code generated - EDITING IS FUTILE. DO NOT EDIT.\" comment in generated\nfiles headers."
         }
       },
       "additionalProperties": false,

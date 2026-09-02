@@ -3,7 +3,7 @@ package yaml
 import (
 	"fmt"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers"
 	"github.com/grafana/cog/internal/veneers/builder"
@@ -160,7 +160,7 @@ func (rule ComposeBuilders) AsRule(pkg string) (*builder.Rule, error) {
 type Properties struct {
 	BuilderSelector `yaml:",inline"`
 
-	Set []ast.StructField `yaml:"set"`
+	Set []ir.StructField `yaml:"set"`
 }
 
 func (rule Properties) AsRule(pkg string) (*builder.Rule, error) {
@@ -246,7 +246,7 @@ func (rule AddOption) AsRule(pkg string) (*builder.Rule, error) {
 type AddFactory struct {
 	BuilderSelector `yaml:",inline"`
 
-	Factory ast.BuilderFactory `yaml:"factory"`
+	Factory ir.BuilderFactory `yaml:"factory"`
 }
 
 func (rule AddFactory) AsRule(pkg string) (*builder.Rule, error) {
@@ -307,7 +307,7 @@ func (selector BuilderSelector) AsSelector(pkg string) (*builder.Selector, error
 	}
 
 	if selector.ByVariant != nil {
-		return builder.ByVariant(ast.SchemaVariant(*selector.ByVariant)), nil
+		return builder.ByVariant(ir.SchemaVariant(*selector.ByVariant)), nil
 	}
 
 	if selector.GeneratedFromDisjunction != nil {

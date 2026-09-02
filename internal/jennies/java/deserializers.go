@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -36,7 +36,7 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 	deserialisers := make(codejen.Files, 0)
 	for _, schema := range context.Schemas {
 		var hasErr error
-		schema.Objects.Iterate(func(key string, obj ast.Object) {
+		schema.Objects.Iterate(func(key string, obj ir.Object) {
 			jenny.imports = NewImportMap(jenny.config.PackagePath)
 			jenny.packageMapper = func(pkg string, class string) string {
 				if jenny.imports.IsIdentical(pkg, schema.Package) {
@@ -67,7 +67,7 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 	return deserialisers, nil
 }
 
-func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj ast.Object) (*codejen.File, error) {
+func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj ir.Object) (*codejen.File, error) {
 	customUnmarshalTmpl := template.CustomObjectUnmarshalBlock(obj)
 	if jenny.tmpl.Exists(customUnmarshalTmpl) {
 		rendered, err := jenny.tmpl.RenderAsBytes(customUnmarshalTmpl, map[string]any{
@@ -82,15 +82,15 @@ func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj
 		return codejen.NewFile(path, rendered, jenny), nil
 	}
 
-	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ir.HintDisjunctionOfScalars) {
 		return jenny.genDisjunctionsDeserializer(obj, "disjunctions_of_scalars")
 	}
 
-	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ir.HintDiscriminatedDisjunctionOfRefs) {
 		return jenny.genDisjunctionsDeserializer(obj, "disjunctions_of_refs")
 	}
 
-	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalarsAndRefs) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ir.HintDisjunctionOfScalarsAndRefs) {
 		return jenny.genDisjunctionsDeserializer(obj, "disjunctions_of_scalars_and_refs")
 	}
 
@@ -99,7 +99,7 @@ func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj
 }
 
 // TODO(kgz): this shouldn't be done by cog
-func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, obj ast.Object) (*codejen.File, error) {
+func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, obj ir.Object) (*codejen.File, error) {
 	jenny.packageMapper("cog.variants", "Dataquery")
 	jenny.packageMapper("cog.variants", "Registry")
 
@@ -124,7 +124,7 @@ func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, 
 }
 
 // TODO(kgz): this shouldn't be done by cog
-func (jenny *Deserializers) genDataqueryCode(context languages.Context, obj ast.Object) []DataqueryUnmarshalling {
+func (jenny *Deserializers) genDataqueryCode(context languages.Context, obj ir.Object) []DataqueryUnmarshalling {
 	dataqueryUnmarshalling := make([]DataqueryUnmarshalling, 0)
 	for _, field := range obj.Type.AsStruct().Fields {
 		composableSlotType, resolved := context.ResolveToComposableSlot(field.Type)
@@ -132,7 +132,7 @@ func (jenny *Deserializers) genDataqueryCode(context languages.Context, obj ast.
 			continue
 		}
 
-		if composableSlotType.AsComposableSlot().Variant == ast.SchemaVariantDataQuery {
+		if composableSlotType.AsComposableSlot().Variant == ir.SchemaVariantDataQuery {
 			dataqueryUnmarshalling = append(dataqueryUnmarshalling, jenny.renderUnmarshalDataqueryField(obj, field))
 		}
 	}
@@ -141,8 +141,8 @@ func (jenny *Deserializers) genDataqueryCode(context languages.Context, obj ast.
 }
 
 // TODO(kgz): this shouldn't be done by cog
-func (jenny *Deserializers) renderUnmarshalDataqueryField(obj ast.Object, field ast.StructField) DataqueryUnmarshalling {
-	var hintField *ast.StructField
+func (jenny *Deserializers) renderUnmarshalDataqueryField(obj ir.Object, field ir.StructField) DataqueryUnmarshalling {
+	var hintField *ir.StructField
 	for i, f := range obj.Type.AsStruct().Fields {
 		if !f.Type.IsRef() {
 			continue
@@ -173,13 +173,13 @@ func (jenny *Deserializers) renderUnmarshalDataqueryField(obj ast.Object, field 
 	}
 }
 
-func (jenny *Deserializers) genDisjunctionsDeserializer(obj ast.Object, tmpl string) (*codejen.File, error) {
+func (jenny *Deserializers) genDisjunctionsDeserializer(obj ir.Object, tmpl string) (*codejen.File, error) {
 	rendered, err := jenny.tmpl.Render(fmt.Sprintf("marshalling/%s.json_unmarshall.tmpl", tmpl), Unmarshalling{
 		Package: jenny.config.formatPackage(obj.SelfRef.ReferredPkg),
 		Imports: jenny.imports,
 		Name:    tools.UpperCamelCase(obj.Name),
 		Fields:  obj.Type.AsStruct().Fields,
-		Hint:    obj.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs],
+		Hint:    obj.Type.Hints[ir.HintDiscriminatedDisjunctionOfRefs],
 	})
 	if err != nil {
 		return nil, err

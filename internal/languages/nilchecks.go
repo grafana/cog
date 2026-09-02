@@ -1,7 +1,7 @@
 package languages
 
 import (
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 )
 
 func GenerateBuilderNilChecks(language Language, context Context) (Context, error) {
@@ -20,20 +20,20 @@ func GenerateBuilderNilChecks(language Language, context Context) (Context, erro
 	// Changes in scope must reset this map.
 	checks := make(map[string]struct{})
 
-	nilChecksVisitor := ast.BuilderVisitor{
-		OnConstructor: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, constructor ast.Constructor) (ast.Constructor, error) {
+	nilChecksVisitor := ir.BuilderVisitor{
+		OnConstructor: func(visitor *ir.BuilderVisitor, schemas ir.Schemas, builder ir.Builder, constructor ir.Constructor) (ir.Constructor, error) {
 			checks = make(map[string]struct{})
 
 			return visitor.TraverseConstructor(schemas, builder, constructor)
 		},
-		OnOption: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, option ast.Option) (ast.Option, error) {
+		OnOption: func(visitor *ir.BuilderVisitor, schemas ir.Schemas, builder ir.Builder, option ir.Option) (ir.Option, error) {
 			checks = make(map[string]struct{})
 
 			return visitor.TraverseOption(schemas, builder, option)
 		},
-		OnAssignment: func(_ *ast.BuilderVisitor, _ ast.Schemas, b ast.Builder, assignment ast.Assignment) (ast.Assignment, error) {
+		OnAssignment: func(_ *ir.BuilderVisitor, _ ir.Schemas, b ir.Builder, assignment ir.Assignment) (ir.Assignment, error) {
 			for i, chunk := range assignment.Path {
-				protectArrayAppend := nullableKinds.ProtectArrayAppend && assignment.Method == ast.AppendAssignment
+				protectArrayAppend := nullableKinds.ProtectArrayAppend && assignment.Method == ir.AppendAssignment
 				if i == len(assignment.Path)-1 && !protectArrayAppend {
 					continue
 				}
@@ -50,7 +50,7 @@ func GenerateBuilderNilChecks(language Language, context Context) (Context, erro
 						continue
 					}
 
-					assignment.NilChecks = append(assignment.NilChecks, ast.AssignmentNilCheck{
+					assignment.NilChecks = append(assignment.NilChecks, ir.AssignmentNilCheck{
 						Path:           subPath,
 						EmptyValueType: valueType,
 					})

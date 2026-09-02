@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -45,7 +45,7 @@ func cleanString(s string) string {
 	return s
 }
 
-func formatType(t ast.ScalarKind, val any) string {
+func formatType(t ir.ScalarKind, val any) string {
 	// When the default is 0, is detected as integer even if it's a float.
 	parseFloatVal := func(val any) any {
 		if v, ok := val.(int64); ok {
@@ -65,13 +65,13 @@ func formatType(t ast.ScalarKind, val any) string {
 	}
 
 	switch t {
-	case ast.KindInt64, ast.KindUint64:
+	case ir.KindInt64, ir.KindUint64:
 		return fmt.Sprintf("%dL", tools.AnyToInt64(val))
-	case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16, ast.KindInt32, ast.KindUint32:
+	case ir.KindInt8, ir.KindUint8, ir.KindInt16, ir.KindUint16, ir.KindInt32, ir.KindUint32:
 		return fmt.Sprintf("%d", tools.AnyToInt64(val))
-	case ast.KindFloat32:
+	case ir.KindFloat32:
 		return fmt.Sprintf("%.1ff", parseFloatVal(val))
-	case ast.KindFloat64:
+	case ir.KindFloat64:
 		return fmt.Sprintf("%.1f", parseFloatVal(val))
 	}
 
@@ -87,7 +87,7 @@ func escapeVarName(varName string) string {
 	return varName
 }
 
-func lastPathIdentifier(fieldPath ast.Path) string {
+func lastPathIdentifier(fieldPath ir.Path) string {
 	lastPath := make([]string, 0)
 	shouldAddPath := false
 	for _, path := range fieldPath {
@@ -130,25 +130,25 @@ func containsValue(value string, list []DataqueryUnmarshalling) bool {
 	return false
 }
 
-func getJavaFieldTypeCheck(t ast.Type) string {
+func getJavaFieldTypeCheck(t ir.Type) string {
 	switch t.Kind {
-	case ast.KindArray:
+	case ir.KindArray:
 		return "isArray()"
-	case ast.KindMap:
+	case ir.KindMap:
 		return "isObject()"
-	case ast.KindScalar:
+	case ir.KindScalar:
 		switch t.AsScalar().ScalarKind {
-		case ast.KindString:
+		case ir.KindString:
 			return "isTextual()"
-		case ast.KindBool:
+		case ir.KindBool:
 			return "isBoolean()"
-		case ast.KindInt8, ast.KindUint8, ast.KindInt32, ast.KindUint32:
+		case ir.KindInt8, ir.KindUint8, ir.KindInt32, ir.KindUint32:
 			return "isInt()"
-		case ast.KindInt64, ast.KindUint64:
+		case ir.KindInt64, ir.KindUint64:
 			return "isIntegralNumber()"
-		case ast.KindFloat32:
+		case ir.KindFloat32:
 			return "isFloatingPointNumber()"
-		case ast.KindFloat64:
+		case ir.KindFloat64:
 			return "isDouble()"
 		default:
 			return "isObject()"
@@ -158,7 +158,7 @@ func getJavaFieldTypeCheck(t ast.Type) string {
 	}
 }
 
-func objectNeedsCustomDeserializer(context languages.Context, obj ast.Object, tmpl *template.Template) bool {
+func objectNeedsCustomDeserializer(context languages.Context, obj ir.Object, tmpl *template.Template) bool {
 	// an object needs a custom unmarshal if:
 	// - it is a struct that was generated from a disjunction by the `DisjunctionToType` compiler pass.
 	// - it is a struct and one or more of its fields is a KindComposableSlot, or an array of KindComposableSlot

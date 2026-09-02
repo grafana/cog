@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/httputil"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/openapi"
 )
 
@@ -60,7 +60,7 @@ func (input *OpenAPIInput) interpolateParameters(interpolator ParametersInterpol
 	input.Package = interpolator(input.Package)
 }
 
-func (input *OpenAPIInput) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
+func (input *OpenAPIInput) LoadSchemas(ctx context.Context) (ir.Schemas, error) {
 	oapiSchema, err := input.loadSchema(ctx)
 	if err != nil {
 		return nil, err

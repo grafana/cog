@@ -3,7 +3,7 @@ package terraform
 import (
 	"fmt"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -18,16 +18,16 @@ func initTemplates(config Config) *template.Template {
 			"importStdPkg": func(_ string) string {
 				panic("importStdPkg() needs to be overridden by a jenny")
 			},
-			"toTfType": func(_ ast.Type) string {
+			"toTfType": func(_ ir.Type) string {
 				panic("toTfType() needs to be overridden by a jenny")
 			},
-			"toGoType": func(_ ast.Type) string {
+			"toGoType": func(_ ir.Type) string {
 				panic("toGoType() needs to be overridden by a jenny")
 			},
-			"toTfModel": func(_ ast.Type) string {
+			"toTfModel": func(_ ir.Type) string {
 				panic("toTfModel() needs to be overridden by a jenny")
 			},
-			"toTfModelWithRefs": func(_ ast.Type) string {
+			"toTfModelWithRefs": func(_ ir.Type) string {
 				panic("toTfModelWithRefs() needs to be overridden by a jenny")
 			},
 
@@ -35,7 +35,7 @@ func initTemplates(config Config) *template.Template {
 
 			// tfValueOf returns the Terraform value-getter method for a scalar field.
 			// Nullable types use the pointer variant (e.g. "ValueStringPointer()" for *string).
-			"tfValueOf": func(typeDef ast.Type, intoNullable bool) string {
+			"tfValueOf": func(typeDef ir.Type, intoNullable bool) string {
 				if !typeDef.IsScalar() {
 					return ""
 				}
@@ -46,32 +46,32 @@ func initTemplates(config Config) *template.Template {
 				}
 
 				switch typeDef.Scalar.ScalarKind {
-				case ast.KindString:
+				case ir.KindString:
 					return "ValueString" + ptr + "()"
-				case ast.KindBool:
+				case ir.KindBool:
 					return "ValueBool" + ptr + "()"
-				case ast.KindFloat32, ast.KindFloat64:
+				case ir.KindFloat32, ir.KindFloat64:
 					return "ValueFloat64" + ptr + "()"
-				case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16, ast.KindInt32, ast.KindUint32, ast.KindInt64, ast.KindUint64:
+				case ir.KindInt8, ir.KindUint8, ir.KindInt16, ir.KindUint16, ir.KindInt32, ir.KindUint32, ir.KindInt64, ir.KindUint64:
 					return "ValueInt64" + ptr + "()"
 				default:
 					return fmt.Sprintf("unsupported scalar kind '%s'", typeDef.Scalar.ScalarKind)
 				}
 			},
 
-			"tfTypeNullValueOf": func(typeDef ast.Type) string {
+			"tfTypeNullValueOf": func(typeDef ir.Type) string {
 				if !typeDef.IsScalar() {
 					return ""
 				}
 
 				switch typeDef.Scalar.ScalarKind {
-				case ast.KindString:
+				case ir.KindString:
 					return "types.StringNull"
-				case ast.KindBool:
+				case ir.KindBool:
 					return "types.BoolNull"
-				case ast.KindFloat32, ast.KindFloat64:
+				case ir.KindFloat32, ir.KindFloat64:
 					return "types.Float64Null"
-				case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16, ast.KindInt32, ast.KindUint32, ast.KindInt64, ast.KindUint64:
+				case ir.KindInt8, ir.KindUint8, ir.KindInt16, ir.KindUint16, ir.KindInt32, ir.KindUint32, ir.KindInt64, ir.KindUint64:
 					return "types.Int64Null"
 				default:
 					return fmt.Sprintf("unsupported tfTypeNullValueOf kind '%s'", typeDef.Scalar.ScalarKind)
@@ -81,7 +81,7 @@ func initTemplates(config Config) *template.Template {
 			// tfTypeValueOf returns the Terraform constructor for converting a native Go value
 			// to a Terraform SDK type. Nullable types use the pointer variant
 			// (e.g. "types.StringPointerValue" for *string).
-			"tfTypeValueOf": func(typeDef ast.Type, intoNullable bool) string {
+			"tfTypeValueOf": func(typeDef ir.Type, intoNullable bool) string {
 				if !typeDef.IsScalar() {
 					return ""
 				}
@@ -92,13 +92,13 @@ func initTemplates(config Config) *template.Template {
 				}
 
 				switch typeDef.Scalar.ScalarKind {
-				case ast.KindString:
+				case ir.KindString:
 					return "types.String" + ptr + "Value"
-				case ast.KindBool:
+				case ir.KindBool:
 					return "types.Bool" + ptr + "Value"
-				case ast.KindFloat32, ast.KindFloat64:
+				case ir.KindFloat32, ir.KindFloat64:
 					return "types.Float64" + ptr + "Value"
-				case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16, ast.KindInt32, ast.KindUint32, ast.KindInt64, ast.KindUint64:
+				case ir.KindInt8, ir.KindUint8, ir.KindInt16, ir.KindUint16, ir.KindInt32, ir.KindUint32, ir.KindInt64, ir.KindUint64:
 					return "types.Int64" + ptr + "Value"
 				default:
 					return fmt.Sprintf("unsupported scalar kind '%s'", typeDef.Scalar.ScalarKind)

@@ -2,7 +2,7 @@ package openapi
 
 import (
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast/compiler"
+	compiler2 "github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/languages"
 )
 
@@ -48,10 +48,10 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	return jenny
 }
 
-func (language *Language) CompilerPasses() compiler.Passes {
-	return compiler.Passes{
+func (language *Language) CompilerPasses() compiler2.Transforms {
+	return compiler2.Transforms{
 		// should be a superset of the compiler passes defined for jsonschema jennies
-		&compiler.DisjunctionWithNullToOptional{},
-		&compiler.InferEntrypoint{},
+		&compiler2.DisjunctionWithNullToOptional{},
+		&compiler2.InferEntrypoint{},
 	}
 }

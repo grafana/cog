@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/codegen"
+	"github.com/grafana/cog/internal/ir"
+	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
@@ -157,7 +157,7 @@ func inspectConvertersIR(codegenCtx languages.Context, language languages.Langua
 	}
 
 	// select builders within a package
-	builders := tools.Filter(codegenCtx.Builders, func(b ast.Builder) bool {
+	builders := tools.Filter(codegenCtx.Builders, func(b ir.Builder) bool {
 		return strings.EqualFold(b.Package, selectorParts[0]) && strings.EqualFold(b.Name, selectorParts[1])
 	})
 	if len(builders) == 0 {
@@ -187,7 +187,7 @@ func applyTypesIRSelector(codegenCtx languages.Context, selector string) (any, e
 	}
 
 	// select a package
-	schema, found := schemas.Locate(selectorParts[0])
+	schema, found := schemas.Get(selectorParts[0])
 	if !found {
 		return nil, fmt.Errorf("package '%s' not found", selectorParts[0])
 	}
@@ -196,7 +196,7 @@ func applyTypesIRSelector(codegenCtx languages.Context, selector string) (any, e
 	}
 
 	// select a specific object
-	objects := schema.Objects.Filter(func(_ string, object ast.Object) bool {
+	objects := schema.Objects.Filter(func(_ string, object ir.Object) bool {
 		return strings.EqualFold(object.Name, selectorParts[1])
 	})
 	if objects.Len() == 0 {
@@ -217,7 +217,7 @@ func applyBuilderIRSelector(context languages.Context, selector string) (any, er
 	}
 
 	// select builders within a package
-	builders := tools.Filter(context.Builders, func(b ast.Builder) bool {
+	builders := tools.Filter(context.Builders, func(b ir.Builder) bool {
 		return strings.EqualFold(b.Package, selectorParts[0])
 	})
 	if len(builders) == 0 {
@@ -228,7 +228,7 @@ func applyBuilderIRSelector(context languages.Context, selector string) (any, er
 	}
 
 	// target a specific builder
-	builders = tools.Filter(builders, func(builder ast.Builder) bool {
+	builders = tools.Filter(builders, func(builder ir.Builder) bool {
 		return strings.EqualFold(builder.Name, selectorParts[1])
 	})
 	if len(builders) == 0 {
@@ -239,7 +239,7 @@ func applyBuilderIRSelector(context languages.Context, selector string) (any, er
 	}
 
 	// select a specific option within a builder
-	opts := tools.Filter(builders[0].Options, func(opt ast.Option) bool {
+	opts := tools.Filter(builders[0].Options, func(opt ir.Option) bool {
 		return strings.EqualFold(opt.Name, selectorParts[2])
 	})
 	if len(opts) == 0 {
@@ -271,6 +271,6 @@ func (language dummyLanguage) Jennies(_ languages.Config) *codejen.JennyList[lan
 	return nil
 }
 
-func (language dummyLanguage) CompilerPasses() compiler.Passes {
+func (language dummyLanguage) CompilerPasses() transforms.Transforms {
 	return nil
 }

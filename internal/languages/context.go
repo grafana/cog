@@ -3,26 +3,26 @@ package languages
 import (
 	"sort"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/tools"
 )
 
 //nolint:musttag
 type Context struct {
-	Schemas         ast.Schemas
-	Builders        ast.Builders
+	Schemas         ir.Schemas
+	Builders        ir.Builders
 	ConverterConfig ConverterConfig
 }
 
-func (context *Context) LocateObject(pkg string, name string) (ast.Object, bool) {
-	return context.Schemas.LocateObject(pkg, name)
+func (context *Context) LocateObject(pkg string, name string) (ir.Object, bool) {
+	return context.Schemas.GetObject(pkg, name)
 }
 
-func (context *Context) LocateObjectByRef(ref ast.RefType) (ast.Object, bool) {
-	return context.Schemas.LocateObjectByRef(ref)
+func (context *Context) LocateObjectByRef(ref ir.RefType) (ir.Object, bool) {
+	return context.Schemas.GetObjectByRef(ref)
 }
 
-func (context *Context) ResolveToBuilder(def ast.Type) bool {
+func (context *Context) ResolveToBuilder(def ir.Type) bool {
 	if def.IsArray() {
 		return context.ResolveToBuilder(def.AsArray().ValueType)
 	}
@@ -53,7 +53,7 @@ func (context *Context) ResolveToBuilder(def ast.Type) bool {
 	return len(context.Builders.LocateAllByRef(def.AsRef())) != 0
 }
 
-func (context *Context) IsDisjunctionOfBuilders(def ast.Type) bool {
+func (context *Context) IsDisjunctionOfBuilders(def ir.Type) bool {
 	if !def.IsDisjunction() {
 		return false
 	}
@@ -67,7 +67,7 @@ func (context *Context) IsDisjunctionOfBuilders(def ast.Type) bool {
 	return true
 }
 
-func (context *Context) IsArrayOfKinds(def ast.Type, kinds ...ast.Kind) bool {
+func (context *Context) IsArrayOfKinds(def ir.Type, kinds ...ir.Kind) bool {
 	def = context.ResolveRefs(def)
 	if !def.IsArray() {
 		return false
@@ -81,7 +81,7 @@ func (context *Context) IsArrayOfKinds(def ast.Type, kinds ...ast.Kind) bool {
 	return valueType.IsAnyOf(kinds...)
 }
 
-func (context *Context) IsMapOfKinds(def ast.Type, kinds ...ast.Kind) bool {
+func (context *Context) IsMapOfKinds(def ir.Type, kinds ...ir.Kind) bool {
 	def = context.ResolveRefs(def)
 	if !def.IsMap() {
 		return false
@@ -95,7 +95,7 @@ func (context *Context) IsMapOfKinds(def ast.Type, kinds ...ast.Kind) bool {
 	return valueType.IsAnyOf(kinds...)
 }
 
-func (context *Context) ResolveToComposableSlot(def ast.Type) (ast.Type, bool) {
+func (context *Context) ResolveToComposableSlot(def ir.Type) (ir.Type, bool) {
 	if def.IsComposableSlot() {
 		return def, true
 	}
@@ -107,16 +107,16 @@ func (context *Context) ResolveToComposableSlot(def ast.Type) (ast.Type, bool) {
 	if def.IsRef() {
 		referredObj, found := context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if !found {
-			return ast.Type{}, false
+			return ir.Type{}, false
 		}
 
 		return context.ResolveToComposableSlot(referredObj.Type)
 	}
 
-	return ast.Type{}, false
+	return ir.Type{}, false
 }
 
-func (context *Context) ResolveToStruct(def ast.Type) bool {
+func (context *Context) ResolveToStruct(def ir.Type) bool {
 	if def.IsStruct() {
 		return true
 	}
@@ -133,7 +133,7 @@ func (context *Context) ResolveToStruct(def ast.Type) bool {
 	return context.ResolveToStruct(referredObj.Type)
 }
 
-func (context *Context) ResolveRefsChain(def ast.Type) ast.Type {
+func (context *Context) ResolveRefsChain(def ir.Type) ir.Type {
 	if !def.IsRef() {
 		return def
 	}
@@ -150,7 +150,7 @@ func (context *Context) ResolveRefsChain(def ast.Type) ast.Type {
 	return context.ResolveRefsChain(referredObj.Type)
 }
 
-func (context *Context) ResolveRefs(def ast.Type) ast.Type {
+func (context *Context) ResolveRefs(def ir.Type) ir.Type {
 	if !def.IsRef() {
 		return def
 	}
@@ -163,11 +163,11 @@ func (context *Context) ResolveRefs(def ast.Type) ast.Type {
 	return context.ResolveRefs(referredObj.Type)
 }
 
-func (context *Context) BuildersForType(typeDef ast.Type) ast.Builders {
-	var candidateBuilders ast.Builders
+func (context *Context) BuildersForType(typeDef ir.Type) ir.Builders {
+	var candidateBuilders ir.Builders
 
-	var search func(def ast.Type)
-	search = func(def ast.Type) {
+	var search func(def ir.Type)
+	search = func(def ir.Type) {
 		if def.IsArray() {
 			search(def.AsArray().ValueType)
 			return
@@ -198,14 +198,14 @@ func (context *Context) BuildersForType(typeDef ast.Type) ast.Builders {
 }
 
 func (context Context) PackagesForVariant(variant string) []string {
-	return tools.Map(context.SchemasForVariant(variant), func(schema *ast.Schema) string {
+	return tools.Map(context.SchemasForVariant(variant), func(schema *ir.Schema) string {
 		return schema.Package
 	})
 }
 
-func (context Context) SchemasForVariant(variant string) []*ast.Schema {
-	schemas := tools.Filter(context.Schemas, func(schema *ast.Schema) bool {
-		return schema.Metadata.Kind == ast.SchemaKindComposable && string(schema.Metadata.Variant) == variant && schema.Metadata.Identifier != ""
+func (context Context) SchemasForVariant(variant string) []*ir.Schema {
+	schemas := tools.Filter(context.Schemas, func(schema *ir.Schema) bool {
+		return schema.IsComposableVariant(variant) && schema.Metadata.Identifier != ""
 	})
 
 	sort.Slice(schemas, func(i int, j int) bool {

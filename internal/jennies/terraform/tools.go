@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -23,7 +23,7 @@ func formatObjectName(name string) string {
 	return tools.UpperCamelCase(name)
 }
 
-func formatModelName(ref ast.RefType) string {
+func formatModelName(ref ir.RefType) string {
 	return formatObjectName(ref.ReferredType) + "Model"
 }
 
@@ -31,7 +31,7 @@ func formatModelFieldName(name string) string {
 	return tools.UpperCamelCase(name)
 }
 
-func formatTypeName(ref ast.RefType) string {
+func formatTypeName(ref ir.RefType) string {
 	return formatObjectName(ref.ReferredType) + "Type"
 }
 
@@ -58,37 +58,37 @@ func formatScalar(val any) string {
 	return fmt.Sprintf("%#v", val)
 }
 
-func formatEnumValuesAsConstraints(enumValues []ast.EnumValue) []ast.TypeConstraint {
+func formatEnumValuesAsConstraints(enumValues []ir.EnumValue) []ir.TypeConstraint {
 	values := make([]any, len(enumValues))
 	for i, v := range enumValues {
 		values[i] = v.Value
 	}
 
-	return []ast.TypeConstraint{
+	return []ir.TypeConstraint{
 		{
-			Op:   ast.EqualOp,
+			Op:   ir.EqualOp,
 			Args: values,
 		},
 	}
 }
 
-func formatScalarAsModel(scalar ast.ScalarType) string {
+func formatScalarAsModel(scalar ir.ScalarType) string {
 	switch scalar.ScalarKind {
-	case ast.KindString, ast.KindBytes, ast.KindNull:
+	case ir.KindString, ir.KindBytes, ir.KindNull:
 		return "types.String"
-	case ast.KindBool:
+	case ir.KindBool:
 		return "types.Bool"
-	case ast.KindInt32, ast.KindUint32:
+	case ir.KindInt32, ir.KindUint32:
 		return "types.Int32"
-	case ast.KindInt64, ast.KindUint64:
+	case ir.KindInt64, ir.KindUint64:
 		return "types.Int64"
-	case ast.KindFloat32:
+	case ir.KindFloat32:
 		return "types.Float32"
-	case ast.KindFloat64:
+	case ir.KindFloat64:
 		return "types.Float64"
-	case ast.KindAny:
+	case ir.KindAny:
 		return "types.String" // `any` should be represented as a string holding a JSON payload
-	case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16:
+	case ir.KindInt8, ir.KindUint8, ir.KindInt16, ir.KindUint16:
 		return "types.Number" // types.Number can be converted into any numeric type https://developer.hashicorp.com/terraform/plugin/framework/handling-data/types/number#setting-values
 	default:
 		return fmt.Sprintf("unsupported scalar kind '%s'", scalar.ScalarKind)

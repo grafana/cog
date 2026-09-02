@@ -3,7 +3,7 @@ package jsonschema
 import (
 	"testing"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/testutils"
@@ -11,7 +11,7 @@ import (
 )
 
 func TestSchema_Generate(t *testing.T) {
-	test := testutils.GoldenFilesTestSuite[ast.Schema]{
+	test := testutils.GoldenFilesTestSuite[ir.Schema]{
 		TestDataRoot: "../../../testdata/jennies/rawtypes",
 		Name:         "JSONSchema",
 	}
@@ -20,13 +20,13 @@ func TestSchema_Generate(t *testing.T) {
 	jenny := Schema{Config: config}
 	compilerPasses := New(config).CompilerPasses()
 
-	test.Run(t, func(tc *testutils.Test[ast.Schema]) {
+	test.Run(t, func(tc *testutils.Test[ir.Schema]) {
 		req := require.New(tc)
 
 		// We run the compiler passes defined fo JSONSchema since without them, we
 		// might not be able to translate some of the IR's semantics.
 		schema := tc.UnmarshalJSONInput(testutils.RawTypesIRInputFile)
-		processedAsts, err := compilerPasses.Process(logs.NoopLogger(), ast.Schemas{&schema})
+		processedAsts, err := compilerPasses.Process(logs.NoopLogger(), ir.Schemas{&schema})
 		req.NoError(err)
 
 		req.Len(processedAsts, 1, "we somehow got more ast.Schema than we put in")

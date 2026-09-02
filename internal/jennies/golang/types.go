@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -19,7 +19,7 @@ type typeFormatter struct {
 	context    languages.Context
 }
 
-func MakeTypeFormatterHelper(config Config, context languages.Context, imports *common.DirectImportMap, packageMapper func(pkg string) string) func(def ast.Type) string {
+func MakeTypeFormatterHelper(config Config, context languages.Context, imports *common.DirectImportMap, packageMapper func(pkg string) string) func(def ir.Type) string {
 	return defaultTypeFormatter(config, context, imports, packageMapper).formatType
 }
 
@@ -42,34 +42,34 @@ func builderTypeFormatter(config Config, context languages.Context, imports *com
 	}
 }
 
-func (formatter *typeFormatter) formatType(def ast.Type) string {
+func (formatter *typeFormatter) formatType(def ir.Type) string {
 	return formatter.doFormatType(def, formatter.forBuilder)
 }
 
-func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
+func (formatter *typeFormatter) formatTypeDeclaration(def ir.Object) string {
 	var buffer strings.Builder
 
 	defName := formatObjectName(def.Name)
 
 	switch def.Type.Kind {
-	case ast.KindEnum:
+	case ir.KindEnum:
 		buffer.WriteString(formatter.formatEnumDef(def))
-	case ast.KindScalar:
+	case ir.KindScalar:
 		scalarType := def.Type.AsScalar()
 
 		// nolint: gocritic
 		if scalarType.Value != nil {
 			fmt.Fprintf(&buffer, "const %s = %s", defName, formatScalar(scalarType.Value))
-		} else if scalarType.ScalarKind == ast.KindBytes {
+		} else if scalarType.ScalarKind == ir.KindBytes {
 			fmt.Fprintf(&buffer, "type %s %s", defName, "[]byte")
 		} else {
 			fmt.Fprintf(&buffer, "type %s %s", defName, formatter.formatType(def.Type))
 		}
-	case ast.KindRef:
+	case ir.KindRef:
 		fmt.Fprintf(&buffer, "type %s = %s", defName, formatter.formatType(def.Type))
-	case ast.KindMap, ast.KindArray, ast.KindStruct, ast.KindIntersection:
+	case ir.KindMap, ir.KindArray, ir.KindStruct, ir.KindIntersection:
 		fmt.Fprintf(&buffer, "type %s %s", defName, formatter.formatType(def.Type))
-	case ast.KindConstantRef:
+	case ir.KindConstantRef:
 		fmt.Fprintf(&buffer, "const %s = %s", defName, formatScalar(def.Type.AsConstantRef().ReferenceValue))
 	default:
 		return fmt.Sprintf("unhandled type def kind: %s", def.Type.Kind)
@@ -78,7 +78,7 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatEnumDef(def ast.Object) string {
+func (formatter *typeFormatter) formatEnumDef(def ir.Object) string {
 	var buffer strings.Builder
 
 	enumName := formatObjectName(def.Name)
@@ -96,7 +96,7 @@ func (formatter *typeFormatter) formatEnumDef(def ast.Object) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool) string {
+func (formatter *typeFormatter) doFormatType(def ir.Type, resolveBuilders bool) string {
 	actualFormatter := func() string {
 		if def.IsAny() && formatter.config.AnyAsInterface {
 			return "interface{}"
@@ -127,18 +127,18 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 
 		if def.IsScalar() {
 			typeName := def.AsScalar().ScalarKind
-			if def.HasHint(ast.HintStringFormatDateTime) {
+			if def.HasHint(ir.HintStringFormatDateTime) {
 				typeName = "time.Time"
 				formatter.imports.Add("time", "time")
 			}
-			if def.HasHint(ast.HintStringFormatDuration) {
+			if def.HasHint(ir.HintStringFormatDuration) {
 				typeName = "time.Duration"
 				formatter.imports.Add("time", "time")
 			}
 			if def.Nullable {
 				typeName = "*" + typeName
 			}
-			if def.AsScalar().ScalarKind == ast.KindBytes {
+			if def.AsScalar().ScalarKind == ir.KindBytes {
 				typeName = "[]byte"
 			}
 
@@ -185,7 +185,7 @@ func (formatter *typeFormatter) variantInterface(variant string) string {
 	return referredPkg + "." + formatObjectName(variant)
 }
 
-func (formatter *typeFormatter) formatStructBody(def ast.StructType) string {
+func (formatter *typeFormatter) formatStructBody(def ir.StructType) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("struct {\n")
@@ -202,7 +202,7 @@ func (formatter *typeFormatter) formatStructBody(def ast.StructType) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatField(def ast.StructField) string {
+func (formatter *typeFormatter) formatField(def ir.StructField) string {
 	var buffer strings.Builder
 
 	comments := def.Comments
@@ -244,20 +244,20 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatArray(def ast.ArrayType, resolveBuilders bool) string {
+func (formatter *typeFormatter) formatArray(def ir.ArrayType, resolveBuilders bool) string {
 	subTypeString := formatter.doFormatType(def.ValueType, resolveBuilders)
 
 	return "[]" + subTypeString
 }
 
-func (formatter *typeFormatter) formatMap(def ast.MapType, resolveBuilders bool) string {
+func (formatter *typeFormatter) formatMap(def ir.MapType, resolveBuilders bool) string {
 	keyTypeString := formatter.doFormatType(def.IndexType, resolveBuilders)
 	valueTypeString := formatter.doFormatType(def.ValueType, resolveBuilders)
 
 	return fmt.Sprintf("map[%s]%s", keyTypeString, valueTypeString)
 }
 
-func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
+func (formatter *typeFormatter) formatRef(def ir.Type, resolveBuilders bool) string {
 	referredPkg := formatter.packageMapper(def.AsRef().ReferredPkg)
 	typeName := formatObjectName(def.AsRef().ReferredType)
 
@@ -278,7 +278,7 @@ func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) st
 	return typeName
 }
 
-func (formatter *typeFormatter) formatConstantRef(def ast.Type) string {
+func (formatter *typeFormatter) formatConstantRef(def ir.Type) string {
 	constRef := def.AsConstantRef()
 
 	obj, ok := formatter.context.LocateObject(constRef.ReferredPkg, constRef.ReferredType)
@@ -305,13 +305,13 @@ func (formatter *typeFormatter) formatConstantRef(def ast.Type) string {
 	return nullable + typeName
 }
 
-func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) string {
+func (formatter *typeFormatter) formatIntersection(def ir.IntersectionType) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("struct {\n")
 
-	refs := make([]ast.Type, 0)
-	rest := make([]ast.Type, 0)
+	refs := make([]ir.Type, 0)
+	rest := make([]ir.Type, 0)
 	for _, b := range def.Branches {
 		if b.IsRef() {
 			refs = append(refs, b)
@@ -364,8 +364,8 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	return buffer.String()
 }
 
-func makePathFormatter(typeFormatter *typeFormatter) func(path ast.Path) string {
-	return func(fieldPath ast.Path) string {
+func makePathFormatter(typeFormatter *typeFormatter) func(path ir.Path) string {
+	return func(fieldPath ir.Path) string {
 		path := ""
 
 		for i := range fieldPath {
@@ -407,8 +407,8 @@ func makePathFormatter(typeFormatter *typeFormatter) func(path ast.Path) string 
 	}
 }
 
-func formatPathForRange(typeFormatter *typeFormatter) func(path ast.Path) string {
-	return func(fieldPath ast.Path) string {
+func formatPathForRange(typeFormatter *typeFormatter) func(path ir.Path) string {
+	return func(fieldPath ir.Path) string {
 		path := ""
 
 		for i := range fieldPath {

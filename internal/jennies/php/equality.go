@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/languages"
 )
 
@@ -15,7 +15,7 @@ func newEqualityMethods() equalityMethods {
 }
 
 // generateForObject generates a PHP equals() method for struct objects.
-func (jenny equalityMethods) generateForObject(context languages.Context, object ast.Object) string {
+func (jenny equalityMethods) generateForObject(context languages.Context, object ir.Object) string {
 	if !object.Type.IsStruct() {
 		return ""
 	}
@@ -43,14 +43,14 @@ func (jenny equalityMethods) generateForObject(context languages.Context, object
 	return buffer.String()
 }
 
-func (jenny equalityMethods) compareField(context languages.Context, typeDef ast.Type, selfExpr, otherExpr string) string {
+func (jenny equalityMethods) compareField(context languages.Context, typeDef ir.Type, selfExpr, otherExpr string) string {
 	if typeDef.Nullable {
 		return jenny.compareNullableField(context, typeDef, selfExpr, otherExpr)
 	}
 	return jenny.compareNonNullField(context, typeDef, selfExpr, otherExpr)
 }
 
-func (jenny equalityMethods) compareNullableField(context languages.Context, typeDef ast.Type, selfExpr, otherExpr string) string {
+func (jenny equalityMethods) compareNullableField(context languages.Context, typeDef ir.Type, selfExpr, otherExpr string) string {
 	var buffer strings.Builder
 
 	buffer.WriteString(fmt.Sprintf("    if ((%s === null) !== (%s === null)) {\n", selfExpr, otherExpr))
@@ -67,7 +67,7 @@ func (jenny equalityMethods) compareNullableField(context languages.Context, typ
 	return buffer.String()
 }
 
-func (jenny equalityMethods) compareNonNullField(context languages.Context, typeDef ast.Type, selfExpr, otherExpr string) string {
+func (jenny equalityMethods) compareNonNullField(context languages.Context, typeDef ir.Type, selfExpr, otherExpr string) string {
 	if context.ResolveToStruct(typeDef) {
 		return fmt.Sprintf("    if (!%s->equals(%s)) {\n        return false;\n    }\n", selfExpr, otherExpr)
 	}

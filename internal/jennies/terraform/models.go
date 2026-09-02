@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/languages"
 )
 
@@ -30,50 +30,50 @@ func modelFormatterWithRefs(context languages.Context, packageMapper func(pkg st
 	}
 }
 
-func (formatter *modelFormatter) formatDeclaration(object ast.Object) string {
+func (formatter *modelFormatter) formatDeclaration(object ir.Object) string {
 	objectName := formatModelName(object.SelfRef)
 
 	switch object.Type.Kind {
-	case ast.KindScalar:
+	case ir.KindScalar:
 		if object.Type.AsScalar().Value != nil {
 			return fmt.Sprintf("const %s = %s", objectName, formatScalar(object.Type.AsScalar().Value))
 		}
 		return fmt.Sprintf("type %s = %s", objectName, formatScalarAsModel(object.Type.AsScalar()))
-	case ast.KindRef, ast.KindMap, ast.KindArray:
+	case ir.KindRef, ir.KindMap, ir.KindArray:
 		return fmt.Sprintf("type %s = %s", objectName, formatter.formatModel(object.Type))
 	default:
 		return fmt.Sprintf("type %s %s", objectName, formatter.formatModel(object.Type))
 	}
 }
 
-func (formatter *modelFormatter) formatModel(def ast.Type) string {
+func (formatter *modelFormatter) formatModel(def ir.Type) string {
 	switch def.Kind {
-	case ast.KindScalar:
-		if def.HasHint(ast.HintStringFormatDateTime) {
+	case ir.KindScalar:
+		if def.HasHint(ir.HintStringFormatDateTime) {
 			formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
 			return "timetypes.RFC3339"
 		}
-		if def.HasHint(ast.HintStringFormatDuration) {
+		if def.HasHint(ir.HintStringFormatDuration) {
 			formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
 			return "timetypes.GoDurationType"
 		}
 		return formatScalarAsModel(def.AsScalar())
-	case ast.KindMap:
+	case ir.KindMap:
 		return "types.Map"
-	case ast.KindArray:
+	case ir.KindArray:
 		return "types.List"
-	case ast.KindRef:
+	case ir.KindRef:
 		return formatter.formatReference(def)
-	case ast.KindEnum:
+	case ir.KindEnum:
 		return formatter.formatModel(def.AsEnum().Values[0].Type)
-	case ast.KindStruct:
+	case ir.KindStruct:
 		return formatter.formatStruct(def.AsStruct())
 	default:
 		return "unknown"
 	}
 }
 
-func (formatter *modelFormatter) formatStruct(s ast.StructType) string {
+func (formatter *modelFormatter) formatStruct(s ir.StructType) string {
 	var buffer strings.Builder
 	buffer.WriteString("struct {\n")
 	for _, field := range s.Fields {
@@ -92,7 +92,7 @@ func (formatter *modelFormatter) formatStruct(s ast.StructType) string {
 	return buffer.String()
 }
 
-func (formatter *modelFormatter) formatReference(typeDef ast.Type) string {
+func (formatter *modelFormatter) formatReference(typeDef ir.Type) string {
 	resolved := formatter.context.ResolveRefs(typeDef)
 	if resolved.IsRef() {
 		return fmt.Sprintf("could not resolve ref '%s'", typeDef.Ref.String())

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -58,10 +58,10 @@ func (jenny RawTypes) getTemplate() *template.Template {
 	})
 }
 
-func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, error) {
+func (jenny RawTypes) genFilesForSchema(schema *ir.Schema) (codejen.Files, error) {
 	var err error
 	files := make(codejen.Files, 0)
-	scalars := make(map[string]ast.ScalarType)
+	scalars := make(map[string]ir.ScalarType)
 
 	packageMapper := func(pkg string, class string) string {
 		if jenny.imports.IsIdentical(pkg, schema.Package) {
@@ -73,7 +73,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 
 	jenny.typeFormatter = jenny.typeFormatter.withPackageMapper(packageMapper)
 
-	schema.Objects.Iterate(func(_ string, object ast.Object) {
+	schema.Objects.Iterate(func(_ string, object ir.Object) {
 		jenny.imports = NewImportMap(jenny.config.PackagePath)
 		if object.Type.IsScalar() {
 			if object.Type.AsScalar().IsConcrete() {
@@ -111,27 +111,27 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 	return files, nil
 }
 
-func (jenny RawTypes) generateSchema(pkg string, schema *ast.Schema, object ast.Object) ([]byte, error) {
+func (jenny RawTypes) generateSchema(pkg string, schema *ir.Schema, object ir.Object) ([]byte, error) {
 	functionsBlock, err := jenny.extraFunctionsBlock(schema, object)
 	if err != nil {
 		return nil, err
 	}
 
 	switch object.Type.Kind {
-	case ast.KindStruct:
+	case ir.KindStruct:
 		return jenny.formatStruct(pkg, schema.Metadata.Identifier, object, functionsBlock)
-	case ast.KindEnum:
+	case ir.KindEnum:
 		return formatEnum(jenny.config.formatPackage(pkg), object, jenny.getTemplate())
-	case ast.KindRef:
+	case ir.KindRef:
 		return jenny.formatReference(pkg, schema.Metadata.Identifier, object, functionsBlock)
-	case ast.KindIntersection:
+	case ir.KindIntersection:
 		return jenny.formatIntersection(pkg, schema.Metadata.Identifier, object, functionsBlock)
 	}
 
 	return nil, nil
 }
 
-func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Object, functionsBlock string) ([]byte, error) {
+func (jenny RawTypes) formatStruct(pkg string, identifier string, object ir.Object, functionsBlock string) ([]byte, error) {
 	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
 		Package:                 jenny.config.formatPackage(pkg),
 		RawPackage:              pkg,
@@ -152,7 +152,7 @@ func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Obj
 	})
 }
 
-func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarType) ([]byte, error) {
+func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ir.ScalarType) ([]byte, error) {
 	constants := make([]Constant, 0)
 	for name, scalar := range scalars {
 		constants = append(constants, Constant{
@@ -174,7 +174,7 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 	})
 }
 
-func (jenny RawTypes) formatReference(pkg string, identifier string, object ast.Object, extraFunctionsBlock string) ([]byte, error) {
+func (jenny RawTypes) formatReference(pkg string, identifier string, object ir.Object, extraFunctionsBlock string) ([]byte, error) {
 	ref := object.Type.AsRef()
 	reference := fmt.Sprintf("%s.%s", jenny.config.formatPackage(formatPackageName(ref.ReferredPkg)), formatObjectName(ref.ReferredType))
 
@@ -190,10 +190,10 @@ func (jenny RawTypes) formatReference(pkg string, identifier string, object ast.
 	})
 }
 
-func (jenny RawTypes) formatIntersection(pkg string, identifier string, object ast.Object, extraFunctionsBlock string) ([]byte, error) {
+func (jenny RawTypes) formatIntersection(pkg string, identifier string, object ir.Object, extraFunctionsBlock string) ([]byte, error) {
 	intersection := object.Type.AsIntersection()
 	extensions := make([]string, 0)
-	fields := make([]ast.StructField, 0)
+	fields := make([]ir.StructField, 0)
 
 	// Collect field names from extended classes to avoid duplicates
 	extendedFieldNames := make(map[string]bool)
@@ -211,9 +211,9 @@ func (jenny RawTypes) formatIntersection(pkg string, identifier string, object a
 
 	for _, branch := range intersection.Branches {
 		switch branch.Kind {
-		case ast.KindRef:
+		case ir.KindRef:
 			extensions = append(extensions, jenny.typeFormatter.formatReference(branch.AsRef()))
-		case ast.KindStruct:
+		case ir.KindStruct:
 			for _, field := range branch.AsStruct().Fields {
 				// Skip fields that are already defined in extended classes
 				if extendedFieldNames[field.Name] {
@@ -237,7 +237,7 @@ func (jenny RawTypes) formatIntersection(pkg string, identifier string, object a
 	})
 }
 
-func (jenny RawTypes) getVariant(t ast.Type) string {
+func (jenny RawTypes) getVariant(t ir.Type) string {
 	variant := ""
 	if t.ImplementsVariant() {
 		variant = fmt.Sprintf("cog.variants.%s", tools.UpperCamelCase(t.ImplementedVariant()))
@@ -246,14 +246,14 @@ func (jenny RawTypes) getVariant(t ast.Type) string {
 	return variant
 }
 
-func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
+func (jenny RawTypes) constructors(object ir.Object) []ConstructorTemplate {
 	if object.Type.IsDisjunctionOfAnyKind() {
 		return nil
 	}
 
 	fields := object.Type.AsStruct().Fields
 
-	args := make([]ast.Argument, 0)
+	args := make([]ir.Argument, 0)
 	assignments := make([]ConstructorAssignmentTemplate, 0)
 	defaultConstructorAssignments := make([]ConstructorAssignmentTemplate, 0)
 	for _, field := range fields {
@@ -269,7 +269,7 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 			continue
 		}
 
-		args = append(args, ast.Argument{
+		args = append(args, ir.Argument{
 			Name: name,
 			Type: field.Type,
 		})
@@ -298,7 +298,7 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 	constructors := []ConstructorTemplate{
 		// Default constructor
 		{
-			Args:        []ast.Argument{},
+			Args:        []ir.Argument{},
 			Assignments: defaultConstructorAssignments,
 		},
 	}
@@ -313,9 +313,9 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 	return constructors
 }
 
-func (jenny RawTypes) genDefaultForType(t ast.Type, value any) string {
+func (jenny RawTypes) genDefaultForType(t ir.Type, value any) string {
 	switch t.Kind {
-	case ast.KindScalar:
+	case ir.KindScalar:
 		if mapVal, ok := value.(map[string]any); ok && len(mapVal) == 0 {
 			jenny.typeFormatter.packageMapper("java.util", "Map")
 			return "Map.of()"
@@ -325,9 +325,9 @@ func (jenny RawTypes) genDefaultForType(t ast.Type, value any) string {
 			return "List.of()"
 		}
 		return formatType(t.AsScalar().ScalarKind, value)
-	case ast.KindRef:
+	case ir.KindRef:
 		return jenny.formatReferenceDefaults(t, value)
-	case ast.KindArray:
+	case ir.KindArray:
 		if sliceVal, ok := value.([]any); ok && len(sliceVal) == 0 {
 			jenny.typeFormatter.packageMapper("java.util", "List")
 			return "List.of()"
@@ -337,7 +337,7 @@ func (jenny RawTypes) genDefaultForType(t ast.Type, value any) string {
 			return "List.of()"
 		}
 		return fmt.Sprintf("List.of(%s)", jenny.genDefaultForType(t.AsArray().ValueType, value))
-	case ast.KindMap:
+	case ir.KindMap:
 		if mapVal, ok := value.(map[string]any); ok && len(mapVal) == 0 {
 			jenny.typeFormatter.packageMapper("java.util", "Map")
 			return "Map.of()"
@@ -349,7 +349,7 @@ func (jenny RawTypes) genDefaultForType(t ast.Type, value any) string {
 	return ""
 }
 
-func (jenny RawTypes) formatReferenceDefaults(ref ast.Type, value any) string {
+func (jenny RawTypes) formatReferenceDefaults(ref ir.Type, value any) string {
 	// Enums
 	if _, ok := value.(map[string]any); !ok {
 		jenny.typeFormatter.packageMapper(ref.AsRef().ReferredPkg, ref.AsRef().ReferredType)
@@ -382,7 +382,7 @@ func (jenny RawTypes) formatReferenceDefaults(ref ast.Type, value any) string {
 	return fmt.Sprintf("new %s(%s)", class, strings.Join(args, ", "))
 }
 
-func (jenny RawTypes) extraFunctionsBlock(schema *ast.Schema, object ast.Object) (string, error) {
+func (jenny RawTypes) extraFunctionsBlock(schema *ir.Schema, object ir.Object) (string, error) {
 	buffer := strings.Builder{}
 
 	if jenny.config.GenerateEqual {

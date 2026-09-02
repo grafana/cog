@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -42,7 +42,7 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 	return files, nil
 }
 
-func (jenny *Converter) generateConverter(context languages.Context, builder ast.Builder) ([]byte, error) {
+func (jenny *Converter) generateConverter(context languages.Context, builder ir.Builder) ([]byte, error) {
 	converter := languages.NewConverterGenerator(jenny.NullableConfig, context.ConverterConfig).FromBuilder(context, builder)
 
 	imports := NewImportMap(jenny.Config.PackageRoot)
@@ -61,7 +61,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 	}
 
 	formatRawRef := func(pkg string, ref string) string {
-		return formatter.formatRef(ast.NewRef(pkg, ref), false)
+		return formatter.formatRef(ir.NewRef(pkg, ref), false)
 	}
 
 	jenny.apiRefCollector.RegisterFunction(builder.Package, common.FunctionReference{

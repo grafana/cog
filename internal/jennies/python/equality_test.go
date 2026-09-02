@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/logs"
@@ -12,21 +12,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func equalitySchema() *ast.Schema {
-	return &ast.Schema{
+func equalitySchema() *ir.Schema {
+	return &ir.Schema{
 		Package: "equality",
 		Objects: testutils.ObjectsMap(
-			ast.NewObject("equality", "Variable", ast.NewStruct(
-				ast.NewStructField("name", ast.NewScalar(ast.KindString), ast.Required()),
+			ir.NewObject("equality", "Variable", ir.NewStruct(
+				ir.NewStructField("name", ir.NewScalar(ir.KindString), ir.Required()),
 			)),
-			ast.NewObject("equality", "Container", ast.NewStruct(
-				ast.NewStructField("stringField", ast.NewScalar(ast.KindString), ast.Required()),
-				ast.NewStructField("intField", ast.NewScalar(ast.KindInt64), ast.Required()),
-				ast.NewStructField("refField", ast.NewRef("equality", "Variable"), ast.Required()),
+			ir.NewObject("equality", "Container", ir.NewStruct(
+				ir.NewStructField("stringField", ir.NewScalar(ir.KindString), ir.Required()),
+				ir.NewStructField("intField", ir.NewScalar(ir.KindInt64), ir.Required()),
+				ir.NewStructField("refField", ir.NewRef("equality", "Variable"), ir.Required()),
 			)),
-			ast.NewObject("equality", "Optionals", ast.NewStruct(
-				ast.NewStructField("stringField", ast.NewScalar(ast.KindString)),
-				ast.NewStructField("refField", ast.NewRef("equality", "Variable")),
+			ir.NewObject("equality", "Optionals", ir.NewStruct(
+				ir.NewStructField("stringField", ir.NewScalar(ir.KindString)),
+				ir.NewStructField("refField", ir.NewRef("equality", "Variable")),
 			)),
 		),
 	}
@@ -45,7 +45,7 @@ func TestEquality_Python_GeneratesEqMethods(t *testing.T) {
 	schema := equalitySchema()
 
 	// Run Python compiler passes so nullable types are handled correctly
-	processedSchemas, err := New(config).CompilerPasses().Process(logs.NoopLogger(), ast.Schemas{schema})
+	processedSchemas, err := New(config).CompilerPasses().Process(logs.NoopLogger(), ir.Schemas{schema})
 	req.NoError(err)
 
 	context := languages.Context{Schemas: processedSchemas}
@@ -83,14 +83,14 @@ func TestEquality_Python_SkipsNonStructTypes(t *testing.T) {
 	}
 
 	// A scalar constant (non-struct type) should not generate __eq__
-	schema := &ast.Schema{
+	schema := &ir.Schema{
 		Package: "test",
 		Objects: testutils.ObjectsMap(
-			ast.NewObject("test", "MyConstant", ast.NewScalar(ast.KindString, ast.Value("hello"))),
+			ir.NewObject("test", "MyConstant", ir.NewScalar(ir.KindString, ir.Value("hello"))),
 		),
 	}
 
-	context := languages.Context{Schemas: ast.Schemas{schema}}
+	context := languages.Context{Schemas: ir.Schemas{schema}}
 	files, err := jenny.Generate(context)
 	req.NoError(err)
 	req.Len(files, 1)
@@ -110,7 +110,7 @@ func TestEquality_Python_DisabledByDefault(t *testing.T) {
 	}
 
 	schema := equalitySchema()
-	context := languages.Context{Schemas: ast.Schemas{schema}}
+	context := languages.Context{Schemas: ir.Schemas{schema}}
 
 	files, err := jenny.Generate(context)
 	req.NoError(err)

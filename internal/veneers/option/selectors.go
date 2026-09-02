@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type Selector struct {
 	description string
-	matcher     func(builder ast.Builder, option ast.Option) bool
+	matcher     func(builder ir.Builder, option ir.Option) bool
 }
 
-func (selector Selector) Matches(builder ast.Builder, option ast.Option) bool {
+func (selector Selector) Matches(builder ir.Builder, option ir.Option) bool {
 	return selector.matcher(builder, option)
 }
 
@@ -25,7 +25,7 @@ func (selector Selector) String() string {
 func EveryOption() *Selector {
 	return &Selector{
 		description: "every_option",
-		matcher: func(_ ast.Builder, _ ast.Option) bool {
+		matcher: func(_ ir.Builder, _ ir.Option) bool {
 			return true
 		},
 	}
@@ -37,7 +37,7 @@ func EveryOption() *Selector {
 func ByName(pkg string, objectName string, optionNames ...string) *Selector {
 	return &Selector{
 		description: fmt.Sprintf("by_name[builder.for.pkg='%s', option.name=(%s)]", objectName, strings.Join(optionNames, ", ")),
-		matcher: func(builder ast.Builder, option ast.Option) bool {
+		matcher: func(builder ir.Builder, option ir.Option) bool {
 			return (builder.For.SelfRef.ReferredPkg == pkg || pkg == "*") &&
 				strings.EqualFold(builder.For.Name, objectName) &&
 				tools.StringInListEqualFold(option.Name, optionNames)
@@ -50,7 +50,7 @@ func ByName(pkg string, objectName string, optionNames ...string) *Selector {
 func ByBuilder(pkg string, builderName string, optionNames ...string) *Selector {
 	return &Selector{
 		description: fmt.Sprintf("by_builder[builder.pkg='%s', builder.name='%s', option.name=(%s)]", pkg, builderName, strings.Join(optionNames, ", ")),
-		matcher: func(builder ast.Builder, option ast.Option) bool {
+		matcher: func(builder ir.Builder, option ir.Option) bool {
 			return (builder.Package == pkg || pkg == "*") &&
 				strings.EqualFold(builder.Name, builderName) &&
 				tools.StringInListEqualFold(option.Name, optionNames)

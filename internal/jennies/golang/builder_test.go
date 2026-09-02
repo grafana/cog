@@ -3,7 +3,7 @@ package golang
 import (
 	"testing"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
@@ -64,40 +64,40 @@ func TestBuilder_emptyValueForGuard(t *testing.T) {
 	testCases := []struct {
 		desc     string
 		context  languages.Context
-		input    ast.Type
+		input    ir.Type
 		expected string
 	}{
 		{
 			desc:     "map",
 			context:  languages.Context{},
-			input:    ast.NewMap(ast.String(), ast.String()),
+			input:    ir.NewMap(ir.String(), ir.String()),
 			expected: "map[string]string{}",
 		},
 		{
 			desc:     "array",
 			context:  languages.Context{},
-			input:    ast.NewArray(ast.String()),
+			input:    ir.NewArray(ir.String()),
 			expected: "[]string{}",
 		},
 		{
 			desc: "ref",
 			context: languages.Context{
-				Schemas: []*ast.Schema{
+				Schemas: []*ir.Schema{
 					{
 						Package: "somePkg",
-						Objects: orderedmap.FromMap(map[string]ast.Object{
-							"SomeType": ast.NewObject("somePkg", "SomeType", ast.NewStruct( /* the fields don't actually matter here */ )),
+						Objects: orderedmap.FromMap(map[string]ir.Object{
+							"SomeType": ir.NewObject("somePkg", "SomeType", ir.NewStruct( /* the fields don't actually matter here */ )),
 						}),
 					},
 				},
 			},
-			input:    ast.NewRef("somePkg", "SomeType"),
+			input:    ir.NewRef("somePkg", "SomeType"),
 			expected: "somePkg.NewSomeType()",
 		},
 		{
 			desc:    "struct",
 			context: languages.Context{},
-			input:   ast.NewStruct(ast.NewStructField("field", ast.String())),
+			input:   ir.NewStruct(ir.NewStructField("field", ir.String())),
 			expected: `&struct {
     Field string ` + "`" + `json:"field,omitempty"` + "`" + `
 }{}`,

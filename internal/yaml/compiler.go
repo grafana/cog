@@ -5,22 +5,22 @@ import (
 	"os"
 
 	"github.com/goccy/go-yaml"
-	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/ir/transforms"
 )
 
-type Compiler struct {
-	Passes []CompilerPass `yaml:"passes"`
+type Transforms struct {
+	Passes []Transform `yaml:"passes"`
 }
 
-type CompilerLoader struct {
+type TransformsLoader struct {
 }
 
-func NewCompilerLoader() *CompilerLoader {
-	return &CompilerLoader{}
+func NewTransformsLoader() *TransformsLoader {
+	return &TransformsLoader{}
 }
 
-func (loader *CompilerLoader) PassesFrom(filenames []string) (compiler.Passes, error) {
-	allPasses := make(compiler.Passes, 0, len(filenames))
+func (loader *TransformsLoader) LoadFiles(filenames []string) (transforms.Transforms, error) {
+	allPasses := make(transforms.Transforms, 0, len(filenames))
 
 	for _, filename := range filenames {
 		passes, err := loader.load(filename)
@@ -34,22 +34,22 @@ func (loader *CompilerLoader) PassesFrom(filenames []string) (compiler.Passes, e
 	return allPasses, nil
 }
 
-func (loader *CompilerLoader) load(file string) (compiler.Passes, error) {
+func (loader *TransformsLoader) load(file string) (transforms.Transforms, error) {
 	contents, err := os.ReadFile(file)
 	if err != nil {
 		return nil, err
 	}
 
-	compilerConfig := &Compiler{}
+	compilerConfig := &Transforms{}
 	if err := yaml.UnmarshalWithOptions(contents, compilerConfig, yaml.DisallowUnknownField()); err != nil {
 		return nil, fmt.Errorf("can not load compiler passes: %s\n%s", file, yaml.FormatError(err, true, true))
 	}
 
-	passes := make(compiler.Passes, 0, len(compilerConfig.Passes))
+	passes := make(transforms.Transforms, 0, len(compilerConfig.Passes))
 
 	// convert compiler passes
 	for i, passConfig := range compilerConfig.Passes {
-		pass, err := passConfig.AsCompilerPass()
+		pass, err := passConfig.AsTransform()
 		if err != nil {
 			path, innerErr := yaml.PathString(fmt.Sprintf("$.passes[%d]", i))
 			if innerErr != nil {

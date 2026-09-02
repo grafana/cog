@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -22,8 +22,8 @@ func (apiRef *APIRef) apiReferenceFormatter() common.APIReferenceFormatter {
 	}
 
 	return common.APIReferenceFormatter{
-		KindName: func(kind ast.Kind) string {
-			if kind == ast.KindStruct {
+		KindName: func(kind ir.Kind) string {
+			if kind == ir.KindStruct {
 				return "class"
 			}
 
@@ -41,10 +41,10 @@ func (apiRef *APIRef) apiReferenceFormatter() common.APIReferenceFormatter {
 			return fmt.Sprintf("public %[1]s(%[2]s)", tools.LowerCamelCase(function.Name), strings.Join(args, ", "))
 		},
 
-		ObjectName: func(object ast.Object) string {
+		ObjectName: func(object ir.Object) string {
 			return formatObjectName(object.Name)
 		},
-		ObjectDefinition: func(context languages.Context, object ast.Object) string {
+		ObjectDefinition: func(context languages.Context, object ir.Object) string {
 			typesFormatter := createFormatter(context, apiRef.config).withPackageMapper(pkgMapper)
 			return apiRef.definition(typesFormatter, object)
 		},
@@ -60,26 +60,26 @@ func (apiRef *APIRef) apiReferenceFormatter() common.APIReferenceFormatter {
 			return fmt.Sprintf("public %[1]s %[2]s(%[3]s)", method.Return, tools.LowerCamelCase(method.Name), strings.Join(args, ", "))
 		},
 
-		BuilderName: func(builder ast.Builder) string {
+		BuilderName: func(builder ir.Builder) string {
 			return formatObjectName(builder.Name) + "Builder"
 		},
-		ConstructorSignature: func(context languages.Context, builder ast.Builder) string {
+		ConstructorSignature: func(context languages.Context, builder ir.Builder) string {
 			typesFormatter := createFormatter(context, apiRef.config).withPackageMapper(func(pkg string, class string) string {
 				return pkg
 			})
-			args := tools.Map(builder.Constructor.Args, func(arg ast.Argument) string {
+			args := tools.Map(builder.Constructor.Args, func(arg ir.Argument) string {
 				argType := typesFormatter.formatFieldType(arg.Type)
 				return argType + " " + formatArgName(arg.Name)
 			})
 
 			return fmt.Sprintf("new %[1]s(%[2]s)", formatObjectName(builder.Name)+"Builder", strings.Join(args, ", "))
 		},
-		OptionName: func(option ast.Option) string {
+		OptionName: func(option ir.Option) string {
 			return tools.LowerCamelCase(option.Name)
 		},
-		OptionSignature: func(context languages.Context, builder ast.Builder, option ast.Option) string {
+		OptionSignature: func(context languages.Context, builder ir.Builder, option ir.Option) string {
 			typesFormatter := createFormatter(context, apiRef.config).withPackageMapper(pkgMapper)
-			args := tools.Map(option.Args, func(arg ast.Argument) string {
+			args := tools.Map(option.Args, func(arg ir.Argument) string {
 				argType := typesFormatter.formatBuilderFieldType(arg.Type)
 				if argType != "" {
 					argType += " "
@@ -93,15 +93,15 @@ func (apiRef *APIRef) apiReferenceFormatter() common.APIReferenceFormatter {
 	}
 }
 
-func (apiRef *APIRef) definition(typesFormatter *typeFormatter, def ast.Object) string {
+func (apiRef *APIRef) definition(typesFormatter *typeFormatter, def ir.Object) string {
 	switch def.Type.Kind {
-	case ast.KindStruct:
+	case ir.KindStruct:
 		return apiRef.defineStruct(typesFormatter, def)
-	case ast.KindScalar:
+	case ir.KindScalar:
 		return fmt.Sprintf("public static final %s %s = %v", formatScalarType(def.Type.AsScalar()), def.Name, def.Type.AsScalar().Value)
-	case ast.KindRef:
+	case ir.KindRef:
 		return fmt.Sprintf("public class %s extends %s {}", def.Name, apiRef.config.formatPackage(def.Type.AsRef().String()))
-	case ast.KindEnum:
+	case ir.KindEnum:
 		b, err := formatEnum(apiRef.config.formatPackage(def.SelfRef.String()), def, apiRef.tmpl)
 		if err != nil {
 			return ""
@@ -115,12 +115,12 @@ func (apiRef *APIRef) definition(typesFormatter *typeFormatter, def ast.Object) 
 	return ""
 }
 
-func (apiRef *APIRef) defineStruct(typesFormatter *typeFormatter, def ast.Object) string {
+func (apiRef *APIRef) defineStruct(typesFormatter *typeFormatter, def ir.Object) string {
 	buffer := strings.Builder{}
 
 	buffer.WriteString(fmt.Sprintf("public class %s ", tools.UpperCamelCase(def.Name)))
-	if def.Type.HasHint(ast.HintImplementsVariant) {
-		if def.Type.Hints[ast.HintImplementsVariant] == string(ast.SchemaVariantDataQuery) {
+	if def.Type.HasHint(ir.HintImplementsVariant) {
+		if def.Type.Hints[ir.HintImplementsVariant] == string(ir.SchemaVariantDataQuery) {
 			buffer.WriteString(fmt.Sprintf("extends %s ", apiRef.config.formatPackage("cog.variants.Dataquery")))
 		}
 	}

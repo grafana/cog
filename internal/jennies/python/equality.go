@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 )
 
 type equalityMethods struct{}
@@ -16,7 +16,7 @@ func newEqualityMethods() equalityMethods {
 // generateForObject generates a Python __eq__ method for struct objects.
 // Python's native != operator handles None, lists, dicts, and custom objects
 // with __eq__ defined, so a simple field-by-field != comparison is sufficient.
-func (jenny equalityMethods) generateForObject(object ast.Object) string {
+func (jenny equalityMethods) generateForObject(object ir.Object) string {
 	if !object.Type.IsStruct() {
 		return ""
 	}
