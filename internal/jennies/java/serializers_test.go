@@ -3,8 +3,8 @@ package java
 import (
 	"testing"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/testutils"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/logs"
@@ -21,7 +21,7 @@ func TestSerializers_Generate(t *testing.T) {
 
 	jenny := Serializers{
 		config: cfg,
-		tmpl:   initTemplates(cfg, common.NewAPIReferenceCollector()),
+		tmpl:   initTemplates(cfg, apiref.NewAPIReferenceCollector()),
 	}
 	transforms := New(logs.NoopLogger(), cfg).Transform
 

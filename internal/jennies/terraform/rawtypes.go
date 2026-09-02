@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/pkg/ir"
@@ -33,8 +32,8 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	jenny.tmpl = jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
-		Funcs(common.TypesTemplateHelpers(context))
+		Funcs(template.TypeResolvingHelpers(context)).
+		Funcs(template.TypesHelpers(context))
 
 	for _, schema := range context.Schemas {
 		output, err := jenny.generateSchema(context, schema)

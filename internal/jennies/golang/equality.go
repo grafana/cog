@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -12,10 +13,10 @@ import (
 
 type equalityMethods struct {
 	tmpl            *template.Template
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 }
 
-func newEqualityMethods(tmpl *template.Template, apiRefCollector *common.APIReferenceCollector) equalityMethods {
+func newEqualityMethods(tmpl *template.Template, apiRefCollector *apiref.APIReferenceCollector) equalityMethods {
 	return equalityMethods{
 		tmpl:            tmpl,
 		apiRefCollector: apiRefCollector,
@@ -27,9 +28,9 @@ func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context 
 		return nil
 	}
 
-	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(object, apiref.MethodReference{
 		Name: "Equals",
-		Arguments: []common.ArgumentReference{
+		Arguments: []apiref.ArgumentReference{
 			{Name: "other", Type: formatObjectName(object.Name)},
 		},
 		Comments: []string{
@@ -39,7 +40,7 @@ func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context 
 	})
 
 	tmpl := jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(template.TypeResolvingHelpers(context)).
 		Funcs(template.FuncMap{
 			"typeHasEqualityFunc": func(typeDef ir.Type) bool {
 				if !typeDef.IsRef() {

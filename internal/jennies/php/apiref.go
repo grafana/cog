@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
 )
 
-func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIReferenceFormatter {
-	return common.APIReferenceFormatter{
+func apiReferenceFormatter(tmpl *template.Template, config Config) apiref.APIReferenceFormatter {
+	return apiref.APIReferenceFormatter{
 		KindName: func(kind ir.Kind) string {
 			if kind == ir.KindStruct {
 				return "class"
@@ -21,11 +21,11 @@ func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIRef
 			return string(kind)
 		},
 
-		FunctionName: func(function common.FunctionReference) string {
+		FunctionName: func(function apiref.FunctionReference) string {
 			return formatOptionName(function.Name)
 		},
-		FunctionSignature: func(context languages.Context, function common.FunctionReference) string {
-			args := tools.Map(function.Arguments, func(arg common.ArgumentReference) string {
+		FunctionSignature: func(context languages.Context, function apiref.FunctionReference) string {
+			args := tools.Map(function.Arguments, func(arg apiref.ArgumentReference) string {
 				return fmt.Sprintf("%s $%s", arg.Type, arg.Name)
 			})
 
@@ -40,11 +40,11 @@ func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIRef
 			return typesFormatter.formatTypeDeclaration(tmpl, context, object)
 		},
 
-		MethodName: func(method common.MethodReference) string {
+		MethodName: func(method apiref.MethodReference) string {
 			return formatOptionName(method.Name)
 		},
-		MethodSignature: func(context languages.Context, method common.MethodReference) string {
-			args := tools.Map(method.Arguments, func(arg common.ArgumentReference) string {
+		MethodSignature: func(context languages.Context, method apiref.MethodReference) string {
+			args := tools.Map(method.Arguments, func(arg apiref.ArgumentReference) string {
 				return fmt.Sprintf("%s $%s", arg.Type, arg.Name)
 			})
 

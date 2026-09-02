@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -18,7 +18,7 @@ import (
 type RawTypes struct {
 	config          Config
 	tmpl            *template.Template
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 
 	typeFormatter *typeFormatter
 	shaper        *shape
@@ -38,7 +38,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 			config:  jenny.config,
 			context: context,
 		})).
-		Funcs(common.TypesTemplateHelpers(context))
+		Funcs(template.TypesHelpers(context))
 
 	// generate typehints with a compiler pass
 	context.Schemas, err = (&AddTypehintsComments{config: jenny.config}).Process(context.Schemas)
@@ -410,13 +410,13 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ir.Object)
 	buffer.WriteString("    );\n")
 	buffer.WriteString("}")
 
-	jenny.apiRefCollector.ObjectMethod(def, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(def, apiref.MethodReference{
 		Name: "fromArray",
 		Comments: []string{
 			"Builds this object from an array.",
 			"This function is meant to be used with the return value of `json_decode($json, true)`.",
 		},
-		Arguments: []common.ArgumentReference{{
+		Arguments: []apiref.ArgumentReference{{
 			Name: "inputData",
 			Type: "array",
 		}},
@@ -670,7 +670,7 @@ func (jenny RawTypes) generateJSONSerialize(def ir.Object) string {
 
 	buffer.WriteString("}")
 
-	jenny.apiRefCollector.ObjectMethod(def, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(def, apiref.MethodReference{
 		Name: "jsonSerialize",
 		Comments: []string{
 			"Returns the data representing this object, preparing it for JSON serialization with `json_encode()`.",

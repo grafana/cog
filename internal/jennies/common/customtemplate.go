@@ -63,12 +63,12 @@ func (jenny CustomTemplates) generateForTemplatesDirectory(context languages.Con
 
 		tmpl, err := template.New(
 			path,
-			template.Funcs(TypeResolvingTemplateHelpers(context)),
+			template.Funcs(template.TypeResolvingHelpers(context)),
 			template.Funcs(template.FuncMap{
 				"registryToSemver": jenny.registryToSemver,
 			}),
 			template.Funcs(jenny.TmplFuncs),
-			template.Funcs(TypesTemplateHelpers(context)),
+			template.Funcs(template.TypesHelpers(context)),
 			template.Parse(string(templateContent)),
 		)
 		if err != nil {
