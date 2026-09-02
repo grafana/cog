@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/builders"
 	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -42,7 +43,7 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 }
 
 func (jenny *Converter) generateConverter(context languages.Context, builder ir.Builder) ([]byte, error) {
-	converter := languages.NewConverterGenerator(jenny.nullableConfig, context.ConverterConfig).FromBuilder(context, builder)
+	converter := builders.NewConverterGenerator(jenny.nullableConfig, context.ConverterConfig).FromBuilder(context, builder)
 	schema, schemaFound := context.Schemas.Get(builder.Package)
 
 	inputIsDataquery := schemaFound && schema.Metadata.Variant == ir.SchemaVariantDataQuery && schema.EntryPoint == builder.For.Name

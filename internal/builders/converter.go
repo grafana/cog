@@ -1,4 +1,4 @@
-package languages
+package builders
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ir"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -136,19 +137,8 @@ func (converter Converter) inputRootPath() ir.Path {
 	}
 }
 
-type ConverterConfig struct {
-	RuntimeConfig []RuntimeConfig
-}
-
-type RuntimeConfig struct {
-	Package            string
-	Name               string
-	NameFunc           string `yaml:"name_func"`
-	DiscriminatorField string `yaml:"discriminator_field"`
-}
-
 type ConverterGenerator struct {
-	nullableTypes NullableConfig
+	nullableTypes languages.NullableConfig
 
 	// generatedPaths lets us keep track of the paths in the input that we generated option mappings for.
 	// Since several options can represent with a single path, it allows us to not have "duplicates".
@@ -156,10 +146,10 @@ type ConverterGenerator struct {
 
 	listOfDisjunctionOptions map[string][]ir.Option
 
-	config ConverterConfig
+	config languages.ConverterConfig
 }
 
-func NewConverterGenerator(nullableTypes NullableConfig, config ConverterConfig) *ConverterGenerator {
+func NewConverterGenerator(nullableTypes languages.NullableConfig, config languages.ConverterConfig) *ConverterGenerator {
 	return &ConverterGenerator{
 		nullableTypes:            nullableTypes,
 		generatedPaths:           make(map[string]struct{}),
@@ -168,7 +158,7 @@ func NewConverterGenerator(nullableTypes NullableConfig, config ConverterConfig)
 	}
 }
 
-func (generator *ConverterGenerator) FromBuilder(context Context, builder ir.Builder) Converter {
+func (generator *ConverterGenerator) FromBuilder(context languages.Context, builder ir.Builder) Converter {
 	converter := Converter{
 		Package:     builder.Package,
 		BuilderName: builder.Name,
@@ -216,7 +206,7 @@ func (generator *ConverterGenerator) constructorArgs(converter Converter, builde
 	})
 }
 
-func (generator *ConverterGenerator) convertListOfDisjunctionOptions(context Context, converter Converter, options []ir.Option) ConversionMapping {
+func (generator *ConverterGenerator) convertListOfDisjunctionOptions(context languages.Context, converter Converter, options []ir.Option) ConversionMapping {
 	mapping := generator.setupMappings(converter, options[0].Assignments)
 	mapping.Options = tools.Map(options, func(option ir.Option) OptionMapping {
 		return generator.mappingForOption(context, converter, mapping, option)
@@ -229,7 +219,7 @@ func (generator *ConverterGenerator) convertListOfDisjunctionOptions(context Con
 	return mapping
 }
 
-func (generator *ConverterGenerator) convertOption(context Context, converter Converter, option ir.Option) ConversionMapping {
+func (generator *ConverterGenerator) convertOption(context languages.Context, converter Converter, option ir.Option) ConversionMapping {
 	assignments := tools.Filter(option.Assignments, func(assignment ir.Assignment) bool {
 		_, pathAlreadyGenerated := generator.generatedPaths[generator.assignmentKey(assignment)]
 		return !pathAlreadyGenerated
@@ -258,7 +248,7 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 	return mapping
 }
 
-func (generator *ConverterGenerator) mappingForOption(context Context, converter Converter, mapping ConversionMapping, option ir.Option) OptionMapping {
+func (generator *ConverterGenerator) mappingForOption(context languages.Context, converter Converter, mapping ConversionMapping, option ir.Option) OptionMapping {
 	optMapping := OptionMapping{
 		Option: option,
 		Guards: generator.guardForAssignments(converter.inputRootPath(), option.Assignments),
@@ -334,7 +324,7 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 	return optMapping
 }
 
-func (generator *ConverterGenerator) argumentsForEnvelope(context Context, converter Converter, argName string, valuePath ir.Path, assignment ir.Assignment) []ArgumentMapping {
+func (generator *ConverterGenerator) argumentsForEnvelope(context languages.Context, converter Converter, argName string, valuePath ir.Path, assignment ir.Assignment) []ArgumentMapping {
 	var mappings []ArgumentMapping
 	for _, envelopeField := range assignment.Value.Envelope.Values {
 		fieldValuePath := valuePath.Append(envelopeField.Path)
@@ -343,7 +333,7 @@ func (generator *ConverterGenerator) argumentsForEnvelope(context Context, conve
 	return mappings
 }
 
-func (generator *ConverterGenerator) argumentForType(context Context, converter Converter, argName string, valuePath ir.Path, typeDef ir.Type) ArgumentMapping {
+func (generator *ConverterGenerator) argumentForType(context languages.Context, converter Converter, argName string, valuePath ir.Path, typeDef ir.Type) ArgumentMapping {
 	if typeDef.IsComposableSlot() {
 		return ArgumentMapping{
 			Runtime: &RuntimeArgMapping{
@@ -490,7 +480,7 @@ func (generator *ConverterGenerator) argumentFromTypeHintReference(converter Con
 	}, true
 }
 
-func (generator *ConverterGenerator) isAssignmentFromDisjunctionStruct(context Context, assignment ir.Assignment) bool {
+func (generator *ConverterGenerator) isAssignmentFromDisjunctionStruct(context languages.Context, assignment ir.Assignment) bool {
 	if assignment.Value.Envelope == nil {
 		return false
 	}
@@ -498,7 +488,7 @@ func (generator *ConverterGenerator) isAssignmentFromDisjunctionStruct(context C
 	var getEnvelopedType func(envelopedType ir.Type) ir.Type
 	getEnvelopedType = func(envelopedType ir.Type) ir.Type {
 		if envelopedType.IsRef() {
-			referredObject, _ := context.LocateObject(envelopedType.Ref.ReferredPkg, envelopedType.Ref.ReferredType)
+			referredObject, _ := context.GetObject(envelopedType.Ref.ReferredPkg, envelopedType.Ref.ReferredType)
 			envelopedType = referredObject.Type
 		}
 
@@ -512,7 +502,7 @@ func (generator *ConverterGenerator) isAssignmentFromDisjunctionStruct(context C
 	return getEnvelopedType(assignment.Value.Envelope.Type).IsStructGeneratedFromDisjunction()
 }
 
-func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Context, converter Converter, argName string, valuePath ir.Path, assignment ir.Assignment) (ArgumentMapping, bool) {
+func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context languages.Context, converter Converter, argName string, valuePath ir.Path, assignment ir.Assignment) (ArgumentMapping, bool) {
 	if !generator.isAssignmentFromDisjunctionStruct(context, assignment) {
 		return ArgumentMapping{}, false
 	}

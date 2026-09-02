@@ -480,7 +480,7 @@ func (jenny RawTypes) unmarshalMap(context languages.Context, object ir.Object, 
 }
 
 func (jenny RawTypes) unmarshalRefFunc(context languages.Context, refDef ir.Type) string {
-	referredObject, found := context.LocateObjectByRef(refDef.AsRef())
+	referredObject, found := context.GetObjectByRef(refDef.AsRef())
 	formattedRef := jenny.typeFormatter.formatRef(refDef, false)
 
 	switch {
@@ -571,7 +571,7 @@ func (jenny RawTypes) unmarshalDisjunctionFunc(context languages.Context, disjun
 		//nolint:gocritic
 		if len(ignoredBranches) == 1 && ignoredBranches[0].IsRef() {
 			ref := ignoredBranches[0].AsRef()
-			referredObject, found := context.LocateObjectByRef(ref)
+			referredObject, found := context.GetObjectByRef(ref)
 			formattedRef := jenny.typeFormatter.formatRef(ignoredBranches[0], false)
 
 			value := "$input"

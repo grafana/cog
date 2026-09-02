@@ -118,7 +118,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ir.Buil
 			},
 			"formatValue": func(destinationType ir.Type, value any) string {
 				if destinationType.IsRef() {
-					referredObj, found := context.LocateObjectByRef(destinationType.AsRef())
+					referredObj, found := context.GetObjectByRef(destinationType.AsRef())
 					if found && referredObj.Type.IsEnum() {
 						return jenny.typeFormatter.formatEnumValue(referredObj, value)
 					}

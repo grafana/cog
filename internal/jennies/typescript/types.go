@@ -150,7 +150,7 @@ func (formatter *typeFormatter) formatRef(refType ir.RefType, resolveBuilders bo
 	// if the field's type is a reference to a constant,
 	// we need to use the constant's value instead.
 	// ie: `SomeField: "foo"` instead of `SomeField: MyStringConstant`
-	referredType, found := formatter.context.LocateObjectByRef(refType)
+	referredType, found := formatter.context.GetObjectByRef(refType)
 	if found && referredType.Type.IsConcreteScalar() {
 		return formatter.doFormatType(referredType.Type, resolveBuilders)
 	}
@@ -311,7 +311,7 @@ func (formatter *typeFormatter) formatIntersection(def ir.IntersectionType) stri
 }
 
 func (formatter *typeFormatter) formatConstantReferences(def ir.ConstantReferenceType) string {
-	referredType, found := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	referredType, found := formatter.context.GetObject(def.ReferredPkg, def.ReferredType)
 	if !found {
 		return "unknown"
 	}

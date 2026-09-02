@@ -56,7 +56,7 @@ func (generator *shape) enumShape(def ir.Type) string {
 }
 
 func (generator *shape) refShape(def ir.Type) string {
-	referredObj, found := generator.context.LocateObjectByRef(def.AsRef())
+	referredObj, found := generator.context.GetObjectByRef(def.AsRef())
 	if !found {
 		return "mixed"
 	}

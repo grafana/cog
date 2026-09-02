@@ -213,7 +213,7 @@ func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context langu
 	}
 
 	if object.Type.IsRef() {
-		referredObj, found := context.LocateObjectByRef(*object.Type.Ref)
+		referredObj, found := context.GetObjectByRef(*object.Type.Ref)
 		if !found || !referredObj.Type.IsStruct() {
 			return
 		}
