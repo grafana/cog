@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/pkg/template"
 )
 
 type BuildOptions struct {

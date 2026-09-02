@@ -29,12 +29,12 @@ func (jenny equalityMethods) generateForObject(object ir.Object) string {
 	buffer.WriteString("\n\n    @Override\n")
 	buffer.WriteString("    public boolean equals(Object other) {\n")
 	buffer.WriteString("        if (this == other) return true;\n")
-	buffer.WriteString(fmt.Sprintf("        if (!(other instanceof %s)) return false;\n", className))
-	buffer.WriteString(fmt.Sprintf("        %s o = (%s) other;\n", className, className))
+	fmt.Fprintf(&buffer, "        if (!(other instanceof %s)) return false;\n", className)
+	fmt.Fprintf(&buffer, "        %s o = (%s) other;\n", className, className)
 
 	for _, field := range fields {
 		fieldName := formatFieldName(field.Name)
-		buffer.WriteString(fmt.Sprintf("        if (!Objects.equals(this.%s, o.%s)) return false;\n", fieldName, fieldName))
+		fmt.Fprintf(&buffer, "        if (!Objects.equals(this.%s, o.%s)) return false;\n", fieldName, fieldName)
 	}
 
 	buffer.WriteString("        return true;\n")
@@ -50,7 +50,7 @@ func (jenny equalityMethods) generateForObject(object ir.Object) string {
 		for _, field := range fields {
 			fieldExprs = append(fieldExprs, "this."+formatFieldName(field.Name))
 		}
-		buffer.WriteString(fmt.Sprintf("        return Objects.hash(%s);\n", strings.Join(fieldExprs, ", ")))
+		fmt.Fprintf(&buffer, "        return Objects.hash(%s);\n", strings.Join(fieldExprs, ", "))
 	}
 
 	buffer.WriteString("    }")

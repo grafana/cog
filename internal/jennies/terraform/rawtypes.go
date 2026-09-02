@@ -8,10 +8,10 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/golang"
-	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/template"
 )
 
 type RawTypes struct {
@@ -129,9 +129,9 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ir.Schem
 		importStatements += "\n\n"
 	}
 
-	return []byte(fmt.Sprintf(`package %[1]s
+	return fmt.Appendf(nil, `package %[1]s
 
-%[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String())), nil
+%[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String()), nil
 }
 
 func (jenny RawTypes) formatObject(buffer *strings.Builder, object ir.Object) error {
