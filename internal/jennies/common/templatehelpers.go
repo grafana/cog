@@ -3,10 +3,10 @@ package common
 import (
 	"encoding/json"
 
-	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/template"
 )
 
 func TypeResolvingTemplateHelpers(context languages.Context) template.FuncMap {

@@ -6,11 +6,11 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/ir/transforms"
 	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/template"
 )
 
 const LanguageRef = "php"

@@ -18,8 +18,8 @@ func (jenny ModuleInit) JennyName() string {
 
 func (jenny ModuleInit) Generate(context languages.Context) (codejen.Files, error) {
 	module := func(name string) []byte {
-		return []byte(fmt.Sprintf(`"""%s module"""
-`, name))
+		return fmt.Appendf(nil, `"""%s module"""
+`, name)
 	}
 
 	boilerplate := []struct {

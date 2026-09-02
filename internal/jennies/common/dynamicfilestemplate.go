@@ -4,8 +4,8 @@ import (
 	"maps"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/template"
 )
 
 func DynamicFilesTemplateHelpers() template.FuncMap {

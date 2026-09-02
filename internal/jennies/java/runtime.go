@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/template"
 )
 
 type Runtime struct {
