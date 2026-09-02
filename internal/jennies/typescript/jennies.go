@@ -11,6 +11,7 @@ import (
 	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/ir/transforms"
+	"github.com/grafana/cog/pkg/jennies"
 	"github.com/grafana/cog/pkg/languages"
 )
 
@@ -125,18 +126,18 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If(!language.config.SkipRuntime, Runtime{config: language.config}),
+		jennies.If(!language.config.SkipRuntime, Runtime{config: language.config}),
 
-		common.If(globalConfig.Types, RawTypes{config: language.config, tmpl: tmpl}),
-		common.If(!language.config.SkipRuntime && globalConfig.Builders, &Builder{
+		jennies.If(globalConfig.Types, RawTypes{config: language.config, tmpl: tmpl}),
+		jennies.If(!language.config.SkipRuntime && globalConfig.Builders, &Builder{
 			config:          language.config,
 			tmpl:            tmpl,
 			apiRefCollector: language.apiRefCollector,
 		}),
 
-		common.If(!language.config.SkipIndex, Index{config: language.config, Targets: globalConfig}),
+		jennies.If(!language.config.SkipIndex, Index{config: language.config, Targets: globalConfig}),
 
-		common.If(globalConfig.APIReference, apiref.APIReference{
+		jennies.If(globalConfig.APIReference, apiref.APIReference{
 			Collector: language.apiRefCollector,
 			Language:  LanguageRef,
 			Formatter: apiReferenceFormatter(language.config),
@@ -151,7 +152,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			ExtraData: language.config.ExtraFilesTemplatesData,
 		},
 	)
-	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+	jenny.AddPostprocessors(jennies.GeneratedCommentHeader(globalConfig.Debug))
 
 	return jenny
 }

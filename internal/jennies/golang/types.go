@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/imports"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 )
 
 type typeFormatter struct {
-	imports       *common.DirectImportMap
+	imports       *imports.DirectImportMap
 	packageMapper func(pkg string) string
 	config        Config
 
@@ -19,11 +19,11 @@ type typeFormatter struct {
 	context    languages.Context
 }
 
-func MakeTypeFormatterHelper(config Config, context languages.Context, imports *common.DirectImportMap, packageMapper func(pkg string) string) func(def ir.Type) string {
+func MakeTypeFormatterHelper(config Config, context languages.Context, imports *imports.DirectImportMap, packageMapper func(pkg string) string) func(def ir.Type) string {
 	return defaultTypeFormatter(config, context, imports, packageMapper).formatType
 }
 
-func defaultTypeFormatter(config Config, context languages.Context, imports *common.DirectImportMap, packageMapper func(pkg string) string) *typeFormatter {
+func defaultTypeFormatter(config Config, context languages.Context, imports *imports.DirectImportMap, packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
 		imports:       imports,
 		packageMapper: packageMapper,
@@ -32,7 +32,7 @@ func defaultTypeFormatter(config Config, context languages.Context, imports *com
 	}
 }
 
-func builderTypeFormatter(config Config, context languages.Context, imports *common.DirectImportMap, packageMapper func(pkg string) string) *typeFormatter {
+func builderTypeFormatter(config Config, context languages.Context, imports *imports.DirectImportMap, packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
 		imports:       imports,
 		packageMapper: packageMapper,

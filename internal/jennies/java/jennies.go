@@ -12,6 +12,7 @@ import (
 	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/ir/transforms"
+	"github.com/grafana/cog/pkg/jennies"
 	"github.com/grafana/cog/pkg/languages"
 )
 
@@ -122,15 +123,15 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If(!config.SkipRuntime, Runtime{config: config, tmpl: tmpl}),
-		common.If(!config.SkipRuntime && config.GenerateJSONMarshaller, &Deserializers{config: config, tmpl: tmpl}),
-		common.If(!config.SkipRuntime && config.GenerateJSONMarshaller, &Serializers{config: config, tmpl: tmpl}),
+		jennies.If(!config.SkipRuntime, Runtime{config: config, tmpl: tmpl}),
+		jennies.If(!config.SkipRuntime && config.GenerateJSONMarshaller, &Deserializers{config: config, tmpl: tmpl}),
+		jennies.If(!config.SkipRuntime && config.GenerateJSONMarshaller, &Serializers{config: config, tmpl: tmpl}),
 		RawTypes{config: config, tmpl: tmpl},
-		common.If(config.GenerateBuilders, Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
-		common.If(globalConfig.Builders, &Factory{config: config, tmpl: tmpl}),
-		common.If(!config.SkipRuntime && config.GenerateBuilders && config.GenerateConverters, &Converter{config: config, tmpl: tmpl}),
+		jennies.If(config.GenerateBuilders, Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		jennies.If(globalConfig.Builders, &Factory{config: config, tmpl: tmpl}),
+		jennies.If(!config.SkipRuntime && config.GenerateBuilders && config.GenerateConverters, &Converter{config: config, tmpl: tmpl}),
 
-		common.If(globalConfig.APIReference, apiref.APIReference{
+		jennies.If(globalConfig.APIReference, apiref.APIReference{
 			Collector: language.apiRefCollector,
 			Language:  LanguageRef,
 			Formatter: apiRef.apiReferenceFormatter(),
@@ -147,7 +148,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			ExtraData: config.ExtraFilesTemplatesData,
 		},
 	)
-	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+	jenny.AddPostprocessors(jennies.GeneratedCommentHeader(globalConfig.Debug))
 
 	return jenny
 }

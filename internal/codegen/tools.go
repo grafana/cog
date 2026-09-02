@@ -8,6 +8,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/pkg/jennies"
 )
 
 func guessPackageFromFilename(filename string) string {
@@ -60,8 +61,8 @@ func repositoryTemplatesJenny(pipeline *Pipeline) (*codejen.JennyList[common.Bui
 		ReplaceExtensions: pipeline.Output.OutputOptions.ReplaceExtension,
 	})
 	repoTemplatesJenny.AddPostprocessors(
-		common.GeneratedCommentHeader(pipeline.jenniesConfig()),
-		common.PathPrefixer(strings.ReplaceAll(outputDir, "%l", ".")),
+		jennies.GeneratedCommentHeader(pipeline.jenniesConfig().Debug),
+		jennies.PathPrefixer(strings.ReplaceAll(outputDir, "%l", ".")),
 	)
 
 	return repoTemplatesJenny, nil

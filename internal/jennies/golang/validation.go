@@ -6,8 +6,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/pkg/apiref"
+	"github.com/grafana/cog/pkg/imports"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -27,7 +27,7 @@ func newValidationMethods(tmpl *template.Template, packageMapper func(string) st
 	}
 }
 
-func (jenny validationMethods) generateForObject(buffer *strings.Builder, context languages.Context, object ir.Object, imports *common.DirectImportMap) error {
+func (jenny validationMethods) generateForObject(buffer *strings.Builder, context languages.Context, object ir.Object, imports *imports.DirectImportMap) error {
 	if !object.Type.IsStruct() {
 		return nil
 	}

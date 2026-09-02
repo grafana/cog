@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/pkg/apiref"
+	"github.com/grafana/cog/pkg/imports"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -14,13 +14,13 @@ import (
 type strictJSONUnmarshal struct {
 	tmpl            *template.Template
 	config          Config
-	imports         *common.DirectImportMap
+	imports         *imports.DirectImportMap
 	packageMapper   func(string) string
 	typeFormatter   *typeFormatter
 	apiRefCollector *apiref.APIReferenceCollector
 }
 
-func newStrictJSONUnmarshal(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *apiref.APIReferenceCollector) strictJSONUnmarshal {
+func newStrictJSONUnmarshal(config Config, tmpl *template.Template, imports *imports.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *apiref.APIReferenceCollector) strictJSONUnmarshal {
 	return strictJSONUnmarshal{
 		config: config,
 		tmpl: tmpl.Funcs(template.FuncMap{

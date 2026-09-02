@@ -1,11 +1,10 @@
-package common
+package jennies
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/pkg/languages"
 	"github.com/stretchr/testify/require"
 )
 
@@ -127,7 +126,7 @@ With some content`
 		t.Run(tc.name, func(t *testing.T) {
 			req := require.New(t)
 
-			resultFile, err := GeneratedCommentHeader(languages.Config{Debug: tc.debug})(*tc.inputFile)
+			resultFile, err := GeneratedCommentHeader(tc.debug)(*tc.inputFile)
 			req.NoError(err)
 
 			req.Equal(tc.expectedContent, string(resultFile.Data))

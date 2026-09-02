@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/pkg/apiref"
+	"github.com/grafana/cog/pkg/imports"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -14,13 +14,13 @@ import (
 type JSONMarshalling struct {
 	tmpl            *template.Template
 	config          Config
-	imports         *common.DirectImportMap
+	imports         *imports.DirectImportMap
 	packageMapper   func(string) string
 	typeFormatter   *typeFormatter
 	apiRefCollector *apiref.APIReferenceCollector
 }
 
-func newJSONMarshalling(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *apiref.APIReferenceCollector) JSONMarshalling {
+func newJSONMarshalling(config Config, tmpl *template.Template, imports *imports.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *apiref.APIReferenceCollector) JSONMarshalling {
 	return JSONMarshalling{
 		config: config,
 		tmpl: tmpl.Funcs(template.FuncMap{
