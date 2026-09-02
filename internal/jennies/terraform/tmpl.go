@@ -3,7 +3,6 @@ package terraform
 import (
 	"fmt"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -11,8 +10,8 @@ import (
 
 func initTemplates(config Config) *template.Template {
 	tmpl, err := template.New("terraform",
-		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
-		template.Funcs(common.TypesTemplateHelpers(languages.Context{})),
+		template.Funcs(template.TypeResolvingHelpers(languages.Context{})),
+		template.Funcs(template.TypesHelpers(languages.Context{})),
 		template.Funcs(template.FuncMap{
 			// placeholder — overridden per-schema in RawTypes.generateSchema
 			"importStdPkg": func(_ string) string {

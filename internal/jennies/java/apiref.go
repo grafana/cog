@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -16,12 +16,12 @@ type APIRef struct {
 	tmpl   *template.Template
 }
 
-func (apiRef *APIRef) apiReferenceFormatter() common.APIReferenceFormatter {
+func (apiRef *APIRef) apiReferenceFormatter() apiref.APIReferenceFormatter {
 	pkgMapper := func(pkg string, class string) string {
 		return pkg
 	}
 
-	return common.APIReferenceFormatter{
+	return apiref.APIReferenceFormatter{
 		KindName: func(kind ir.Kind) string {
 			if kind == ir.KindStruct {
 				return "class"
@@ -30,11 +30,11 @@ func (apiRef *APIRef) apiReferenceFormatter() common.APIReferenceFormatter {
 			return string(kind)
 		},
 
-		FunctionName: func(function common.FunctionReference) string {
+		FunctionName: func(function apiref.FunctionReference) string {
 			return tools.LowerCamelCase(function.Name)
 		},
-		FunctionSignature: func(context languages.Context, function common.FunctionReference) string {
-			args := tools.Map(function.Arguments, func(arg common.ArgumentReference) string {
+		FunctionSignature: func(context languages.Context, function apiref.FunctionReference) string {
+			args := tools.Map(function.Arguments, func(arg apiref.ArgumentReference) string {
 				return fmt.Sprintf("%s %s", arg.Type, arg.Name)
 			})
 
@@ -49,11 +49,11 @@ func (apiRef *APIRef) apiReferenceFormatter() common.APIReferenceFormatter {
 			return apiRef.definition(typesFormatter, object)
 		},
 
-		MethodName: func(method common.MethodReference) string {
+		MethodName: func(method apiref.MethodReference) string {
 			return tools.LowerCamelCase(method.Name)
 		},
-		MethodSignature: func(context languages.Context, method common.MethodReference) string {
-			args := tools.Map(method.Arguments, func(arg common.ArgumentReference) string {
+		MethodSignature: func(context languages.Context, method apiref.MethodReference) string {
+			args := tools.Map(method.Arguments, func(arg apiref.ArgumentReference) string {
 				return fmt.Sprintf("%s %s", arg.Type, arg.Name)
 			})
 

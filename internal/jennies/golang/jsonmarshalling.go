@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -16,10 +17,10 @@ type JSONMarshalling struct {
 	imports         *common.DirectImportMap
 	packageMapper   func(string) string
 	typeFormatter   *typeFormatter
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 }
 
-func newJSONMarshalling(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *common.APIReferenceCollector) JSONMarshalling {
+func newJSONMarshalling(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *apiref.APIReferenceCollector) JSONMarshalling {
 	return JSONMarshalling{
 		config: config,
 		tmpl: tmpl.Funcs(template.FuncMap{
@@ -69,7 +70,7 @@ func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ir.Object) bool {
 }
 
 func (jenny JSONMarshalling) renderCustomMarshal(obj ir.Object) (string, error) {
-	jenny.apiRefCollector.ObjectMethod(obj, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(obj, apiref.MethodReference{
 		Name: "MarshalJSON",
 		Comments: []string{
 			fmt.Sprintf("MarshalJSON implements a custom JSON marshalling logic to encode `%s` as JSON.", formatObjectName(obj.Name)),
@@ -138,9 +139,9 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 }
 
 func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, obj ir.Object) (string, error) {
-	jenny.apiRefCollector.ObjectMethod(obj, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(obj, apiref.MethodReference{
 		Name: "UnmarshalJSON",
-		Arguments: []common.ArgumentReference{
+		Arguments: []apiref.ArgumentReference{
 			{Name: "raw", Type: "[]byte"},
 		},
 		Comments: []string{

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/testutils"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/logs"
@@ -26,7 +26,7 @@ func TestRawTypes_Generate(t *testing.T) {
 		GenerateJSONMarshaller: true,
 	}
 
-	jenny := RawTypes{config: cfg, tmpl: initTemplates(cfg, common.NewAPIReferenceCollector())}
+	jenny := RawTypes{config: cfg, tmpl: initTemplates(cfg, apiref.NewAPIReferenceCollector())}
 	transforms := New(logs.NoopLogger(), cfg).Transform
 
 	test.Run(t, func(tc *testutils.Test[ir.Schema]) {
@@ -73,7 +73,7 @@ public String customMethod() {
 		),
 	}
 	runTest := func(config Config) {
-		jenny := RawTypes{config: config, tmpl: initTemplates(config, common.NewAPIReferenceCollector())}
+		jenny := RawTypes{config: config, tmpl: initTemplates(config, apiref.NewAPIReferenceCollector())}
 		transforms := New(logs.NoopLogger(), config).Transform
 
 		schemas, err := transforms(ir.Schemas{schema})

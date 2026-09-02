@@ -7,6 +7,7 @@ import (
 	"unicode"
 
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -15,10 +16,10 @@ import (
 type validationMethods struct {
 	tmpl            *template.Template
 	packageMapper   func(string) string
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 }
 
-func newValidationMethods(tmpl *template.Template, packageMapper func(string) string, apiRefCollector *common.APIReferenceCollector) validationMethods {
+func newValidationMethods(tmpl *template.Template, packageMapper func(string) string, apiRefCollector *apiref.APIReferenceCollector) validationMethods {
 	return validationMethods{
 		tmpl:            tmpl,
 		packageMapper:   packageMapper,
@@ -79,7 +80,7 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 		return false
 	}
 
-	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(object, apiref.MethodReference{
 		Name: "Validate",
 		Comments: []string{
 			fmt.Sprintf("Validate checks all the validation constraints that may be defined on `%s` fields for violations and returns them.", formatObjectName(object.Name)),
@@ -88,7 +89,7 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 	})
 
 	tmpl := jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(template.TypeResolvingHelpers(context)).
 		Funcs(template.FuncMap{
 			"resolvesToConstraints": resolvesToConstraints,
 			"importPkg":             jenny.packageMapper,

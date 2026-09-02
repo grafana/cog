@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/builders"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/testutils"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/logs"
 	"github.com/stretchr/testify/require"
@@ -29,8 +29,8 @@ func TestConverter_Generate(t *testing.T) {
 	jenny := Converter{
 		Config:          config,
 		NullableConfig:  language.NullableKinds(),
-		Tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
-		apiRefCollector: common.NewAPIReferenceCollector(),
+		Tmpl:            initTemplates(config, apiref.NewAPIReferenceCollector()),
+		apiRefCollector: apiref.NewAPIReferenceCollector(),
 	}
 
 	test.Run(t, func(tc *testutils.Test[languages.Context]) {

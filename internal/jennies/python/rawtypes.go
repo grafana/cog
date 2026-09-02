@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -21,7 +21,7 @@ type RawTypes struct {
 	typeFormatter   *typeFormatter
 	importModule    moduleImporter
 	importPkg       pkgImporter
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -67,7 +67,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ir.Schem
 	jenny.typeFormatter = defaultTypeFormatter(context, jenny.importPkg, jenny.importModule)
 
 	jenny.tmpl = jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(template.TypeResolvingHelpers(context)).
 		Funcs(template.FuncMap{
 			"importModule": jenny.importModule,
 			"importPkg":    jenny.importPkg,
@@ -246,7 +246,7 @@ func (jenny RawTypes) generateInitMethod(schemas ir.Schemas, object ir.Object) s
 func (jenny RawTypes) generateToJSONMethod(object ir.Object) string {
 	var buffer strings.Builder
 
-	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(object, apiref.MethodReference{
 		Name: "to_json",
 		Comments: []string{
 			"Converts this object into a representation that can easily be encoded to JSON.",
@@ -284,12 +284,12 @@ func (jenny RawTypes) generateToJSONMethod(object ir.Object) string {
 }
 
 func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object ir.Object) (string, error) {
-	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(object, apiref.MethodReference{
 		Name: "from_json",
 		Comments: []string{
 			"Builds this object from a JSON-decoded dict.",
 		},
-		Arguments: []common.ArgumentReference{
+		Arguments: []apiref.ArgumentReference{
 			{Name: "data", Type: "dict[str, typing.Any]"},
 		},
 		Return: "typing.Self",

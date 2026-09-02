@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -21,7 +21,7 @@ type Factory struct {
 	config          Config
 	tmpl            *template.Template
 	typeFormatter   *typeFormatter
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 }
 
 func (jenny *Factory) JennyName() string {
@@ -48,12 +48,12 @@ func (jenny *Factory) Generate(context languages.Context) (codejen.Files, error)
 					ReferredType: factoriesClassName,
 				},
 			}
-			jenny.apiRefCollector.VirtualObjectMethod(fakeFactoryObject, common.MethodReference{
+			jenny.apiRefCollector.VirtualObjectMethod(fakeFactoryObject, apiref.MethodReference{
 				Name:     factory.Name,
 				Comments: factory.Comments,
 				Static:   true,
-				Arguments: tools.Map(factory.Args, func(arg ir.Argument) common.ArgumentReference {
-					return common.ArgumentReference{
+				Arguments: tools.Map(factory.Args, func(arg ir.Argument) apiref.ArgumentReference {
+					return apiref.ArgumentReference{
 						Name: arg.Name,
 						Type: jenny.typeFormatter.formatType(arg.Type),
 					}

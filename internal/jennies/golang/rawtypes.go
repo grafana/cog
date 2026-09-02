@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -16,7 +16,7 @@ import (
 type RawTypes struct {
 	config          Config
 	tmpl            *template.Template
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 
 	typeFormatter *typeFormatter
 	packageMapper func(pkg string) string
@@ -30,8 +30,8 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	jenny.tmpl = jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
-		Funcs(common.TypesTemplateHelpers(context))
+		Funcs(template.TypeResolvingHelpers(context)).
+		Funcs(template.TypesHelpers(context))
 
 	for _, schema := range context.Schemas {
 		output, err := jenny.generateSchema(context, schema)
@@ -203,7 +203,7 @@ func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context langu
 	constructorName := "New" + formatFunctionName(object.Name)
 
 	declareConstructor := func() {
-		jenny.apiRefCollector.RegisterFunction(object.SelfRef.ReferredPkg, common.FunctionReference{
+		jenny.apiRefCollector.RegisterFunction(object.SelfRef.ReferredPkg, apiref.FunctionReference{
 			Name: constructorName,
 			Comments: []string{
 				fmt.Sprintf("%[1]s creates a new %[2]s object.", constructorName, objectName),

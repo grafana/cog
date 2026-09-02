@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 )
 
-func apiReferenceFormatter() common.APIReferenceFormatter {
-	return common.APIReferenceFormatter{
+func apiReferenceFormatter() apiref.APIReferenceFormatter {
+	return apiref.APIReferenceFormatter{
 		KindName: func(kind ir.Kind) string {
 			if kind == ir.KindStruct {
 				return "class"
@@ -20,11 +20,11 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 			return string(kind)
 		},
 
-		FunctionName: func(function common.FunctionReference) string {
+		FunctionName: func(function apiref.FunctionReference) string {
 			return formatFunctionName(function.Name)
 		},
-		FunctionSignature: func(context languages.Context, function common.FunctionReference) string {
-			args := tools.Map(function.Arguments, func(arg common.ArgumentReference) string {
+		FunctionSignature: func(context languages.Context, function apiref.FunctionReference) string {
+			args := tools.Map(function.Arguments, func(arg apiref.ArgumentReference) string {
 				return fmt.Sprintf("%s: %s", arg.Name, arg.Type)
 			})
 
@@ -53,11 +53,11 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 			return formatted
 		},
 
-		MethodName: func(method common.MethodReference) string {
+		MethodName: func(method apiref.MethodReference) string {
 			return formatIdentifier(method.Name)
 		},
-		MethodSignature: func(context languages.Context, method common.MethodReference) string {
-			args := tools.Map(method.Arguments, func(arg common.ArgumentReference) string {
+		MethodSignature: func(context languages.Context, method apiref.MethodReference) string {
+			args := tools.Map(method.Arguments, func(arg apiref.ArgumentReference) string {
 				return fmt.Sprintf("%s: %s", arg.Name, arg.Type)
 			})
 

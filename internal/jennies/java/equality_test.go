@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/testutils"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/logs"
@@ -38,7 +38,7 @@ func TestEquality_Java_GeneratesEqualsMethods(t *testing.T) {
 	config := Config{GenerateEqual: true}
 	jenny := RawTypes{
 		config: config,
-		tmpl:   initTemplates(config, common.NewAPIReferenceCollector()),
+		tmpl:   initTemplates(config, apiref.NewAPIReferenceCollector()),
 	}
 
 	schema := equalitySchema()
@@ -92,7 +92,7 @@ func TestEquality_Java_SkipsNonStructTypes(t *testing.T) {
 	config := Config{GenerateEqual: true}
 	jenny := RawTypes{
 		config: config,
-		tmpl:   initTemplates(config, common.NewAPIReferenceCollector()),
+		tmpl:   initTemplates(config, apiref.NewAPIReferenceCollector()),
 	}
 
 	// A scalar constant (non-struct type) should not generate equals()
@@ -118,7 +118,7 @@ func TestEquality_Java_DisabledByDefault(t *testing.T) {
 	config := Config{} // GenerateEqual defaults to false
 	jenny := RawTypes{
 		config: config,
-		tmpl:   initTemplates(config, common.NewAPIReferenceCollector()),
+		tmpl:   initTemplates(config, apiref.NewAPIReferenceCollector()),
 	}
 
 	schema := equalitySchema()

@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/ir/transforms"
 	"github.com/grafana/cog/pkg/languages"
@@ -95,14 +96,14 @@ func (config *Config) MergeWithGlobal(global languages.Config) Config {
 type Language struct {
 	logger          *slog.Logger
 	config          Config
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 }
 
 func New(logger *slog.Logger, config Config) *Language {
 	return &Language{
 		logger:          logger,
 		config:          config,
-		apiRefCollector: common.NewAPIReferenceCollector(),
+		apiRefCollector: apiref.NewAPIReferenceCollector(),
 	}
 }
 
@@ -129,7 +130,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If(globalConfig.Builders, &Factory{config: config, tmpl: tmpl}),
 		common.If(!config.SkipRuntime && config.GenerateBuilders && config.GenerateConverters, &Converter{config: config, tmpl: tmpl}),
 
-		common.If(globalConfig.APIReference, common.APIReference{
+		common.If(globalConfig.APIReference, apiref.APIReference{
 			Collector: language.apiRefCollector,
 			Language:  LanguageRef,
 			Formatter: apiRef.apiReferenceFormatter(),

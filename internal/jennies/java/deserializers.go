@@ -27,7 +27,7 @@ func (jenny *Deserializers) JennyName() string {
 func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, error) {
 	jenny.typeFormatter = createFormatter(context, jenny.config)
 	jenny.tmpl = jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(template.TypeResolvingHelpers(context)).
 		Funcs(template.FuncMap{
 			"importPkg":  jenny.config.formatPackage,
 			"formatType": jenny.typeFormatter.formatFieldType,

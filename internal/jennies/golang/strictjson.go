@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -16,10 +17,10 @@ type strictJSONUnmarshal struct {
 	imports         *common.DirectImportMap
 	packageMapper   func(string) string
 	typeFormatter   *typeFormatter
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 }
 
-func newStrictJSONUnmarshal(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *common.APIReferenceCollector) strictJSONUnmarshal {
+func newStrictJSONUnmarshal(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *apiref.APIReferenceCollector) strictJSONUnmarshal {
 	return strictJSONUnmarshal{
 		config: config,
 		tmpl: tmpl.Funcs(template.FuncMap{
@@ -61,9 +62,9 @@ func (jenny strictJSONUnmarshal) objectNeedsUnmarshal(obj ir.Object) bool {
 }
 
 func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj ir.Object) (string, error) {
-	jenny.apiRefCollector.ObjectMethod(obj, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(obj, apiref.MethodReference{
 		Name: "UnmarshalJSONStrict",
-		Arguments: []common.ArgumentReference{
+		Arguments: []apiref.ArgumentReference{
 			{Name: "raw", Type: "[]byte"},
 		},
 		Comments: []string{
@@ -74,7 +75,7 @@ func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj 
 	})
 
 	tmpl := jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(template.TypeResolvingHelpers(context)).
 		Funcs(template.FuncMap{
 			"resolvesToArrayOfScalars": func(typeDef ir.Type) bool {
 				return context.IsArrayOfKinds(typeDef, ir.KindScalar, ir.KindEnum)

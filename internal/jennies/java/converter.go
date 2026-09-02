@@ -6,7 +6,6 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/builders"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/pkg/ir"
@@ -94,7 +93,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ir.
 	typeFormatter := createFormatter(context, jenny.config).withPackageMapper(packageMapper)
 
 	return jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(template.TypeResolvingHelpers(context)).
 		Funcs(map[string]any{
 			"formatRawRef": func(pkg string, ref string) string {
 				return typeFormatter.formatReference(ir.NewRef(pkg, ref).AsRef())

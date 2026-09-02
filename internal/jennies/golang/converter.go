@@ -6,7 +6,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/builders"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -16,7 +16,7 @@ type Converter struct {
 	Config          Config
 	NullableConfig  languages.NullableConfig
 	Tmpl            *template.Template
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 }
 
 func (jenny *Converter) JennyName() string {
@@ -65,9 +65,9 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ir.
 		return formatter.formatRef(ir.NewRef(pkg, ref), false)
 	}
 
-	jenny.apiRefCollector.RegisterFunction(builder.Package, common.FunctionReference{
+	jenny.apiRefCollector.RegisterFunction(builder.Package, apiref.FunctionReference{
 		Name: formatFunctionName(converter.BuilderName + "Converter"),
-		Arguments: []common.ArgumentReference{
+		Arguments: []apiref.ArgumentReference{
 			{
 				Name: "input",
 				Type: formatRawRef(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType),

@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -14,7 +14,7 @@ import (
 
 type Builder struct {
 	tmpl            *template.Template
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 
 	imports          *ModuleImportMap
 	typeFormatter    *typeFormatter
@@ -75,7 +75,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ir.Buil
 
 	fullObjectName := jenny.typeFormatter.formatRef(builder.For.SelfRef)
 
-	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
+	jenny.apiRefCollector.BuilderMethod(builder, apiref.MethodReference{
 		Name: "build",
 		Comments: []string{
 			"Builds the object.",
@@ -84,11 +84,11 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ir.Buil
 	})
 
 	for _, factory := range builder.Factories {
-		jenny.apiRefCollector.RegisterFunction(builder.Package, common.FunctionReference{
+		jenny.apiRefCollector.RegisterFunction(builder.Package, apiref.FunctionReference{
 			Name:     factory.Name,
 			Comments: factory.Comments,
-			Arguments: tools.Map(factory.Args, func(arg ir.Argument) common.ArgumentReference {
-				return common.ArgumentReference{
+			Arguments: tools.Map(factory.Args, func(arg ir.Argument) apiref.ArgumentReference {
+				return apiref.ArgumentReference{
 					Name: arg.Name,
 					Type: jenny.typeFormatter.formatType(arg.Type),
 				}
@@ -98,7 +98,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ir.Buil
 	}
 
 	return jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(template.TypeResolvingHelpers(context)).
 		Funcs(map[string]any{
 			"importModule":            jenny.importModule,
 			"isDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
