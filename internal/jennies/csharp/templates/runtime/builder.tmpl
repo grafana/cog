@@ -1,0 +1,10 @@
+{{- /* Cog runtime — fluent builder interface.
+       Mirrors the cog.Builder<T> Java interface. Lives in
+       Grafana.Foundation.Cog (or whatever NamespaceRoot resolves to).
+*/ -}}
+namespace {{ .Namespace }};
+
+public interface IBuilder<out T>
+{
+    T Build();
+}

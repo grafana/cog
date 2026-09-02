@@ -1,0 +1,11 @@
+{{- /* Renders a comma-separated parameter list. When IsBuilder is
+       true (called from the Builder template), arguments whose type
+       has a registered builder are wrapped in `Cog.IBuilder<T>` so the
+       caller can pass either a built instance or a fluent builder.
+*/ -}}
+{{- define "args" }}
+    {{- range $i, $arg := .Arguments }}
+        {{- if gt $i 0 }}, {{- end }}
+        {{- if $.IsBuilder }}{{ $arg.Type | formatBuilderFieldType }}{{ else }}{{ $arg.Type | formatType }}{{ end }} {{ $arg.Name | escapeVar | lowerCamelCase }}
+    {{- end }}
+{{- end }}

@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"github.com/grafana/cog/internal/jennies/csharp"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
@@ -61,6 +62,7 @@ func (output *Output) interpolateParameters(interpolator ParametersInterpolator)
 }
 
 type OutputLanguage struct {
+	CSharp     *csharp.Config     `yaml:"csharp"`
 	Go         *golang.Config     `yaml:"go"`
 	Java       *java.Config       `yaml:"java"`
 	JSONSchema *jsonschema.Config `yaml:"jsonschema"`
@@ -87,6 +89,10 @@ func (outputLanguage *OutputLanguage) interpolateParameters(output *Output, inte
 	if outputLanguage.Java != nil {
 		outputLanguage.Java.InterpolateParameters(interpolator)
 		outputLanguage.Java.ExtraFilesTemplatesData = output.TemplatesData
+	}
+	if outputLanguage.CSharp != nil {
+		outputLanguage.CSharp.InterpolateParameters(interpolator)
+		outputLanguage.CSharp.ExtraFilesTemplatesData = output.TemplatesData
 	}
 	if outputLanguage.Typescript != nil {
 		outputLanguage.Typescript.InterpolateParameters(interpolator)
