@@ -75,9 +75,14 @@ func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schema
 
 	logger := pipeline.logger.With(slog.String("language", language.Name()))
 
-	// apply  language-specific compiler passes
-	compilerPasses := language.CompilerPasses().Concat(pipeline.finalPasses())
-	jenniesInput.Schemas, err = compilerPasses.Process(logger, jenniesInput.Schemas)
+	// apply language-specific schema transformations
+	jenniesInput.Schemas, err = language.Transform(jenniesInput.Schemas)
+	if err != nil {
+		return languages.Context{}, err
+	}
+
+	// apply global schema transformations
+	jenniesInput.Schemas, err = pipeline.finalPasses().Process(logger, jenniesInput.Schemas)
 	if err != nil {
 		return languages.Context{}, err
 	}

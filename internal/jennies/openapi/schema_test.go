@@ -18,7 +18,7 @@ func TestSchema_Generate(t *testing.T) {
 
 	config := Config{debug: true}
 	jenny := Schema{Config: config}
-	compilerPasses := New(config).CompilerPasses()
+	transforms := New(logs.NoopLogger(), config).Transform
 
 	test.Run(t, func(tc *testutils.Test[ir.Schema]) {
 		req := require.New(tc)
@@ -26,7 +26,7 @@ func TestSchema_Generate(t *testing.T) {
 		// We run the compiler passes defined fo OpenAPI since without them, we
 		// might not be able to translate some of the IR's semantics.
 		schema := tc.UnmarshalJSONInput(testutils.RawTypesIRInputFile)
-		processedAsts, err := compilerPasses.Process(logs.NoopLogger(), ir.Schemas{&schema})
+		processedAsts, err := transforms(ir.Schemas{&schema})
 		req.NoError(err)
 
 		req.Len(processedAsts, 1, "we somehow got more ast.Schema than we put in")
