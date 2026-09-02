@@ -5,10 +5,10 @@ import (
 	"log/slog"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/ir/transforms"
+	"github.com/grafana/cog/pkg/jennies"
 	"github.com/grafana/cog/pkg/languages"
 )
 
@@ -89,10 +89,10 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	})
 
 	jenny.AppendOneToMany(
-		common.If(globalConfig.Types, RawTypes{config: config, tmpl: tmpl}))
+		jennies.If(globalConfig.Types, RawTypes{config: config, tmpl: tmpl}))
 
 	if !config.SkipGeneratedHeader {
-		jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+		jenny.AddPostprocessors(jennies.GeneratedCommentHeader(globalConfig.Debug))
 	}
 	if !config.SkipPostFormatting {
 		jenny.AddPostprocessors(golang.FormatGoFiles)

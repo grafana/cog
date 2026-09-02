@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/cog/internal/builders"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/jennies"
 	"github.com/grafana/cog/pkg/languages"
 )
 
@@ -41,7 +42,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 
 		// prepare the jennies
 		languageJennies := target.Jennies(pipeline.jenniesConfig())
-		languageJennies.AddPostprocessors(common.PathPrefixer(languageOutputDir))
+		languageJennies.AddPostprocessors(jennies.PathPrefixer(languageOutputDir))
 
 		// then delegate the codegen to the jennies
 		if err := runJenny(languageJennies, jenniesInput, generatedFS); err != nil {

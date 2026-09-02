@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/ir/transforms"
+	"github.com/grafana/cog/pkg/jennies"
 	"github.com/grafana/cog/pkg/languages"
 )
 
@@ -87,12 +88,12 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	})
 	jenny.AppendOneToMany(
 		ModuleInit{},
-		common.If(!language.config.SkipRuntime, Runtime{tmpl: tmpl}),
+		jennies.If(!language.config.SkipRuntime, Runtime{tmpl: tmpl}),
 
-		common.If(globalConfig.Types, RawTypes{config: language.config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
-		common.If(!language.config.SkipRuntime && globalConfig.Builders, &Builder{tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		jennies.If(globalConfig.Types, RawTypes{config: language.config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		jennies.If(!language.config.SkipRuntime && globalConfig.Builders, &Builder{tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 
-		common.If(globalConfig.APIReference, apiref.APIReference{
+		jennies.If(globalConfig.APIReference, apiref.APIReference{
 			Collector: language.apiRefCollector,
 			Language:  LanguageRef,
 			Formatter: apiReferenceFormatter(),
@@ -101,13 +102,13 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 		extraTemplatesJenny,
 	)
-	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+	jenny.AddPostprocessors(jennies.GeneratedCommentHeader(globalConfig.Debug))
 
 	if language.config.PathPrefix != "" {
-		jenny.AddPostprocessors(common.PathPrefixer(
+		jenny.AddPostprocessors(jennies.PathPrefixer(
 			language.config.PathPrefix,
-			common.PrefixExcept("docs/"),
-			common.ExcludeCreatedByJenny(extraTemplatesJenny.JennyName()),
+			jennies.PrefixExcept("docs/"),
+			jennies.ExcludeCreatedByJenny(extraTemplatesJenny.JennyName()),
 		))
 	}
 

@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/pkg/apiref"
+	"github.com/grafana/cog/pkg/imports"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -17,7 +17,7 @@ type Builder struct {
 	tmpl            *template.Template
 	apiRefCollector *apiref.APIReferenceCollector
 
-	imports          *common.DirectImportMap
+	imports          *imports.DirectImportMap
 	typeImportMapper func(string) string
 	typeFormatter    *typeFormatter
 	rawTypes         RawTypes

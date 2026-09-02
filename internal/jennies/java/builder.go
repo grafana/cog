@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/pkg/apiref"
+	"github.com/grafana/cog/pkg/imports"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
@@ -16,7 +16,7 @@ import (
 type Builder struct {
 	config        Config
 	tmpl          *template.Template
-	imports       *common.DirectImportMap
+	imports       *imports.DirectImportMap
 	typeFormatter *typeFormatter
 
 	apiRefCollector *apiref.APIReferenceCollector

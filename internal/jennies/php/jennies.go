@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/ir/transforms"
+	"github.com/grafana/cog/pkg/jennies"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
 )
@@ -114,12 +115,12 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	})
 	jenny.AppendOneToMany(
 		Runtime{config: config, tmpl: tmpl},
-		common.If(globalConfig.Types, rawTypesJenny),
-		common.If(globalConfig.Builders, &Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
-		common.If(globalConfig.Builders, &Factory{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
-		common.If(globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl, nullableConfig: language.NullableKinds()}),
+		jennies.If(globalConfig.Types, rawTypesJenny),
+		jennies.If(globalConfig.Builders, &Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		jennies.If(globalConfig.Builders, &Factory{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		jennies.If(globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl, nullableConfig: language.NullableKinds()}),
 
-		common.If(globalConfig.APIReference, apiref.APIReference{
+		jennies.If(globalConfig.APIReference, apiref.APIReference{
 			Collector: language.apiRefCollector,
 			Language:  LanguageRef,
 			Formatter: apiReferenceFormatter(tmpl, config),
@@ -155,7 +156,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			TmplFuncs: formattingTemplateFuncs(),
 		},
 	)
-	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+	jenny.AddPostprocessors(jennies.GeneratedCommentHeader(globalConfig.Debug))
 
 	return jenny
 }

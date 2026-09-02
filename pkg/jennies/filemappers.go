@@ -1,4 +1,4 @@
-package common
+package jennies
 
 import (
 	"bytes"
@@ -9,32 +9,12 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/tools"
-	"github.com/grafana/cog/pkg/languages"
 )
-
-type noopOneToManyJenny[Input any] struct {
-}
-
-func (jenny noopOneToManyJenny[Input]) JennyName() string {
-	return "noopOneToManyJenny"
-}
-
-func (jenny noopOneToManyJenny[Input]) Generate(_ Input) (codejen.Files, error) {
-	return nil, nil
-}
-
-func If[Input any](condition bool, innerJenny codejen.OneToMany[Input]) codejen.OneToMany[Input] {
-	if !condition {
-		return noopOneToManyJenny[Input]{}
-	}
-
-	return innerJenny
-}
 
 // GeneratedCommentHeader produces a FileMapper that injects a comment header onto
 // a [codejen.File] indicating the jenny or jennies that constructed the
 // file.
-func GeneratedCommentHeader(config languages.Config) codejen.FileMapper {
+func GeneratedCommentHeader(debug bool) codejen.FileMapper {
 	genHeader := `{{ .Leader }} Code generated - EDITING IS FUTILE. DO NOT EDIT.
 {{- with .Using }}
 {{ $.Leader }}
@@ -68,7 +48,7 @@ func GeneratedCommentHeader(config languages.Config) codejen.FileMapper {
 		}
 
 		var from []codejen.NamedJenny
-		if config.Debug {
+		if debug {
 			from = f.From
 		}
 

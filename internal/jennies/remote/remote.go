@@ -1,6 +1,8 @@
 package remote
 
 import (
+	"fmt"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/pkg/languages"
@@ -20,7 +22,7 @@ func (jenny remote) JennyName() string {
 func (jenny remote) Generate(context languages.Context) (codejen.Files, error) {
 	files, err := jenny.plugin.Generate(jenny.globalConfig, jenny.config, context)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while generating context: %w", err)
 	}
 
 	return tools.Map(files, func(file codejen.File) codejen.File {
