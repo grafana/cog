@@ -1,0 +1,10 @@
+# Cog language plugin – {{ .LanguageName }}
+
+Build with:
+
+```
+go mod vendor
+go build -o cog-{{ .LanguageName }} .
+```
+
+And make sure that the resulting binary is accessible via the PATH.
