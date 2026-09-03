@@ -1,0 +1,15 @@
+//! Runtime support shared by every generated Rust SDK.
+//!
+//! Generated code depends on the items re-exported here:
+//! the [`Builder`] trait, the [`BuildError`] type, the
+//! [`variants`] module and the converter helpers from [`tools`].
+
+pub mod builder;
+pub mod error;
+pub mod plugins;
+pub mod tools;
+pub mod variants;
+
+pub use builder::Builder;
+pub use error::BuildError;
+pub use tools::{convert_dataquery_to_code, convert_panel_to_code, dump, dump_json};
