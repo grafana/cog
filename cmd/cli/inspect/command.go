@@ -19,11 +19,12 @@ import (
 )
 
 type options struct {
-	IRType          string
-	ConfigPath      string
-	ExtraParameters map[string]string
-	Selector        string
-	Language        string
+	IRType            string
+	ConfigPath        string
+	ExtraParameters   map[string]string
+	Selector          string
+	Language          string
+	PluginDirectories []string
 }
 
 func Command() *cobra.Command {
@@ -65,6 +66,7 @@ Language-specific builder transformations are NOT applied until a language is sp
 		},
 	}
 
+	cmd.Flags().StringArrayVar(&opts.PluginDirectories, "plugin-directory", nil, "Directories to scan for plugin binaries. If empty, PATH is used.")
 	cmd.Flags().StringVar(&opts.IRType, "ir", "types", "Type of intermediate representation to Inspect. Valid values: types, builders, converters.")
 	cmd.Flags().StringToStringVar(&opts.ExtraParameters, "parameters", nil, "Sets or overrides parameters used in the config file.")
 	cmd.Flags().StringVar(&opts.Selector, "selector", "", "Selector allowing to narrow down the result of the inspection to selected objects. Format: package.[object] for types, package.[builder].[option] for builders.")
@@ -78,7 +80,13 @@ Language-specific builder transformations are NOT applied until a language is sp
 }
 
 func doInspect(ctx context.Context, logger *slog.Logger, opts options) error {
-	pipeline, err := codegen.PipelineFromFile(opts.ConfigPath, codegen.Parameters(opts.ExtraParameters), codegen.Logger(logger))
+	pipelineOpts := []codegen.PipelineOption{
+		codegen.Parameters(opts.ExtraParameters),
+		codegen.Logger(logger),
+		codegen.PluginDirectories(opts.PluginDirectories),
+	}
+
+	pipeline, err := codegen.PipelineFromFile(opts.ConfigPath, pipelineOpts...)
 	if err != nil {
 		return err
 	}
