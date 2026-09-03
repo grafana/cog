@@ -1,0 +1,43 @@
+package main
+
+import (
+	"fmt"
+	"path/filepath"
+
+	"github.com/grafana/codejen"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/jennies"
+	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/template"
+)
+
+type RawTypes struct {
+	tmpl *template.Template
+}
+
+func (jenny RawTypes) JennyName() string {
+	return "RawTypes"
+}
+
+func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
+	jenny.tmpl = jenny.tmpl.
+		Funcs(template.TypeResolvingHelpers(context)).
+		Funcs(template.TypesHelpers(context))
+
+	files := make(codejen.Files, 0, len(context.Schemas))
+	for _, schema := range context.Schemas {
+		output, err := jenny.generateSchema(context, schema)
+		if err != nil {
+			return nil, err
+		}
+
+		filename := filepath.Join(schema.Package, "types_gen.prog")
+		files = append(files, *jennies.NewFile(filename, output))
+	}
+
+	return files, nil
+}
+
+func (jenny RawTypes) generateSchema(context languages.Context, schema *ir.Schema) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
