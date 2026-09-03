@@ -26,7 +26,7 @@ func (jenny remote) Generate(context languages.Context) (codejen.Files, error) {
 	}
 
 	return tools.Map(files, func(file codejen.File) codejen.File {
-		file.From = append(file.From, jenny)
+		file.From = []codejen.NamedJenny{jenny}
 		return file
 	}), nil
 }
