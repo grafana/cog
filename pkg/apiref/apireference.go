@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/jennies"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/template"
 )
@@ -197,7 +198,7 @@ func (jenny APIReference) index(context languages.Context) (codejen.File, error)
 		fmt.Fprintf(&buffer, " * %[1]s[%[2]s](./%[2]s/index.md)\n", badge, schema.Package)
 	}
 
-	return *codejen.NewFile("docs/Reference/index.md", buffer.Bytes(), jenny), nil
+	return *jennies.NewFile("docs/Reference/index.md", buffer.Bytes()), nil
 }
 
 func (jenny APIReference) referenceForSchema(context languages.Context, schema *ir.Schema) (codejen.Files, error) {
@@ -301,7 +302,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ir.Sche
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile(fmt.Sprintf("docs/Reference/%s/index.md", schema.Package), buffer.Bytes(), jenny), nil
+	return *jennies.NewFile(fmt.Sprintf("docs/Reference/%s/index.md", schema.Package), buffer.Bytes()), nil
 }
 
 func (jenny APIReference) referenceForObject(context languages.Context, object ir.Object) (codejen.File, error) {
@@ -363,7 +364,7 @@ title: %[2]s %[1]s
 		}
 	}
 
-	return *codejen.NewFile(fmt.Sprintf("docs/Reference/%s/object-%s.md", object.SelfRef.ReferredPkg, objectName), buffer.Bytes(), jenny), nil
+	return *jennies.NewFile(fmt.Sprintf("docs/Reference/%s/object-%s.md", object.SelfRef.ReferredPkg, objectName), buffer.Bytes()), nil
 }
 
 func (jenny APIReference) referenceStructMethods(buffer *bytes.Buffer, context languages.Context, methods []MethodReference) {
@@ -468,7 +469,7 @@ title: %[2]s %[1]s
 		fmt.Fprintf(&buffer, " * %[3]s [%[1]s.%[2]s](../%[1]s/object-%[2]s.md)\n", builder.For.SelfRef.ReferredPkg, jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind))
 	}
 
-	return *codejen.NewFile(fmt.Sprintf("docs/Reference/%s/builder-%s.md", builder.Package, builderName), buffer.Bytes(), jenny), nil
+	return *jennies.NewFile(fmt.Sprintf("docs/Reference/%s/builder-%s.md", builder.Package, builderName), buffer.Bytes()), nil
 }
 
 func (jenny APIReference) packageBadge(schema *ir.Schema) string {
