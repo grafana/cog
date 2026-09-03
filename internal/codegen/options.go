@@ -28,3 +28,9 @@ func Debug(enabled bool) PipelineOption {
 		pipeline.Debug = enabled
 	}
 }
+
+func PluginDirectories(directories []string) PipelineOption {
+	return func(pipeline *Pipeline) {
+		pipeline.pluginDirs = directories
+	}
+}

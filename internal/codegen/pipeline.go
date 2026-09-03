@@ -85,6 +85,8 @@ type Pipeline struct {
 	converterConfig  *languages.ConverterConfig
 	interpolator     ParametersInterpolator
 	unitsMerged      bool
+	// directories in which to look for plugin binaries (if empty, falls back to using PATH)
+	pluginDirs []string
 }
 
 func NewPipeline() (*Pipeline, error) {
@@ -333,7 +335,7 @@ func (pipeline *Pipeline) OutputLanguages() (languages.Languages, error) {
 	}
 
 	for name, config := range pipeline.Output.LanguagePlugins {
-		languagePlugin, err := remote.New(pipeline.logger.With(slog.String("language", name)), name, config)
+		languagePlugin, err := remote.New(pipeline.logger.With(slog.String("language", name)), name, pipeline.pluginDirs, config)
 		if err != nil {
 			return nil, fmt.Errorf("could not initialize '%s' language plugin: %w", name, err)
 		}
