@@ -1,0 +1,12 @@
+# Cog language plugin – {{ .LanguageName }}
+
+Language plugin for [cog](https://github.com/grafana/cog/), adding support for {{ .LanguageName }}
+
+## Building the plugin
+
+```
+go mod vendor
+go build -o cog-{{ .LanguageName }} .
+```
+
+**Note:** make sure that the resulting binary is accessible via the `PATH`.

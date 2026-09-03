@@ -1,0 +1,28 @@
+package main
+
+import (
+	"embed"
+	"fmt"
+
+	"github.com/grafana/cog/pkg/apiref"
+	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/template"
+)
+
+//go:embed templates/*.tmpl
+//nolint:gochecknoglobals
+var templatesFS embed.FS
+
+func initTemplates(apiRefCollector *apiref.APIReferenceCollector) *template.Template {
+	tmpl, err := template.New(languageName,
+		template.Funcs(template.TypeResolvingHelpers(languages.Context{})),
+		template.Funcs(template.TypesHelpers(languages.Context{})),
+		template.Funcs(apiref.TemplateHelpers(apiRefCollector)),
+		template.ParseFS(templatesFS, "templates"),
+	)
+	if err != nil {
+		panic(fmt.Errorf("could not initialize templates: %w", err))
+	}
+
+	return tmpl
+}
