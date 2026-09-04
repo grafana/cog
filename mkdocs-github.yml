@@ -16,6 +16,8 @@ nav:
     - pipelines/splitting_pipeline.md
     - pipelines/schema_transformations.md
     - pipelines/builder_transformations.md
+  - Plugins:
+    - plugins/language_plugins.md
   - Reference:
     - reference/glossary.md
     - reference/template_blocks.md
