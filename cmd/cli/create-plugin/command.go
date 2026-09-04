@@ -76,6 +76,7 @@ func doScaffold(ctx context.Context, opts options) error {
 		{tmplFile: "go.mod.tmpl", targetFileName: "go.mod"},
 		{tmplFile: "gitignore.tmpl", targetFileName: ".gitignore"},
 		{tmplFile: "main.go.tmpl", targetFileName: "main.go"},
+		{tmplFile: "language.go.tmpl", targetFileName: "language.go"},
 		{tmplFile: "tmpl.go.tmpl", targetFileName: "tmpl.go"},
 		{tmplFile: "rawtypes.go.tmpl", targetFileName: "rawtypes.go"},
 		{tmplFile: "README.md.tmpl", targetFileName: "README.md"},

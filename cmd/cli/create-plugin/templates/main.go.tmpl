@@ -1,106 +1,11 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"log/slog"
-
-	"github.com/grafana/codejen"
-	"github.com/grafana/cog/pkg/apiref"
-	"github.com/grafana/cog/pkg/ir"
-	"github.com/grafana/cog/pkg/ir/transforms"
-	"github.com/grafana/cog/pkg/jennies"
-	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/plugins"
 )
-
-const languageName = "{{ .LanguageName }}"
-
-var _ plugins.Language = (*Language)(nil)
-
-type Config struct {
-	// SkipRuntime disables runtime-related code generation when enabled.
-	// Note: builders can NOT be generated with this flag turned on, as they
-	// rely on the runtime to function.
-	SkipRuntime bool `yaml:"skip_runtime"`
-}
-
-type Language struct {
-	logger *slog.Logger
-}
-
-func (l *Language) ValidateConfig(cfg map[string]any) error {
-	l.logger.Debug("validating config")
-
-	config := Config{}
-	if err := mapToStruct(cfg, &config); err != nil {
-		return fmt.Errorf("could not map config to struct: %w", err)
-	}
-
-	// TODO: verify that the config is valid.
-
-	return nil
-}
-
-func (l *Language) NullableConfig(config map[string]any) (languages.NullableConfig, error) {
-	l.logger.Debug("fetching NullableConfig")
-
-	// TODO: describes properties of nullable types for the current language.
-	return languages.NullableConfig{
-		Kinds:         []ir.Kind{ir.KindArray},
-		AnyIsNullable: true,
-	}, nil
-}
-
-func (l *Language) TransformSchemas(config map[string]any, schemas ir.Schemas) (ir.Schemas, error) {
-	l.logger.Debug("transforming schemas")
-
-	// TODO: apply relevant transformations
-	transformations := transforms.Transforms{
-		&transforms.AnonymousStructsToNamed{},
-		&transforms.NotRequiredFieldAsNullableType{},
-	}
-
-	return transformations.Process(l.logger, schemas)
-}
-
-func (l *Language) Generate(codegenConfig languages.Config, cfg map[string]any, context languages.Context) (codejen.Files, error) {
-	l.logger.Debug("running the codegen")
-
-	config := Config{}
-	if err := mapToStruct(cfg, &config); err != nil {
-		return nil, fmt.Errorf("could not map config to struct: %w", err)
-	}
-
-	apiRefCollector := apiref.NewAPIReferenceCollector()
-	tmpl := initTemplates(apiRefCollector)
-
-	jenny := codejen.JennyList[languages.Context]{}
-	jenny.AppendOneToMany(
-		jennies.If(codegenConfig.Types, RawTypes{
-			tmpl: tmpl,
-		}),
-		// TODO: when requested, generate builders/API reference/…
-	)
-
-	jenny.AddPostprocessors(jennies.GeneratedCommentHeader(codegenConfig.Debug))
-
-	return jenny.Generate(context)
-}
 
 func main() {
 	plugins.Run(plugins.LanguagePlugin(&Language{
 		logger: plugins.DefaultLogger,
 	}))
-}
-
-// mapToStruct converts any value to JSON and back again.
-// Useful cheat to map `map[string]any` to actual structs or the other way around.
-func mapToStruct(from any, to any) error {
-	payload, err := json.Marshal(from)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(payload, to)
 }

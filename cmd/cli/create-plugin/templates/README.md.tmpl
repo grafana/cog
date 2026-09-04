@@ -3,9 +3,23 @@
 Language plugin for [cog](https://github.com/grafana/cog/), adding support for
 {{ .LanguageName }}
 
+## What's included
+
+```
+.
+├── go.mod
+├── language.go # Language implementation: your code starts here.
+├── main.go     # Entrypoint: runs the process as a cog plugin
+├── rawtypes.go # Jenny (ie: code generator) responsible for generating types. This is for you to implement.
+├── README.md   # ← you're here!
+├── templates/  # Directory used to store templates used by the jennies
+└── tmpl.go     # Template-related utilities
+```
+
 ## Building the plugin
 
 ```
+go mod tidy
 go mod vendor
 go build -o cog-{{ .LanguageName }} .
 ```
