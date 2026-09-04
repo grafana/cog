@@ -15,10 +15,11 @@ func (jenny noopOneToManyJenny[Input]) Generate(_ Input) (codejen.Files, error) 
 	return nil, nil
 }
 
-func If[Input any](condition bool, innerJenny codejen.OneToMany[Input]) codejen.OneToMany[Input] {
+// If runs the inner jenny when condition is true.
+func If[Input any](condition bool, inner codejen.OneToMany[Input]) codejen.OneToMany[Input] {
 	if !condition {
 		return noopOneToManyJenny[Input]{}
 	}
 
-	return innerJenny
+	return inner
 }
