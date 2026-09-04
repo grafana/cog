@@ -19,6 +19,8 @@ func (jenny *unNamedJenny) JennyName() string {
 	return ""
 }
 
+// NewFile creates a [codejen.File] so that it can be used in the context of
+// language plugins.
 func NewFile(path string, data []byte) *codejen.File {
 	return codejen.NewFile(path, data, unnamed)
 }

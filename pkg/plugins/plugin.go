@@ -13,18 +13,36 @@ var DefaultLogger = slog.New(logs.NewHandler(os.Stderr, &logs.Options{
 	Level: slog.LevelDebug,
 }))
 
+// Option represents a configuration setting for a language plugin runner.
 type Option func(runner *pluginRunner)
 
-func LanguagePlugin(implementation Language) Option {
+// LanguagePlugin sets the implementation to run.
+func LanguagePlugin(language Language) Option {
 	return func(runner *pluginRunner) {
-		runner.languagePlugin = &LanguagePluginRunner{Impl: implementation}
+		runner.languagePlugin = &LanguagePluginRunner{Impl: language}
 	}
 }
 
+// Logger sets the logger used by the plugin.
 func Logger(logger *slog.Logger) Option {
 	return func(runner *pluginRunner) {
 		runner.logger = logger
 	}
+}
+
+// Run starts and runs a language plugin.
+func Run(opts ...Option) {
+	runner := &pluginRunner{
+		logger:          DefaultLogger,
+		handshakeConfig: LanguagePluginHandshakeConfig,
+	}
+
+	for _, opt := range opts {
+		opt(runner)
+	}
+
+	runner.logger.Debug("starting language plugin runner")
+	runner.run()
 }
 
 type pluginRunner struct {
@@ -44,18 +62,4 @@ func (runner *pluginRunner) run() {
 		HandshakeConfig: runner.handshakeConfig,
 		Plugins:         pluginsMap,
 	})
-}
-
-func Run(opts ...Option) {
-	runner := &pluginRunner{
-		logger:          DefaultLogger,
-		handshakeConfig: LanguagePluginHandshakeConfig,
-	}
-
-	for _, opt := range opts {
-		opt(runner)
-	}
-
-	runner.logger.Debug("starting plugin runner")
-	runner.run()
 }
