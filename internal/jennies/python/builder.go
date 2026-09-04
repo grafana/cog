@@ -98,7 +98,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ir.Buil
 	}
 
 	return jenny.tmpl.
-		Funcs(template.TypeResolvingHelpers(context)).
+		Funcs(template.TypesHelpers(context)).
 		Funcs(map[string]any{
 			"importModule":            jenny.importModule,
 			"isDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,

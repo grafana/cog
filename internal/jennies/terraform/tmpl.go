@@ -10,7 +10,6 @@ import (
 
 func initTemplates(config Config) *template.Template {
 	tmpl, err := template.New("terraform",
-		template.Funcs(template.TypeResolvingHelpers(languages.Context{})),
 		template.Funcs(template.TypesHelpers(languages.Context{})),
 		template.Funcs(template.FuncMap{
 			// placeholder — overridden per-schema in RawTypes.generateSchema

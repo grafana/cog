@@ -75,7 +75,7 @@ func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj 
 	})
 
 	tmpl := jenny.tmpl.
-		Funcs(template.TypeResolvingHelpers(context)).
+		Funcs(template.TypesHelpers(context)).
 		Funcs(template.FuncMap{
 			"resolvesToArrayOfScalars": func(typeDef ir.Type) bool {
 				return context.IsArrayOfKinds(typeDef, ir.KindScalar, ir.KindEnum)

@@ -67,7 +67,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ir.Schem
 	jenny.typeFormatter = defaultTypeFormatter(context, jenny.importPkg, jenny.importModule)
 
 	jenny.tmpl = jenny.tmpl.
-		Funcs(template.TypeResolvingHelpers(context)).
+		Funcs(template.TypesHelpers(context)).
 		Funcs(template.FuncMap{
 			"importModule": jenny.importModule,
 			"importPkg":    jenny.importPkg,

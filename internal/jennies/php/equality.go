@@ -53,10 +53,10 @@ func (jenny equalityMethods) compareField(context languages.Context, typeDef ir.
 func (jenny equalityMethods) compareNullableField(context languages.Context, typeDef ir.Type, selfExpr, otherExpr string) string {
 	var buffer strings.Builder
 
-	buffer.WriteString(fmt.Sprintf("    if ((%s === null) !== (%s === null)) {\n", selfExpr, otherExpr))
+	fmt.Fprintf(&buffer, "    if ((%s === null) !== (%s === null)) {\n", selfExpr, otherExpr)
 	buffer.WriteString("        return false;\n")
 	buffer.WriteString("    }\n")
-	buffer.WriteString(fmt.Sprintf("    if (%s !== null) {\n", selfExpr))
+	fmt.Fprintf(&buffer, "    if (%s !== null) {\n", selfExpr)
 
 	inner := jenny.compareNonNullField(context, typeDef, selfExpr, otherExpr)
 	for _, line := range strings.Split(strings.TrimRight(inner, "\n"), "\n") {

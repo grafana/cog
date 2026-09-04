@@ -21,7 +21,6 @@ func initTemplates(config Config, apiRefCollector *apiref.APIReferenceCollector)
 
 		// "dummy"/unimplemented helpers, to be able to parse the templates before jennies are initialized.
 		// Jennies will override these with proper dependencies.
-		template.Funcs(template.TypeResolvingHelpers(languages.Context{})),
 		template.Funcs(template.TypesHelpers(languages.Context{})),
 		template.Funcs(apiref.TemplateHelpers(apiRefCollector)),
 		template.Funcs(common.DynamicFilesTemplateHelpers()),
@@ -126,5 +125,5 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 		"convertDisjunctionFunc":   deps.convertDisjunctionFunc,
 	}
 
-	return funcs.MergeWith(template.TypeResolvingHelpers(deps.context))
+	return funcs.MergeWith(template.TypesHelpers(deps.context))
 }

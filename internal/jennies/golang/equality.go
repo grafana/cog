@@ -40,7 +40,7 @@ func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context 
 	})
 
 	tmpl := jenny.tmpl.
-		Funcs(template.TypeResolvingHelpers(context)).
+		Funcs(template.TypesHelpers(context)).
 		Funcs(template.FuncMap{
 			"typeHasEqualityFunc": func(typeDef ir.Type) bool {
 				if !typeDef.IsRef() {

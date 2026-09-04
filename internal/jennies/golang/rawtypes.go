@@ -30,7 +30,6 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	jenny.tmpl = jenny.tmpl.
-		Funcs(template.TypeResolvingHelpers(context)).
 		Funcs(template.TypesHelpers(context))
 
 	for _, schema := range context.Schemas {

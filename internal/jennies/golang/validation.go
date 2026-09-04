@@ -89,7 +89,7 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 	})
 
 	tmpl := jenny.tmpl.
-		Funcs(template.TypeResolvingHelpers(context)).
+		Funcs(template.TypesHelpers(context)).
 		Funcs(template.FuncMap{
 			"resolvesToConstraints": resolvesToConstraints,
 			"importPkg":             jenny.packageMapper,
