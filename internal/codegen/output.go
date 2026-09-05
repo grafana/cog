@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/python"
 	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
+	"github.com/grafana/cog/internal/jennies/zod"
 )
 
 type Output struct {
@@ -69,6 +70,7 @@ type OutputLanguage struct {
 	Python     *python.Config     `yaml:"python"`
 	Typescript *typescript.Config `yaml:"typescript"`
 	Terraform  *terraform.Config  `yaml:"terraform"`
+	Zod        *zod.Config        `yaml:"zod"`
 }
 
 func (outputLanguage *OutputLanguage) interpolateParameters(output *Output, interpolator ParametersInterpolator) {
@@ -95,6 +97,10 @@ func (outputLanguage *OutputLanguage) interpolateParameters(output *Output, inte
 
 	if outputLanguage.Terraform != nil {
 		outputLanguage.Terraform.InterpolateParameters(interpolator)
+	}
+
+	if outputLanguage.Zod != nil {
+		outputLanguage.Zod.InterpolateParameters(interpolator)
 	}
 }
 

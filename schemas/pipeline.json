@@ -273,6 +273,9 @@
         },
         "terraform": {
           "$ref": "#/$defs/TerraformConfig"
+        },
+        "zod": {
+          "$ref": "#/$defs/ZodConfig"
         }
       },
       "additionalProperties": false,
@@ -602,6 +605,40 @@
         "enums_as_union_types": {
           "type": "boolean",
           "description": "EnumsAsUnionTypes generates enums as a union of values instead of using\nan actual `enum` declaration.\nIf EnumsAsUnionTypes is false, an enum will be generated as:\n```ts\nenum Direction {\n  Up = \"up\",\n  Down = \"down\",\n  Left = \"left\",\n  Right = \"right\",\n}\n```\nIf EnumsAsUnionTypes is true, the same enum will be generated as:\n```ts\ntype Direction = \"up\" | \"down\" | \"left\" | \"right\";\n```"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ZodConfig": {
+      "properties": {
+        "path_prefix": {
+          "type": "string",
+          "description": "PathPrefix is the directory prefix for generated files. Defaults to \"src\"."
+        },
+        "filename": {
+          "type": "string",
+          "description": "Filename overrides the per-package output filename. Defaults to\n\"schemas.gen.ts\"."
+        },
+        "flat_layout": {
+          "type": "boolean",
+          "description": "FlatLayout drops the per-package directory and writes directly into\nPathPrefix. Useful when the consumer manages its own layout."
+        },
+        "optional_kind_literals": {
+          "type": "boolean",
+          "description": "OptionalKindLiterals turns required fields whose type is a concrete\nstring literal (e.g. `kind: \"Panel\"`) into `.optional().default(\"X\")`,\nso callers don't have to repeat the discriminator. The literal still\nconstrains values that are supplied. Implies VerboseDefaults so the\ngenerated file uses one form for every defaulted field."
+        },
+        "object_mode": {
+          "type": "string",
+          "description": "ObjectMode controls how unknown keys are handled at parse time:\n  - \"strip\" (default): unknown keys are silently dropped (Zod's default).\n  - \"strict\":          unknown keys cause parse errors.\n  - \"loose\":           unknown keys are kept on the parsed output."
+        },
+        "prefer_unknown_for_any": {
+          "type": "boolean",
+          "description": "PreferUnknownForAny emits `z.unknown()` instead of `z.any()` for CUE's\ntop type (`_`), forcing consumers to narrow before use."
+        },
+        "verbose_defaults": {
+          "type": "boolean",
+          "description": "VerboseDefaults emits defaulted fields as `.optional().default(X)`\nrather than `.default(X).optional()`. The verbose form fixes the\ninferred output type, which would otherwise include `undefined` even\nthough the default always fires. Implied by OptionalKindLiterals."
         }
       },
       "additionalProperties": false,
