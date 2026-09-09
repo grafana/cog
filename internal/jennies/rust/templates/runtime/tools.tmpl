@@ -1,0 +1,80 @@
+//! Helpers used by the generated converters.
+//!
+//! A converter turns an already-built object back into the Rust source code
+//! that reconstructs it through builders. These helpers render values that
+//! have no builder of their own: scalars are quoted by the converters
+//! directly, `any` values become a `serde_json::json!` literal, and typed
+//! values without a builder are round-tripped through serde. They mirror the
+//! Go runtime's `Dump` and `Convert*ToCode` functions.
+
+use crate::cog::variants;
+
+/// Renders a serializable value as Rust source code evaluating to a
+/// `serde_json::Value` (a `serde_json::json!` literal).
+pub fn dump_json<T: serde::Serialize + ?Sized>(value: &T) -> String {
+    format!("serde_json::json!({})", to_json_string(value))
+}
+
+/// Renders a serializable value as Rust source code that rebuilds it by
+/// deserializing its JSON representation. This is the catch-all used for
+/// values (enums, structs) that have no dedicated builder, mirroring the Go
+/// runtime's reflection-based `Dump`.
+pub fn dump<T: serde::Serialize + ?Sized>(value: &T) -> String {
+    format!(
+        "serde_json::from_value(serde_json::json!({})).unwrap()",
+        to_json_string(value)
+    )
+}
+
+/// Renders a dataquery as Rust source code that rebuilds it through builders.
+///
+/// When a converter is registered for the dataquery's variant (through the
+/// [`variants::Registry`]) it is delegated to; otherwise the query is
+/// preserved as an [`variants::UnknownDataqueryBuilder`] wrapping the raw
+/// payload, mirroring the Go runtime's `ConvertDataqueryToCode` fallback.
+pub fn convert_dataquery_to_code(dataquery: &dyn variants::Dataquery) -> String {
+    let registry = variants::default_registry();
+    if let Some(config) = registry.config_for_dataquery_variant(&dataquery.dataquery_type()) {
+        if let Some(converter) = config.converter {
+            if let Ok(value) = dataquery.to_json_value() {
+                return converter(&value);
+            }
+        }
+    }
+
+    // The dyn reference is serialized through its own object-safe shim rather
+    // than the generic to_json_string helper: the blanket `Serialize for &T`
+    // route would require the trait object to be `'static`.
+    let json = dataquery
+        .to_json_value()
+        .map(|v| v.to_string())
+        .unwrap_or_else(|_| "null".to_string());
+    format!(
+        "cog::variants::UnknownDataqueryBuilder::from_object(serde_json::from_value(serde_json::json!({json})).unwrap())"
+    )
+}
+
+/// Renders a panel as Rust source code that rebuilds it through builders.
+///
+/// Dispatches to the converter registered for `panel_type` when there is one,
+/// mirroring the Go runtime's `ConvertPanelToCode`.
+pub fn convert_panel_to_code<T: serde::Serialize + ?Sized>(panel: &T, panel_type: &str) -> String {
+    let registry = variants::default_registry();
+    if let Some(config) = registry.config_for_panelcfg_variant(panel_type) {
+        if let Some(converter) = config.converter {
+            if let Ok(value) = serde_json::to_value(panel) {
+                return converter(&value);
+            }
+        }
+    }
+
+    "/* could not convert panel to code */".to_string()
+}
+
+/// Serializes a value to its JSON text, falling back to `null` on failure (a
+/// generated serializable value cannot fail to serialize in practice).
+fn to_json_string<T: serde::Serialize + ?Sized>(value: &T) -> String {
+    serde_json::to_value(value)
+        .map(|v| v.to_string())
+        .unwrap_or_else(|_| "null".to_string())
+}
