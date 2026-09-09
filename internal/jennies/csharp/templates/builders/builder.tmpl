@@ -1,0 +1,48 @@
+{{- /* C# fluent builder template — Phase 4.
+
+   Mirrors the Java builders/builder.tmpl shape: a class implementing
+   `Cog.IBuilder<TargetType>` exposes one fluent method per builder
+   option, accumulates state on a protected `internal_` instance, and
+   returns it from `Build()`. The internal field name uses a verbatim
+   identifier (`@internal`) so the generated source reads identically
+   to the Java/TypeScript targets.
+*/ -}}
+namespace {{ .Namespace }};
+{{ if .Imports }}
+{{ .Imports }}
+{{- end }}
+public class {{ .BuilderName }}Builder : Cog.IBuilder<{{ .BuilderSignatureType }}>
+{
+    protected readonly {{ .ObjectName }} @internal;
+
+    {{- range .Properties }}
+    private {{ .Type | formatBuilderFieldType }} {{ .Name | escapeVar | lowerCamelCase }};
+    {{- end }}
+
+    public {{ .BuilderName }}Builder({{- template "args" (dict "Arguments" .Constructor.Args "IsBuilder" true) }})
+    {
+        this.@internal = new {{ .ObjectName }}();
+    {{- range .Constructor.Assignments }}
+        {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
+    {{- end }}
+    {{- range .Properties }}
+        this.{{ .Name | escapeVar | lowerCamelCase }} = {{ .Type | emptyValueForType }};
+    {{- end }}
+    }
+
+    {{- range $opt := .Options }}
+
+    public {{ $.BuilderName }}Builder {{ .Name | escapeVar | upperCamelCase }}({{- template "args" (dict "Arguments" .Args "IsBuilder" true) }})
+    {
+        {{- range .Assignments }}
+            {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" $opt.Name) }}
+        {{- end }}
+        return this;
+    }
+    {{- end }}
+
+    public {{ .ObjectName }} Build()
+    {
+        return this.@internal;
+    }
+}

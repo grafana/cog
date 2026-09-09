@@ -1,0 +1,92 @@
+{{- /* C# disjunction-of-scalars-and-refs JsonConverter.
+       Reads the input into a JsonDocument so we can inspect its
+       ValueKind. Object payloads are dispatched via try/deserialize
+       attempts against each ref branch (mirrors Java's `couldBe`
+       helper); the first branch that round-trips wins. A trailing
+       `Any`-typed branch, if present, acts as catch-all for objects.
+*/ -}}
+namespace {{ .Namespace }};
+
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+public sealed class {{ .Name }}JsonConverter : JsonConverter<{{ .Name }}>
+{
+    public override {{ .Name }} Read(ref Utf8JsonReader reader, System.Type typeToConvert, JsonSerializerOptions options)
+    {
+        using var doc = JsonDocument.ParseValue(ref reader);
+        var root = doc.RootElement;
+        var raw = root.GetRawText();
+        var result = new {{ .Name }}();
+
+        switch (root.ValueKind)
+        {
+        {{- range .ScalarBranches }}
+        {{- range .ValueKinds }}
+            case JsonValueKind.{{ . }}:
+        {{- end }}
+        {{- if .IntField }}
+                if (root.TryGetInt64(out _)) { result.{{ .IntField }} = root.{{ .IntElementGet }}; }
+                else { result.{{ .Field }} = root.{{ .ElementGet }}; }
+        {{- else if .ElementGet }}
+                result.{{ .Field }} = root.{{ .ElementGet }};
+        {{- else }}
+                result.{{ .Field }} = JsonSerializer.Deserialize<{{ .DeserializeAs }}>(raw, options);
+        {{- end }}
+                break;
+        {{- end }}
+            case JsonValueKind.Object:
+        {{- range .RefBranches }}
+                if (TryDeserialize<{{ .TypeRef }}>(raw, options, out var __{{ .Field }})) { result.{{ .Field }} = __{{ .Field }}; break; }
+        {{- end }}
+        {{- if .HasAnyBranch }}
+                result.{{ .AnyField }} = JsonSerializer.Deserialize<JsonElement>(raw, options);
+        {{- else }}
+                throw new JsonException("no ref branch matched JSON object for {{ .Name }}");
+        {{- end }}
+                break;
+            default:
+                throw new JsonException("unexpected token while deserialising {{ .Name }}: " + root.ValueKind);
+        }
+
+        return result;
+    }
+
+    public override void Write(Utf8JsonWriter writer, {{ .Name }} value, JsonSerializerOptions options)
+    {
+        {{- $first := true -}}
+        {{- range .ScalarBranches }}
+        {{- if .IntField }}
+        {{ if not $first }}else {{ end }}if (value.{{ .IntField }} != null) { JsonSerializer.Serialize(writer, value.{{ .IntField }}{{ .IntWrite }}, options); }
+        {{- $first = false }}
+        {{- end }}
+        {{ if not $first }}else {{ end }}if (value.{{ .Field }} != null) { JsonSerializer.Serialize(writer, value.{{ .Field }}{{ .WriteAccess }}, options); }
+        {{- $first = false }}
+        {{- end }}
+        {{- range .RefBranches }}
+        {{ if not $first }}else {{ end }}if (value.{{ .Field }} != null) { JsonSerializer.Serialize(writer, value.{{ .Field }}, options); }
+        {{- $first = false }}
+        {{- end }}
+        {{- if .HasAnyBranch }}
+        {{ if not $first }}else {{ end }}if (value.{{ .AnyField }} != null) { JsonSerializer.Serialize(writer, value.{{ .AnyField }}, options); }
+        {{- end }}
+        else
+        {
+            writer.WriteNullValue();
+        }
+    }
+
+    private static bool TryDeserialize<T>(string raw, JsonSerializerOptions options, out T? value)
+    {
+        try
+        {
+            value = JsonSerializer.Deserialize<T>(raw, options);
+            return value != null;
+        }
+        catch (JsonException)
+        {
+            value = default;
+            return false;
+        }
+    }
+}

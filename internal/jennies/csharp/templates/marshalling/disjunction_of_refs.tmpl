@@ -1,0 +1,53 @@
+{{- /* C# discriminated disjunction-of-refs JsonConverter.
+       Reads the JSON object once into a JsonDocument, inspects the
+       discriminator field to pick a branch, then deserialises the
+       full object into the matching field.
+*/ -}}
+namespace {{ .Namespace }};
+
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+public sealed class {{ .Name }}JsonConverter : JsonConverter<{{ .Name }}>
+{
+    public override {{ .Name }} Read(ref Utf8JsonReader reader, System.Type typeToConvert, JsonSerializerOptions options)
+    {
+        using var doc = JsonDocument.ParseValue(ref reader);
+        var root = doc.RootElement;
+        if (!root.TryGetProperty("{{ .Discriminator }}", out var discProp))
+        {
+            throw new JsonException("missing discriminator property '{{ .Discriminator }}' for {{ .Name }}");
+        }
+
+        var result = new {{ .Name }}();
+        var raw = root.GetRawText();
+        switch (discProp.GetString())
+        {
+        {{- range .Cases }}
+        {{- if .CatchAll }}
+            default:
+        {{- else }}
+            case "{{ .Discriminator }}":
+        {{- end }}
+                result.{{ .Field }} = JsonSerializer.Deserialize<{{ .TypeRef }}>(raw, options);
+                break;
+        {{- end }}
+        {{- if not .HasCatchAll }}
+            default:
+                throw new JsonException("unknown discriminator value '" + discProp.GetString() + "' for {{ .Name }}");
+        {{- end }}
+        }
+        return result;
+    }
+
+    public override void Write(Utf8JsonWriter writer, {{ .Name }} value, JsonSerializerOptions options)
+    {
+        {{- range $i, $c := .Cases }}
+        {{ if $i }}else {{ end }}if (value.{{ $c.Field }} != null) { JsonSerializer.Serialize(writer, value.{{ $c.Field }}, options); }
+        {{- end }}
+        else
+        {
+            writer.WriteNullValue();
+        }
+    }
+}

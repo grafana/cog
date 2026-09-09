@@ -1,0 +1,52 @@
+{{- /* C# disjunction-of-scalars JsonConverter.
+       For each branch we map a JsonTokenType to one of the struct's
+       fields. Numeric tokens are checked against the int branch
+       (if any) before the float branch.
+*/ -}}
+namespace {{ .Namespace }};
+
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+public sealed class {{ .Name }}JsonConverter : JsonConverter<{{ .Name }}>
+{
+    public override {{ .Name }} Read(ref Utf8JsonReader reader, System.Type typeToConvert, JsonSerializerOptions options)
+    {
+        var result = new {{ .Name }}();
+        switch (reader.TokenType)
+        {
+        {{- range .Branches }}
+        {{- range .Tokens }}
+            case JsonTokenType.{{ . }}:
+        {{- end }}
+        {{- if .IntField }}
+                if (reader.TryGetInt64(out _)) { result.{{ .IntField }} = {{ .IntReadExpr }}; }
+                else { result.{{ .Field }} = {{ .ReadExpr }}; }
+        {{- else }}
+                result.{{ .Field }} = {{ .ReadExpr }};
+        {{- end }}
+                break;
+        {{- end }}
+            default:
+                throw new JsonException("unexpected token while deserialising {{ .Name }}: " + reader.TokenType);
+        }
+        return result;
+    }
+
+    public override void Write(Utf8JsonWriter writer, {{ .Name }} value, JsonSerializerOptions options)
+    {
+        {{- $first := true }}
+        {{- range .Branches }}
+        {{- if .IntField }}
+        {{ if not $first }}else {{ end }}if (value.{{ .IntField }} != null) { JsonSerializer.Serialize(writer, value.{{ .IntField }}{{ .IntWrite }}, options); }
+        {{- $first = false }}
+        {{- end }}
+        {{ if not $first }}else {{ end }}if (value.{{ .Field }} != null) { JsonSerializer.Serialize(writer, value.{{ .Field }}{{ .WriteAccess }}, options); }
+        {{- $first = false }}
+        {{- end }}
+        else
+        {
+            writer.WriteNullValue();
+        }
+    }
+}
