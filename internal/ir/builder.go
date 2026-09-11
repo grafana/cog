@@ -151,7 +151,7 @@ func (constructor *Constructor) DeepCopy() Constructor {
 
 type Builders []Builder
 
-func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool) {
+func (builders Builders) GetByObject(pkg string, name string) (Builder, bool) {
 	for _, builder := range builders {
 		if builder.For.SelfRef.ReferredPkg == pkg && builder.For.SelfRef.ReferredType == name {
 			return builder, true
@@ -161,7 +161,7 @@ func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool)
 	return Builder{}, false
 }
 
-func (builders Builders) LocateByName(pkg string, name string) (Builder, bool) {
+func (builders Builders) GetByName(pkg string, name string) (Builder, bool) {
 	for _, builder := range builders {
 		if builder.Package == pkg && builder.Name == name {
 			return builder, true
@@ -171,20 +171,20 @@ func (builders Builders) LocateByName(pkg string, name string) (Builder, bool) {
 	return Builder{}, false
 }
 
-func (builders Builders) ByPackage(pkg string) Builders {
+func (builders Builders) GetByPackage(pkg string) Builders {
 	return tools.Filter(builders, func(builder Builder) bool {
 		return builder.Package == pkg
 	})
 }
 
-func (builders Builders) LocateAllByObject(pkg string, name string) Builders {
+func (builders Builders) GetAllByObject(pkg string, name string) Builders {
 	return tools.Filter(builders, func(builder Builder) bool {
 		return builder.For.SelfRef.ReferredPkg == pkg && builder.For.SelfRef.ReferredType == name
 	})
 }
 
-func (builders Builders) LocateAllByRef(ref RefType) Builders {
-	return builders.LocateAllByObject(ref.ReferredPkg, ref.ReferredType)
+func (builders Builders) GetAllByRef(ref RefType) Builders {
+	return builders.GetAllByObject(ref.ReferredPkg, ref.ReferredType)
 }
 
 func (builders Builders) HaveConstantConstructorAssignment() bool {
@@ -542,87 +542,4 @@ func FieldAssignment(field StructField, opts ...AssignmentOpt) Assignment {
 	allOpts = append(allOpts, opts...)
 
 	return ArgumentAssignment(PathFromStructField(field), argument, allOpts...)
-}
-
-type BuilderGenerator struct {
-}
-
-func (generator *BuilderGenerator) FromAST(schemas Schemas) []Builder {
-	builders := make([]Builder, 0, len(schemas))
-
-	for _, schema := range schemas {
-		schema.Objects.Iterate(func(_ string, object Object) {
-			resolvedType := schemas.Resolve(object.Type)
-			if !resolvedType.IsAnyOf(KindStruct, KindRef) {
-				return
-			}
-
-			builders = append(builders, generator.structObjectToBuilder(schemas, schema, object))
-		})
-	}
-
-	return builders
-}
-
-func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema *Schema, object Object) Builder {
-	builder := Builder{
-		Package:            schema.Package,
-		For:                object,
-		Name:               object.Name,
-		DeprecationMessage: object.DeprecationMessage,
-	}
-
-	structType := schemas.Resolve(object.Type).AsStruct()
-	for _, field := range structType.Fields {
-		if field.Type.IsScalar() && field.Type.AsScalar().IsConcrete() {
-			constantAssignment := ConstantAssignment(PathFromStructField(field), field.Type.AsScalar().Value)
-
-			builder.Constructor.Assignments = append(builder.Constructor.Assignments, constantAssignment)
-			continue
-		}
-		if field.Required && !field.Type.Nullable && generator.fieldIsRefToConcrete(schemas, field) {
-			resolvedType := schemas.Resolve(field.Type)
-
-			constantAssignment := ConstantAssignment(PathFromStructField(field), resolvedType.AsScalar().Value)
-			builder.Constructor.Assignments = append(builder.Constructor.Assignments, constantAssignment)
-
-			continue
-		}
-		if field.Required && !field.Type.Nullable && field.Type.IsConstantRef() {
-			continue
-		}
-
-		builder.Options = append(builder.Options, generator.structFieldToOption(field))
-	}
-
-	return builder
-}
-
-func (generator *BuilderGenerator) fieldIsRefToConcrete(schemas Schemas, field StructField) bool {
-	if !field.Type.IsRef() {
-		return false
-	}
-
-	return schemas.Resolve(field.Type).IsConcreteScalar()
-}
-
-func (generator *BuilderGenerator) structFieldToOption(field StructField) Option {
-	opt := Option{
-		Name:     field.Name,
-		Comments: field.Comments,
-		Args: []Argument{
-			{Name: field.Name, Type: field.Type},
-		},
-		Assignments: []Assignment{
-			FieldAssignment(field),
-		},
-	}
-
-	if field.Type.Default != nil {
-		opt.Default = &OptionDefault{
-			ArgsValues: []any{field.Type.Default},
-		}
-	}
-
-	return opt
 }

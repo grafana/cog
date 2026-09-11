@@ -54,7 +54,7 @@ func (jenny Builder) genBuilder(context languages.Context, builder ir.Builder) (
 
 	jenny.typeFormatter = createFormatter(context, jenny.config).withPackageMapper(packageMapper)
 
-	object, _ := context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
+	object, _ := context.GetObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
 	tmpl := BuilderTemplate{
 		Package:              jenny.config.formatPackage(builder.Package),
 		RawPackage:           builder.Package,

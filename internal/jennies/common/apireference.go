@@ -264,7 +264,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ir.Sche
 
 	buffer.WriteString("## Builders\n\n")
 
-	builders := context.Builders.ByPackage(schema.Package)
+	builders := context.Builders.GetByPackage(schema.Package)
 	slices.SortFunc(builders, func(builderA, builderB ir.Builder) int {
 		return strings.Compare(builderA.Name, builderB.Name)
 	})
@@ -343,7 +343,7 @@ title: %[2]s %[1]s
 		return codejen.File{}, err
 	}
 
-	buildersForObjet := context.Builders.LocateAllByObject(object.SelfRef.ReferredPkg, object.SelfRef.ReferredType)
+	buildersForObjet := context.Builders.GetAllByObject(object.SelfRef.ReferredPkg, object.SelfRef.ReferredType)
 	if len(buildersForObjet) != 0 {
 		buffer.WriteString("## See also\n\n")
 

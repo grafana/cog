@@ -89,7 +89,7 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 		},
 		"formatValue": func(destinationType ir.Type, value any) string {
 			if destinationType.IsRef() {
-				referredObj, found := deps.context.LocateObjectByRef(destinationType.AsRef())
+				referredObj, found := deps.context.GetObjectByRef(destinationType.AsRef())
 				if found && referredObj.Type.IsEnum() {
 					return typesFormatter.formatEnumValue(referredObj, value)
 				}

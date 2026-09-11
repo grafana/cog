@@ -86,7 +86,7 @@ func (tf *typeFormatter) formatArrayOrMapFields(def ir.Type, importValue string,
 }
 
 func (tf *typeFormatter) formatReference(def ir.RefType) string {
-	object, _ := tf.context.LocateObjectByRef(def)
+	object, _ := tf.context.GetObjectByRef(def)
 	switch object.Type.Kind {
 	case ir.KindScalar:
 		return formatScalarType(object.Type.AsScalar())
@@ -101,7 +101,7 @@ func (tf *typeFormatter) formatReference(def ir.RefType) string {
 }
 
 func (tf *typeFormatter) formatConstantReference(def ir.ConstantReferenceType) string {
-	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	object, _ := tf.context.GetObject(def.ReferredPkg, def.ReferredType)
 	if object.Type.IsEnum() {
 		return formatObjectName(def.ReferredType)
 	}
@@ -184,7 +184,7 @@ func (tf *typeFormatter) emptyValueForType(def ir.Type, useBuilders bool) string
 			return fmt.Sprintf("new %sBuilder().build()", tf.config.formatPackage(refDef))
 		}
 
-		referredObj, found := tf.context.LocateObjectByRef(def.AsRef())
+		referredObj, found := tf.context.GetObjectByRef(def.AsRef())
 		if found && referredObj.Type.IsEnum() {
 			defaultMember := referredObj.Type.AsEnum().Values[0]
 
@@ -282,7 +282,7 @@ func (tf *typeFormatter) formatRefType(destinationType ir.Type, value any) strin
 		return fmt.Sprintf("%#v", value)
 	}
 
-	referredObj, found := tf.context.LocateObjectByRef(destinationType.AsRef())
+	referredObj, found := tf.context.GetObjectByRef(destinationType.AsRef())
 	if !found {
 		return fmt.Sprintf("%#v", value)
 	}
@@ -392,7 +392,7 @@ func (tf *typeFormatter) formatGuardPath(fieldPath ir.Path) string {
 }
 
 func (tf *typeFormatter) constantRefValue(def ir.ConstantReferenceType) string {
-	obj, ok := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	obj, ok := tf.context.GetObject(def.ReferredPkg, def.ReferredType)
 	if !ok {
 		return "unknown"
 	}

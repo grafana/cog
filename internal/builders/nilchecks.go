@@ -1,20 +1,11 @@
-package languages
+package builders
 
 import (
 	"github.com/grafana/cog/internal/ir"
+	"github.com/grafana/cog/internal/languages"
 )
 
-func GenerateBuilderNilChecks(language Language, context Context) (Context, error) {
-	var err error
-	nullableKinds := NullableConfig{
-		Kinds:              nil,
-		ProtectArrayAppend: false,
-		AnyIsNullable:      true,
-	}
-	if nilTypesProvider, ok := language.(NullableKindsProvider); ok {
-		nullableKinds = nilTypesProvider.NullableKinds()
-	}
-
+func GenerateNilChecks(nullableKinds languages.NullableConfig, schemas ir.Schemas, builders ir.Builders) (ir.Builders, error) {
 	// Allows us to keep track of the checks already performed for the current scope (constructor or option)
 	// When a check is generated, the path being checked is stored in this map.
 	// Changes in scope must reset this map.
@@ -61,10 +52,6 @@ func GenerateBuilderNilChecks(language Language, context Context) (Context, erro
 			return assignment, nil
 		},
 	}
-	context.Builders, err = nilChecksVisitor.Visit(context.Schemas, context.Builders)
-	if err != nil {
-		return context, err
-	}
 
-	return context, nil
+	return nilChecksVisitor.Visit(schemas, builders)
 }
