@@ -45,6 +45,8 @@ type Output struct {
 
 	// OutputOptions configures the output of the file
 	OutputOptions OutputOptions `yaml:"output_options"`
+
+	LanguagePlugins map[string]OutputLanguagePlugin `yaml:"language_plugins"`
 }
 
 func (output *Output) interpolateParameters(interpolator ParametersInterpolator) {
@@ -57,6 +59,10 @@ func (output *Output) interpolateParameters(interpolator ParametersInterpolator)
 
 	for _, outputLanguage := range output.Languages {
 		outputLanguage.interpolateParameters(output, interpolator)
+	}
+
+	for _, config := range output.LanguagePlugins {
+		config.interpolateParameters(interpolator)
 	}
 }
 
@@ -101,4 +107,21 @@ func (outputLanguage *OutputLanguage) interpolateParameters(output *Output, inte
 type OutputOptions struct {
 	// ReplaceExtension updates file extensions to the new one
 	ReplaceExtension map[string]string `yaml:"replace_extension"`
+}
+
+type OutputLanguagePlugin map[string]any
+
+func (outputLanguagePlugin OutputLanguagePlugin) interpolateParameters(interpolator ParametersInterpolator) {
+	interpolateAny := func(input any) any {
+		stringVal, ok := input.(string)
+		if ok {
+			return interpolator(stringVal)
+		}
+
+		return input
+	}
+
+	for key, val := range outputLanguagePlugin {
+		outputLanguagePlugin[key] = interpolateAny(val)
+	}
 }

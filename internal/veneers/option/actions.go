@@ -6,9 +6,9 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers"
+	"github.com/grafana/cog/pkg/ir"
 )
 
 type ActionRunner func(ctx RuleCtx, builder ir.Builder, option ir.Option) ([]ir.Option, error)

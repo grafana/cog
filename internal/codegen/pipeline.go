@@ -9,21 +9,22 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
-	"github.com/grafana/cog/internal/ir"
-	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
 	"github.com/grafana/cog/internal/jennies/openapi"
 	"github.com/grafana/cog/internal/jennies/php"
 	"github.com/grafana/cog/internal/jennies/python"
+	"github.com/grafana/cog/internal/jennies/remote"
 	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
-	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/rewrite"
 	cogyaml "github.com/grafana/cog/internal/yaml"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/ir/transforms"
+	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/logs"
 )
 
 type ParametersInterpolator func(input string) string
@@ -329,6 +330,15 @@ func (pipeline *Pipeline) OutputLanguages() (languages.Languages, error) {
 		default:
 			return nil, fmt.Errorf("empty language configuration")
 		}
+	}
+
+	for name, config := range pipeline.Output.LanguagePlugins {
+		languagePlugin, err := remote.New(pipeline.logger.With(slog.String("language", name)), name, config)
+		if err != nil {
+			return nil, fmt.Errorf("could not initialize '%s' language plugin: %w", name, err)
+		}
+
+		outputs[name] = languagePlugin
 	}
 
 	return outputs, nil

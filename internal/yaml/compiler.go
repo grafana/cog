@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/goccy/go-yaml"
-	"github.com/grafana/cog/internal/ir/transforms"
+	"github.com/grafana/cog/pkg/ir/transforms"
 )
 
 type Transforms struct {

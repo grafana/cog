@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 type APIRef struct {
@@ -118,17 +118,17 @@ func (apiRef *APIRef) definition(typesFormatter *typeFormatter, def ir.Object) s
 func (apiRef *APIRef) defineStruct(typesFormatter *typeFormatter, def ir.Object) string {
 	buffer := strings.Builder{}
 
-	buffer.WriteString(fmt.Sprintf("public class %s ", tools.UpperCamelCase(def.Name)))
+	fmt.Fprintf(&buffer, "public class %s ", tools.UpperCamelCase(def.Name))
 	if def.Type.HasHint(ir.HintImplementsVariant) {
 		if def.Type.Hints[ir.HintImplementsVariant] == string(ir.SchemaVariantDataQuery) {
-			buffer.WriteString(fmt.Sprintf("extends %s ", apiRef.config.formatPackage("cog.variants.Dataquery")))
+			fmt.Fprintf(&buffer, "extends %s ", apiRef.config.formatPackage("cog.variants.Dataquery"))
 		}
 	}
 
 	buffer.WriteString("{\n")
 
 	for _, field := range def.Type.AsStruct().Fields {
-		buffer.WriteString(fmt.Sprintf("  public %s %s;\n", typesFormatter.formatFieldType(field.Type), formatFieldName(field.Name)))
+		fmt.Fprintf(&buffer, "  public %s %s;\n", typesFormatter.formatFieldType(field.Type), formatFieldName(field.Name))
 	}
 
 	buffer.WriteString("}")

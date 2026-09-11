@@ -9,7 +9,7 @@ import (
 	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
 	"cuelang.org/go/cue/token"
-	"github.com/grafana/cog/internal/ir"
+	"github.com/grafana/cog/pkg/ir"
 )
 
 const cogAnnotationName = "cog"

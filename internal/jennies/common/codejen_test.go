@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/languages"
 	"github.com/stretchr/testify/require"
 )
 

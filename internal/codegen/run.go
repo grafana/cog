@@ -7,9 +7,9 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/builders"
-	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/ir"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
@@ -46,6 +46,12 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 		// then delegate the codegen to the jennies
 		if err := runJenny(languageJennies, jenniesInput, generatedFS); err != nil {
 			return nil, err
+		}
+
+		// if the language can be terminated, let's do it
+		// ie: plugins
+		if j, ok := target.(interface{ Terminate() }); ok {
+			j.Terminate()
 		}
 	}
 
