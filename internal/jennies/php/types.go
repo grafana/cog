@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -31,22 +31,22 @@ func builderTypeFormatter(config Config, context languages.Context) *typeFormatt
 		forBuilder: true,
 	}
 }
-func (formatter *typeFormatter) formatTypeDeclaration(tmpl *template.Template, context languages.Context, def ast.Object) string {
+func (formatter *typeFormatter) formatTypeDeclaration(tmpl *template.Template, context languages.Context, def ir.Object) string {
 	var buffer strings.Builder
 
 	defName := formatObjectName(def.Name)
 
 	switch def.Type.Kind {
-	case ast.KindEnum:
+	case ir.KindEnum:
 		enum, err := formatter.formatEnumDeclaration(tmpl, context, def)
 		if err != nil {
 			panic(err)
 		}
 
 		buffer.WriteString(enum)
-	case ast.KindRef:
+	case ir.KindRef:
 		buffer.WriteString(fmt.Sprintf("class %s extends %s {}", defName, formatter.formatType(def.Type)))
-	case ast.KindStruct:
+	case ir.KindStruct:
 		variant := ""
 		if def.Type.ImplementsVariant() {
 			variant = ", " + formatter.config.fullNamespaceRef("Cog\\"+formatObjectName(def.Type.ImplementedVariant()))
@@ -67,7 +67,7 @@ func (formatter *typeFormatter) formatTypeDeclaration(tmpl *template.Template, c
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatEnumDeclaration(tmpl *template.Template, context languages.Context, def ast.Object) (string, error) {
+func (formatter *typeFormatter) formatEnumDeclaration(tmpl *template.Template, context languages.Context, def ir.Object) (string, error) {
 	return tmpl.
 		Funcs(templateHelpers(templateDeps{
 			config:  formatter.config,
@@ -79,11 +79,11 @@ func (formatter *typeFormatter) formatEnumDeclaration(tmpl *template.Template, c
 		})
 }
 
-func (formatter *typeFormatter) formatType(def ast.Type) string {
+func (formatter *typeFormatter) formatType(def ir.Type) string {
 	return formatter.doFormatType(def, formatter.forBuilder)
 }
 
-func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool) string {
+func (formatter *typeFormatter) doFormatType(def ir.Type, resolveBuilders bool) string {
 	actualFormatter := func() string {
 		if def.IsAny() {
 			return ""
@@ -140,7 +140,7 @@ func (formatter *typeFormatter) variantInterface(variant string) string {
 	return formatter.config.fullNamespaceRef("Cog\\" + formatObjectName(variant))
 }
 
-func (formatter *typeFormatter) formatField(def ast.StructField) string {
+func (formatter *typeFormatter) formatField(def ir.StructField) string {
 	var buffer strings.Builder
 
 	comments := def.Comments
@@ -179,14 +179,14 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) string {
+func (formatter *typeFormatter) formatEnumValue(enumObj ir.Object, val any) string {
 	referredPkg := formatPackageName(enumObj.SelfRef.ReferredPkg)
 	member, _ := enumObj.Type.Enum.MemberForValue(val)
 
 	return fmt.Sprintf(formatter.config.fullNamespaceRef(referredPkg+"\\"+enumObj.Name)+"::%s()", formatEnumMemberName(member.Name))
 }
 
-func (formatter *typeFormatter) formatScalar(def ast.Type) string {
+func (formatter *typeFormatter) formatScalar(def ir.Type) string {
 	scalarKind := def.AsScalar().ScalarKind
 	/*
 		if def.HasHint(ast.HintStringFormatDateTime) {
@@ -195,31 +195,31 @@ func (formatter *typeFormatter) formatScalar(def ast.Type) string {
 	*/
 
 	switch scalarKind {
-	case ast.KindNull:
+	case ir.KindNull:
 		return "null"
-	case ast.KindAny:
+	case ir.KindAny:
 		return ""
 
-	case ast.KindBytes:
+	case ir.KindBytes:
 		return "string"
-	case ast.KindString:
+	case ir.KindString:
 		return "string"
 
-	case ast.KindFloat32, ast.KindFloat64:
+	case ir.KindFloat32, ir.KindFloat64:
 		return "float"
-	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
+	case ir.KindUint8, ir.KindUint16, ir.KindUint32, ir.KindUint64:
 		return "int"
-	case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
+	case ir.KindInt8, ir.KindInt16, ir.KindInt32, ir.KindInt64:
 		return "int"
 
-	case ast.KindBool:
+	case ir.KindBool:
 		return "bool"
 	default:
 		return string(scalarKind)
 	}
 }
 
-func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
+func (formatter *typeFormatter) formatRef(def ir.Type, resolveBuilders bool) string {
 	referredPkg := formatPackageName(def.AsRef().ReferredPkg)
 	typeName := formatter.config.fullNamespaceRef(referredPkg + "\\" + formatObjectName(def.AsRef().ReferredType))
 
@@ -230,7 +230,7 @@ func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) st
 	return typeName
 }
 
-func (formatter *typeFormatter) formatConstantReference(def ast.Type) string {
+func (formatter *typeFormatter) formatConstantReference(def ir.Type) string {
 	ref := def.AsConstantRef()
 	referredPkg := formatPackageName(ref.ReferredPkg)
 
@@ -250,7 +250,7 @@ func (formatter *typeFormatter) formatConstantReference(def ast.Type) string {
 	return "unknown"
 }
 
-func (formatter *typeFormatter) constantRefValue(def ast.ConstantReferenceType) string {
+func (formatter *typeFormatter) constantRefValue(def ir.ConstantReferenceType) string {
 	obj, ok := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	if !ok {
 		return "unknown"

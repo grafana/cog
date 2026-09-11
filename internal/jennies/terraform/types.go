@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/languages"
 )
 
@@ -20,38 +20,38 @@ func defaultTypeFormatter(context languages.Context, packageMapper func(pkg stri
 	}
 }
 
-func (formatter *typeFormatter) formatDeclaration(object ast.Object) string {
+func (formatter *typeFormatter) formatDeclaration(object ir.Object) string {
 	return fmt.Sprintf("var %s = %s", formatTypeName(object.SelfRef), formatter.formatType(object.Type))
 }
 
-func (formatter *typeFormatter) formatType(def ast.Type) string {
+func (formatter *typeFormatter) formatType(def ir.Type) string {
 	switch def.Kind {
-	case ast.KindScalar:
-		if def.HasHint(ast.HintStringFormatDateTime) {
+	case ir.KindScalar:
+		if def.HasHint(ir.HintStringFormatDateTime) {
 			formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
 			return "timetypes.RFC3339"
 		}
-		if def.HasHint(ast.HintStringFormatDuration) {
+		if def.HasHint(ir.HintStringFormatDuration) {
 			formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
 			return "timetypes.GoDurationType"
 		}
 		return formatter.formatScalarType(def.AsScalar())
-	case ast.KindMap:
+	case ir.KindMap:
 		return formatter.formatMapType(def.AsMap())
-	case ast.KindArray:
+	case ir.KindArray:
 		return formatter.formatArrayType(def.AsArray())
-	case ast.KindStruct:
+	case ir.KindStruct:
 		return formatter.formatStructType(def.AsStruct())
-	case ast.KindRef:
+	case ir.KindRef:
 		return formatter.formatReference(def.AsRef())
-	case ast.KindEnum:
+	case ir.KindEnum:
 		return formatter.formatType(def.AsEnum().Values[0].Type)
 	default:
 		return "unknown"
 	}
 }
 
-func (formatter *typeFormatter) formatStructType(s ast.StructType) string {
+func (formatter *typeFormatter) formatStructType(s ir.StructType) string {
 	var buffer strings.Builder
 
 	formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/attr")
@@ -74,31 +74,31 @@ func (formatter *typeFormatter) formatStructType(s ast.StructType) string {
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatScalarType(scalar ast.ScalarType) string {
+func (formatter *typeFormatter) formatScalarType(scalar ir.ScalarType) string {
 	switch scalar.ScalarKind {
-	case ast.KindString, ast.KindBytes, ast.KindNull:
+	case ir.KindString, ir.KindBytes, ir.KindNull:
 		return "types.StringType"
-	case ast.KindBool:
+	case ir.KindBool:
 		return "types.BoolType"
-	case ast.KindInt32, ast.KindUint32:
+	case ir.KindInt32, ir.KindUint32:
 		return "types.Int32Type"
-	case ast.KindInt64, ast.KindUint64:
+	case ir.KindInt64, ir.KindUint64:
 		return "types.Int64Type"
-	case ast.KindFloat32:
+	case ir.KindFloat32:
 		return "types.Float32Type"
-	case ast.KindFloat64:
+	case ir.KindFloat64:
 		return "types.Float64Type"
-	case ast.KindAny:
+	case ir.KindAny:
 		// `any` should be represented as a string holding a JSON payload
 		return "types.StringType"
-	case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16:
+	case ir.KindInt8, ir.KindUint8, ir.KindInt16, ir.KindUint16:
 		return "types.NumberType"
 	default:
 		return fmt.Sprintf("unsupported scalar kind '%s'", scalar.ScalarKind)
 	}
 }
 
-func (formatter *typeFormatter) formatReference(ref ast.RefType) string {
+func (formatter *typeFormatter) formatReference(ref ir.RefType) string {
 	obj, ok := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
 	if !ok {
 		return "unknown" // We don't find the referenced object, so we assume it's a generic object
@@ -116,10 +116,10 @@ func (formatter *typeFormatter) formatReference(ref ast.RefType) string {
 	return formatTypeName(ref)
 }
 
-func (formatter *typeFormatter) formatArrayType(array ast.ArrayType) string {
+func (formatter *typeFormatter) formatArrayType(array ir.ArrayType) string {
 	return fmt.Sprintf("types.ListType{\n\tElemType: %s,\n}", formatter.formatType(array.ValueType))
 }
 
-func (formatter *typeFormatter) formatMapType(mapType ast.MapType) string {
+func (formatter *typeFormatter) formatMapType(mapType ir.MapType) string {
 	return fmt.Sprintf("types.MapType{\n\tElemType: %s,\n}", formatter.formatType(mapType.ValueType))
 }

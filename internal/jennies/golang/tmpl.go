@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -25,19 +25,19 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 		template.Funcs(formattingTemplateFuncs(config)),
 		template.Funcs(config.OverridesTemplateFuncs),
 		template.Funcs(template.FuncMap{
-			"formatPath": func(_ ast.Path) string {
+			"formatPath": func(_ ir.Path) string {
 				panic("formatPath() needs to be overridden by a jenny")
 			},
-			"formatPathForRange": func(_ ast.Path) string {
+			"formatPathForRange": func(_ ir.Path) string {
 				panic("formatPathForRange() needs to be overridden by a jenny")
 			},
-			"formatType": func(_ ast.Type) string {
+			"formatType": func(_ ir.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
-			"formatTypeNoBuilder": func(_ ast.Type) string {
+			"formatTypeNoBuilder": func(_ ir.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
-			"formatRawRef": func(_ ast.Type) string {
+			"formatRawRef": func(_ ir.Type) string {
 				panic("formatRawRef() needs to be overridden by a jenny")
 			},
 			"importStdPkg": func(_ string) string {
@@ -46,50 +46,50 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 			"importPkg": func(_ string) string {
 				panic("importPkg() needs to be overridden by a jenny")
 			},
-			"emptyValueForGuard": func(_ ast.Type) string {
+			"emptyValueForGuard": func(_ ir.Type) string {
 				panic("emptyValueForGuard() needs to be overridden by a jenny")
 			},
-			"typeHasBuilder": func(_ ast.Type) bool {
+			"typeHasBuilder": func(_ ir.Type) bool {
 				panic("typeHasBuilder() needs to be overridden by a jenny")
 			},
-			"typeHasEqualityFunc": func(_ ast.Type) bool {
+			"typeHasEqualityFunc": func(_ ir.Type) bool {
 				panic("typeHasEqualityFunc() needs to be overridden by a jenny")
 			},
-			"resolvesToArrayOfScalars": func(typeDef ast.Type) bool {
+			"resolvesToArrayOfScalars": func(typeDef ir.Type) bool {
 				panic("resolvesToArrayOfScalars() needs to be overridden by a jenny")
 			},
-			"resolvesToMapOfScalars": func(typeDef ast.Type) bool {
+			"resolvesToMapOfScalars": func(typeDef ir.Type) bool {
 				panic("resolvesToMapOfScalars() needs to be overridden by a jenny")
 			},
-			"resolvesToConstraints": func(_ ast.Type) string {
+			"resolvesToConstraints": func(_ ir.Type) string {
 				panic("resolvesToConstraints() needs to be overridden by a jenny")
 			},
 			"toGoIdent": func(_ string) string {
 				panic("toGoIdent() needs to be overridden by a jenny")
 			},
-			"constructorFor": func(ref *ast.RefType) string {
+			"constructorFor": func(ref *ir.RefType) string {
 				panic("constructorFor() needs to be overridden by a jenny")
 			},
-			"formatValue": func(destinationType ast.Type, value any) string {
+			"formatValue": func(destinationType ir.Type, value any) string {
 				panic("formatValue() needs to be overridden by a jenny")
 			},
 		}),
 		template.Funcs(template.FuncMap{
-			"maybeAsPointer": func(intoType ast.Type, variableName string) string {
-				if intoType.Nullable && !intoType.IsAnyOf(ast.KindArray, ast.KindMap, ast.KindComposableSlot) {
+			"maybeAsPointer": func(intoType ir.Type, variableName string) string {
+				if intoType.Nullable && !intoType.IsAnyOf(ir.KindArray, ir.KindMap, ir.KindComposableSlot) {
 					return "&" + variableName
 				}
 
 				return variableName
 			},
-			"maybeDereference": func(typeDef ast.Type) string {
-				if typeDef.Nullable && !typeDef.IsAnyOf(ast.KindArray, ast.KindMap, ast.KindComposableSlot) {
+			"maybeDereference": func(typeDef ir.Type) string {
+				if typeDef.Nullable && !typeDef.IsAnyOf(ir.KindArray, ir.KindMap, ir.KindComposableSlot) {
 					return "*"
 				}
 
 				return ""
 			},
-			"isNullableNonArray": func(typeDef ast.Type) bool {
+			"isNullableNonArray": func(typeDef ir.Type) bool {
 				return typeDef.Nullable && !typeDef.IsArray()
 			},
 		}),

@@ -1,7 +1,7 @@
 package codegen
 
 import (
-	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -14,11 +14,11 @@ type Transforms struct {
 	// CommonPasses holds a list of compiler passes to apply to all the schemas.
 	// If this field is set, CommonPassesFiles is ignored.
 	// Note: these compiler passes are applied *before* language-specific passes.
-	CommonPasses compiler.Passes `yaml:"-"`
+	CommonPasses transforms.Transforms `yaml:"-"`
 
 	// FinalPasses holds a list of compiler passes to apply to all the schemas.
 	// Note: these compiler passes are applied *after* language-specific passes.
-	FinalPasses compiler.Passes `yaml:"-"`
+	FinalPasses transforms.Transforms `yaml:"-"`
 
 	// VeneersPaths holds a list of paths to veneer files to apply to all the
 	// builders.

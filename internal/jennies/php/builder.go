@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -31,9 +31,9 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 
 	// Add argument typehints and ensure arguments are not nullable
 	hinter := &typehints{config: jenny.config, context: context, resolveBuilders: true}
-	visitor := ast.BuilderVisitor{
-		OnOption: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, option ast.Option) (ast.Option, error) {
-			option.Args = tools.Map(option.Args, func(arg ast.Argument) ast.Argument {
+	visitor := ir.BuilderVisitor{
+		OnOption: func(visitor *ir.BuilderVisitor, schemas ir.Schemas, builder ir.Builder, option ir.Option) (ir.Option, error) {
+			option.Args = tools.Map(option.Args, func(arg ir.Argument) ir.Argument {
 				newArg := arg.DeepCopy()
 				newArg.Type.Nullable = false
 
@@ -51,8 +51,8 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 
 			return option, nil
 		},
-		OnFactory: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, factory ast.BuilderFactory) (ast.BuilderFactory, error) {
-			factory.Args = tools.Map(factory.Args, func(arg ast.Argument) ast.Argument {
+		OnFactory: func(visitor *ir.BuilderVisitor, schemas ir.Schemas, builder ir.Builder, factory ir.BuilderFactory) (ir.BuilderFactory, error) {
+			factory.Args = tools.Map(factory.Args, func(arg ir.Argument) ir.Argument {
 				newArg := arg.DeepCopy()
 				newArg.Type.Nullable = false
 
@@ -93,7 +93,7 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 	return files, nil
 }
 
-func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
+func (jenny *Builder) generateBuilder(context languages.Context, builder ir.Builder) ([]byte, error) {
 	builder.For.Comments = append(
 		builder.For.Comments,
 		fmt.Sprintf("@implements %s<%s>", jenny.config.fullNamespaceRef("Cog\\Builder"), jenny.typeFormatter.doFormatType(builder.For.SelfRef.AsType(), false)),

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -50,7 +50,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	return files, nil
 }
 
-func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Schema) ([]byte, error) {
+func (jenny RawTypes) generateSchema(context languages.Context, schema *ir.Schema) ([]byte, error) {
 	var buffer strings.Builder
 	var err error
 
@@ -68,7 +68,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	equalityMethodsGenerator := newEqualityMethods(jenny.tmpl, jenny.apiRefCollector)
 	validationMethodsGenerator := newValidationMethods(jenny.tmpl, jenny.packageMapper, jenny.apiRefCollector)
 
-	schema.Objects.Iterate(func(_ string, object ast.Object) {
+	schema.Objects.Iterate(func(_ string, object ir.Object) {
 		innerErr := jenny.formatObject(&buffer, schema, object)
 		if innerErr != nil {
 			err = innerErr
@@ -157,7 +157,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 %[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String())), nil
 }
 
-func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, object ast.Object) error {
+func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ir.Schema, object ir.Object) error {
 	objectName := formatObjectName(object.Name)
 
 	comments := object.Comments
@@ -198,7 +198,7 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, 
 	return nil
 }
 
-func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context languages.Context, object ast.Object) {
+func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context languages.Context, object ir.Object) {
 	objectName := formatObjectName(object.Name)
 	constructorName := "New" + formatFunctionName(object.Name)
 
@@ -244,7 +244,7 @@ func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context langu
 	buffer.WriteString("\n}\n")
 }
 
-func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast.RefType, objectType ast.Type, maybeExtraDefaults any) string {
+func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ir.RefType, objectType ir.Type, maybeExtraDefaults any) string {
 	var buffer strings.Builder
 
 	objectName := formatObjectName(objectRef.ReferredType)
@@ -280,7 +280,7 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 	return buffer.String()
 }
 
-func fieldNeedsExplicitDefault(field ast.StructField, resolvedFieldType ast.Type, extraDefaults map[string]any) bool {
+func fieldNeedsExplicitDefault(field ir.StructField, resolvedFieldType ir.Type, extraDefaults map[string]any) bool {
 	return field.Type.Default != nil ||
 		extraDefaults[field.Name] != nil ||
 		(field.Required && field.Type.IsRef() && resolvedFieldType.IsStruct()) ||
@@ -293,7 +293,7 @@ func fieldNeedsExplicitDefault(field ast.StructField, resolvedFieldType ast.Type
 // defaultValueForField computes the Go literal for a field's default. The
 // second return value signals the caller to abort writing further fields
 // (used when a constant ref resolves to something we can't render).
-func (jenny RawTypes) defaultValueForField(context languages.Context, field ast.StructField, resolvedFieldType ast.Type, extraDefaults map[string]any) (string, bool) {
+func (jenny RawTypes) defaultValueForField(context languages.Context, field ir.StructField, resolvedFieldType ir.Type, extraDefaults map[string]any) (string, bool) {
 	if extraDefault, ok := extraDefaults[field.Name]; ok {
 		return jenny.defaultFromExtraDefault(field, resolvedFieldType, extraDefault), false
 	}
@@ -324,7 +324,7 @@ func (jenny RawTypes) defaultValueForField(context languages.Context, field ast.
 	}
 }
 
-func (jenny RawTypes) defaultFromExtraDefault(field ast.StructField, resolvedFieldType ast.Type, extraDefault any) string {
+func (jenny RawTypes) defaultFromExtraDefault(field ir.StructField, resolvedFieldType ir.Type, extraDefault any) string {
 	defaultValue := formatScalar(extraDefault)
 
 	if !(field.Type.IsRef() && resolvedFieldType.IsStructGeneratedFromDisjunction()) {
@@ -352,21 +352,21 @@ func (jenny RawTypes) defaultFromExtraDefault(field ast.StructField, resolvedFie
 	return defaultValue
 }
 
-func (jenny RawTypes) defaultForMapWithDefault(field ast.StructField, resolvedFieldType ast.Type) string {
+func (jenny RawTypes) defaultForMapWithDefault(field ir.StructField, resolvedFieldType ir.Type) string {
 	if emptyMap, ok := field.Type.Default.(map[string]any); ok && len(emptyMap) == 0 {
 		return "map[" + jenny.typeFormatter.formatType(resolvedFieldType.Map.IndexType) + "]" + jenny.typeFormatter.formatType(resolvedFieldType.Map.ValueType) + "{}"
 	}
 	return formatScalar(field.Type.Default)
 }
 
-func (jenny RawTypes) defaultForArrayWithDefault(field ast.StructField, resolvedFieldType ast.Type) string {
+func (jenny RawTypes) defaultForArrayWithDefault(field ir.StructField, resolvedFieldType ir.Type) string {
 	if emptySlice, ok := field.Type.Default.([]any); ok && len(emptySlice) == 0 {
 		return "[]" + jenny.typeFormatter.formatType(resolvedFieldType.Array.ValueType) + "{}"
 	}
 	return formatScalar(field.Type.Default)
 }
 
-func (jenny RawTypes) defaultForStructRefWithDefault(context languages.Context, field ast.StructField, resolvedFieldType ast.Type) string {
+func (jenny RawTypes) defaultForStructRefWithDefault(context languages.Context, field ir.StructField, resolvedFieldType ir.Type) string {
 	defaultValue := jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, field.Type.Default)
 	if field.Type.Nullable {
 		defaultValue = "&" + defaultValue
@@ -374,7 +374,7 @@ func (jenny RawTypes) defaultForStructRefWithDefault(context languages.Context, 
 	return defaultValue
 }
 
-func (jenny RawTypes) defaultForStructRef(field ast.StructField) string {
+func (jenny RawTypes) defaultForStructRef(field ir.StructField) string {
 	defaultValue := "New" + formatObjectName(field.Type.Ref.ReferredType) + "()"
 
 	if referredPkg := jenny.packageMapper(field.Type.Ref.ReferredPkg); referredPkg != "" {
@@ -388,7 +388,7 @@ func (jenny RawTypes) defaultForStructRef(field ast.StructField) string {
 	return defaultValue
 }
 
-func (jenny RawTypes) defaultForEnumRef(field ast.StructField, resolvedFieldType ast.Type) string {
+func (jenny RawTypes) defaultForEnumRef(field ir.StructField, resolvedFieldType ir.Type) string {
 	memberName := resolvedFieldType.Enum.Values[0].Name
 	for _, member := range resolvedFieldType.Enum.Values {
 		if member.Value == field.Type.Default {
@@ -405,16 +405,16 @@ func (jenny RawTypes) defaultForEnumRef(field ast.StructField, resolvedFieldType
 	return jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, field.Type)
 }
 
-func (jenny RawTypes) defaultForConstantRef(context languages.Context, field ast.StructField) (string, bool) {
+func (jenny RawTypes) defaultForConstantRef(context languages.Context, field ir.StructField) (string, bool) {
 	constRef := field.Type.AsConstantRef()
-	t := context.ResolveRefs(ast.NewRef(constRef.ReferredPkg, constRef.ReferredType))
+	t := context.ResolveRefs(ir.NewRef(constRef.ReferredPkg, constRef.ReferredType))
 
 	if !t.IsEnum() && !t.IsScalar() {
 		return "", true
 	}
 
 	var defaultValue string
-	if t.IsScalar() && t.AsScalar().ScalarKind == ast.KindString {
+	if t.IsScalar() && t.AsScalar().ScalarKind == ir.KindString {
 		defaultValue = constRef.ReferredType
 	}
 
@@ -434,16 +434,16 @@ func (jenny RawTypes) defaultForConstantRef(context languages.Context, field ast
 	return jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, field.Type), false
 }
 
-func (jenny RawTypes) maybeValueAsPointer(value string, nullable bool, typeDef ast.Type) string {
+func (jenny RawTypes) maybeValueAsPointer(value string, nullable bool, typeDef ir.Type) string {
 	if !nullable {
 		return value
 	}
 
-	if typeDef.IsAnyOf(ast.KindArray, ast.KindMap) {
+	if typeDef.IsAnyOf(ir.KindArray, ir.KindMap) {
 		return value
 	}
 
-	if typeDef.IsScalar() && typeDef.AsScalar().ScalarKind == ast.KindBytes {
+	if typeDef.IsScalar() && typeDef.AsScalar().ScalarKind == ir.KindBytes {
 		return value
 	}
 

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
@@ -82,5 +82,5 @@ func TestGenerateAST_parseDraft2020Array(t *testing.T) {
 
 	req.True(objectType.IsArray())
 	req.True(objectType.AsArray().ValueType.IsScalar())
-	req.Equal(ast.KindString, objectType.AsArray().ValueType.AsScalar().ScalarKind)
+	req.Equal(ir.KindString, objectType.AsArray().ValueType.AsScalar().ScalarKind)
 }

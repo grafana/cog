@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -49,7 +49,7 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 	return files, nil
 }
 
-func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
+func (jenny *Builder) generateBuilder(context languages.Context, builder ir.Builder) ([]byte, error) {
 	jenny.imports = NewImportMap(jenny.config.PackagesImportMap)
 	jenny.imports.Add("cog", "../cog")
 	jenny.typeImportMapper = func(pkg string) string {
@@ -74,7 +74,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		jenny.apiRefCollector.RegisterFunction(builder.Package, common.FunctionReference{
 			Name:     factory.Name,
 			Comments: factory.Comments,
-			Arguments: tools.Map(factory.Args, func(arg ast.Argument) common.ArgumentReference {
+			Arguments: tools.Map(factory.Args, func(arg ir.Argument) common.ArgumentReference {
 				return common.ArgumentReference{
 					Name: arg.Name,
 					Type: jenny.typeFormatter.formatType(arg.Type),
@@ -90,17 +90,17 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			"typeHasBuilder":              context.ResolveToBuilder,
 			"typeIsDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
 			"formatType":                  jenny.typeFormatter.formatType,
-			"formatRef": func(ref ast.RefType) string {
+			"formatRef": func(ref ir.RefType) string {
 				return jenny.typeFormatter.formatRef(ref, true)
 			},
-			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
+			"resolvesToComposableSlot": func(typeDef ir.Type) bool {
 				_, found := context.ResolveToComposableSlot(typeDef)
 				return found
 			},
-			"defaultValueForType": func(typeDef ast.Type) string {
+			"defaultValueForType": func(typeDef ir.Type) string {
 				return formatValue(jenny.rawTypes.defaultValueForType(typeDef, jenny.typeImportMapper))
 			},
-			"formatValue": func(destinationType ast.Type, value any) string {
+			"formatValue": func(destinationType ir.Type, value any) string {
 				if destinationType.IsRef() {
 					referredObj, found := context.LocateObject(destinationType.AsRef().ReferredPkg, destinationType.AsRef().ReferredType)
 					if found && referredObj.Type.IsEnum() {
@@ -111,10 +111,10 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 				return formatValue(value)
 			},
 			"formatPath": jenny.formatFieldPath,
-			"emptyValueForGuard": func(guard ast.AssignmentNilCheck) string {
+			"emptyValueForGuard": func(guard ir.AssignmentNilCheck) string {
 				return formatValue(jenny.rawTypes.defaultValueForType(guard.EmptyValueType, jenny.typeImportMapper))
 			},
-			"formatTypeNoBuilder": func(def ast.Type) string {
+			"formatTypeNoBuilder": func(def ir.Type) string {
 				return jenny.typeFormatter.doFormatType(def, false)
 			},
 		}).
@@ -129,11 +129,11 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 
 // importType declares an import statement for the type definition of
 // the given object and returns an alias to it.
-func (jenny *Builder) importType(typeRef ast.RefType) string {
+func (jenny *Builder) importType(typeRef ir.RefType) string {
 	return jenny.typeImportMapper(typeRef.ReferredPkg)
 }
 
-func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
+func (jenny *Builder) formatFieldPath(fieldPath ir.Path) string {
 	path := ""
 
 	for i, chunk := range fieldPath {

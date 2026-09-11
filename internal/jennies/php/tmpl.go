@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -58,9 +58,9 @@ func formattingTemplateFuncs() template.FuncMap {
 type templateDeps struct {
 	config                   Config
 	context                  languages.Context
-	unmarshalForType         func(typeDef ast.Type, inputVar string) string
-	unmarshalDisjunctionFunc func(typeDef ast.Type) string
-	convertDisjunctionFunc   func(typeDef ast.Type) string
+	unmarshalForType         func(typeDef ir.Type, inputVar string) string
+	unmarshalDisjunctionFunc func(typeDef ir.Type) string
+	convertDisjunctionFunc   func(typeDef ir.Type) string
 }
 
 func templateHelpers(deps templateDeps) template.FuncMap {
@@ -75,19 +75,19 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 		"isDisjunctionOfBuilders": deps.context.IsDisjunctionOfBuilders,
 
 		"formatType": typesFormatter.formatType,
-		"formatRawType": func(def ast.Type) string {
+		"formatRawType": func(def ir.Type) string {
 			return typesFormatter.doFormatType(def, false)
 		},
 		"formatRawRef": func(pkg string, ref string) string {
-			return typesFormatter.formatRef(ast.NewRef(pkg, ref), false)
+			return typesFormatter.formatRef(ir.NewRef(pkg, ref), false)
 		},
-		"formatRawTypeNotNullable": func(def ast.Type) string {
+		"formatRawTypeNotNullable": func(def ir.Type) string {
 			typeDef := def.DeepCopy()
 			typeDef.Nullable = false
 
 			return typesFormatter.doFormatType(typeDef, false)
 		},
-		"formatValue": func(destinationType ast.Type, value any) string {
+		"formatValue": func(destinationType ir.Type, value any) string {
 			if destinationType.IsRef() {
 				referredObj, found := deps.context.LocateObjectByRef(destinationType.AsRef())
 				if found && referredObj.Type.IsEnum() {
@@ -95,24 +95,24 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 				}
 			}
 
-			if destinationType.IsScalar() && (destinationType.Scalar.ScalarKind == ast.KindFloat32 || destinationType.Scalar.ScalarKind == ast.KindFloat64) {
+			if destinationType.IsScalar() && (destinationType.Scalar.ScalarKind == ir.KindFloat32 || destinationType.Scalar.ScalarKind == ir.KindFloat64) {
 				return fmt.Sprintf("(float) %s", formatValue(value))
 			}
 
 			return formatValue(value)
 		},
 
-		"typeHint": func(def ast.Type) string {
+		"typeHint": func(def ir.Type) string {
 			clone := def.DeepCopy()
 			clone.Nullable = false
 
 			return hinter.forType(clone, false)
 		},
 		"typeShape": shaper.typeShape,
-		"defaultForType": func(typeDef ast.Type) string {
+		"defaultForType": func(typeDef ir.Type) string {
 			return formatValue(defaultValueForType(deps.config, deps.context.Schemas, typeDef, nil))
 		},
-		"disjunctionCaseForType": func(input string, typeDef ast.Type) string {
+		"disjunctionCaseForType": func(input string, typeDef ir.Type) string {
 			return disjunctionCaseForType(typesFormatter, input, typeDef)
 		},
 

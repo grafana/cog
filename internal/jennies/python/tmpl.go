@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -25,28 +25,28 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 		template.Funcs(formattingTemplateFuncs()),
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(template.FuncMap{
-			"isDisjunctionOfBuilders": func(_ ast.Type) string {
+			"isDisjunctionOfBuilders": func(_ ir.Type) string {
 				panic("isDisjunctionOfBuilders() needs to be overridden by a jenny")
 			},
-			"formatType": func(_ ast.Type) string {
+			"formatType": func(_ ir.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
-			"formatTypeNotNullable": func(_ ast.Type) string {
+			"formatTypeNotNullable": func(_ ir.Type) string {
 				panic("formatTypeNotNullable() needs to be overridden by a jenny")
 			},
-			"formatFullyQualifiedRef": func(_ ast.Type) string {
+			"formatFullyQualifiedRef": func(_ ir.Type) string {
 				panic("formatFullyQualifiedRef() needs to be overridden by a jenny")
 			},
-			"formatRawType": func(_ ast.Type) string {
+			"formatRawType": func(_ ir.Type) string {
 				panic("formatRawType() needs to be overridden by a jenny")
 			},
-			"formatRawTypeNotNullable": func(_ ast.Type) string {
+			"formatRawTypeNotNullable": func(_ ir.Type) string {
 				panic("formatRawTypeNotNullable() needs to be overridden by a jenny")
 			},
-			"formatValue": func(_ ast.Type, _ any) string {
+			"formatValue": func(_ ir.Type, _ any) string {
 				panic("formatValue() needs to be overridden by a jenny")
 			},
-			"defaultForType": func(_ ast.Type) string {
+			"defaultForType": func(_ ir.Type) string {
 				panic("defaultForType() needs to be overridden by a jenny")
 			},
 			"importModule": func(alias string, pkg string, module string) string {
@@ -55,7 +55,7 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 			"importPkg": func(alias string, pkg string) string {
 				panic("importPkg() needs to be overridden by a jenny")
 			},
-			"unmarshalForType": func(typeDef ast.Type, inputVar string, hint string) fromJSONCode {
+			"unmarshalForType": func(typeDef ir.Type, inputVar string, hint string) fromJSONCode {
 				panic("unmarshalForType() needs to be overridden by a jenny")
 			},
 		}),
@@ -74,7 +74,7 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 
 func formattingTemplateFuncs() template.FuncMap {
 	return template.FuncMap{
-		"refToType": func(ref ast.RefType) ast.Type {
+		"refToType": func(ref ir.RefType) ir.Type {
 			return ref.AsType()
 		},
 		"formatIdentifier":   formatIdentifier,

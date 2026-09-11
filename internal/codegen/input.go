@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/ir"
+	"github.com/grafana/cog/internal/ir/transforms"
 	"github.com/grafana/cog/internal/tools"
 	cogyaml "github.com/grafana/cog/internal/yaml"
 )
@@ -16,11 +16,11 @@ type interpolable interface {
 }
 
 type transformable interface {
-	commonPasses() (compiler.Passes, error)
+	commonPasses() (transforms.Transforms, error)
 }
 
 type schemaLoader interface {
-	LoadSchemas(ctx context.Context) (ast.Schemas, error)
+	LoadSchemas(ctx context.Context) (ir.Schemas, error)
 }
 
 // InputBase provides common options and behavior, meant to be re-used across
@@ -36,19 +36,19 @@ type InputBase struct {
 	Transforms []string `yaml:"transformations"`
 
 	// Metadata to add to the schema, this can be used to set Kind and Variant
-	Metadata *ast.SchemaMeta `yaml:"metadata"`
+	Metadata *ir.SchemaMeta `yaml:"metadata"`
 }
 
-func (input *InputBase) schemaMetadata() ast.SchemaMeta {
+func (input *InputBase) schemaMetadata() ir.SchemaMeta {
 	if input.Metadata != nil {
 		return *input.Metadata
 	}
 
-	return ast.SchemaMeta{}
+	return ir.SchemaMeta{}
 }
 
-func (input *InputBase) commonPasses() (compiler.Passes, error) {
-	return cogyaml.NewCompilerLoader().PassesFrom(input.Transforms)
+func (input *InputBase) commonPasses() (transforms.Transforms, error) {
+	return cogyaml.NewTransformsLoader().LoadFiles(input.Transforms)
 }
 
 func (input *InputBase) interpolateParameters(interpolator ParametersInterpolator) {
@@ -56,18 +56,18 @@ func (input *InputBase) interpolateParameters(interpolator ParametersInterpolato
 	input.Transforms = tools.Map(input.Transforms, interpolator)
 }
 
-func (input *InputBase) filterSchema(schema *ast.Schema) (ast.Schemas, error) {
+func (input *InputBase) filterSchema(schema *ir.Schema) (ir.Schemas, error) {
 	if len(input.AllowedObjects) == 0 {
-		return ast.Schemas{schema}, nil
+		return ir.Schemas{schema}, nil
 	}
 
-	filterPass := compiler.FilterSchemas{
-		AllowedObjects: tools.Map(input.AllowedObjects, func(objectName string) compiler.ObjectReference {
-			return compiler.ObjectReference{Package: schema.Package, Object: objectName}
+	filterPass := transforms.FilterSchemas{
+		AllowedObjects: tools.Map(input.AllowedObjects, func(objectName string) transforms.ObjectReference {
+			return transforms.ObjectReference{Package: schema.Package, Object: objectName}
 		}),
 	}
 
-	return filterPass.Process(ast.Schemas{schema})
+	return filterPass.Process(ir.Schemas{schema})
 }
 
 type Input struct {
@@ -116,7 +116,7 @@ func (input *Input) loader() (schemaLoader, error) {
 	return nil, fmt.Errorf("empty input")
 }
 
-func (input *Input) LoadSchemas(ctx context.Context, logger *slog.Logger) (ast.Schemas, error) {
+func (input *Input) LoadSchemas(ctx context.Context, logger *slog.Logger) (ir.Schemas, error) {
 	var err error
 
 	loader, err := input.loader()

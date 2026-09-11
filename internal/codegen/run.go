@@ -6,7 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 )
@@ -67,7 +67,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 	return generatedFS, nil
 }
 
-func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schemas ast.Schemas) (languages.Context, error) {
+func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schemas ir.Schemas) (languages.Context, error) {
 	var err error
 	jenniesInput := languages.Context{
 		Schemas: schemas,
@@ -87,7 +87,7 @@ func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schema
 	}
 
 	// from schemas, derive builders
-	jenniesInput.Builders = (&ast.BuilderGenerator{}).FromAST(jenniesInput.Schemas)
+	jenniesInput.Builders = (&ir.BuilderGenerator{}).FromAST(jenniesInput.Schemas)
 
 	// apply veneers to builders
 	veneersRewriter, err := pipeline.veneers()

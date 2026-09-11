@@ -2,18 +2,18 @@ package languages
 
 import (
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/ir"
+	"github.com/grafana/cog/internal/ir/transforms"
 )
 
 type Language interface {
 	Name() string
 	Jennies(config Config) *codejen.JennyList[Context]
-	CompilerPasses() compiler.Passes
+	CompilerPasses() transforms.Transforms
 }
 
 type NullableConfig struct {
-	Kinds              []ast.Kind
+	Kinds              []ir.Kind
 	ProtectArrayAppend bool
 	AnyIsNullable      bool
 }
@@ -22,7 +22,7 @@ type NullableKindsProvider interface {
 	NullableKinds() NullableConfig
 }
 
-func (nullableConfig NullableConfig) TypeIsNullable(typeDef ast.Type) bool {
+func (nullableConfig NullableConfig) TypeIsNullable(typeDef ir.Type) bool {
 	return typeDef.Nullable ||
 		(typeDef.IsAny() && nullableConfig.AnyIsNullable) ||
 		typeDef.IsAnyOf(nullableConfig.Kinds...)

@@ -3,28 +3,28 @@ package veneers
 import (
 	"fmt"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 )
 
 type Option struct {
-	Name        string         `yaml:"name"`
-	Comments    []string       `yaml:"comments"`
-	Arguments   []ast.Argument `yaml:"arguments"`
-	Assignments []Assignment   `yaml:"assignments"`
+	Name        string        `yaml:"name"`
+	Comments    []string      `yaml:"comments"`
+	Arguments   []ir.Argument `yaml:"arguments"`
+	Assignments []Assignment  `yaml:"assignments"`
 }
 
-func (opt Option) AsIR(schemas ast.Schemas, root ast.Builder) (ast.Option, error) {
-	assignments := make([]ast.Assignment, 0, len(opt.Assignments))
+func (opt Option) AsIR(schemas ir.Schemas, root ir.Builder) (ir.Option, error) {
+	assignments := make([]ir.Assignment, 0, len(opt.Assignments))
 	for _, assignment := range opt.Assignments {
 		irAssignment, err := assignment.AsIR(schemas, root)
 		if err != nil {
-			return ast.Option{}, err
+			return ir.Option{}, err
 		}
 
 		assignments = append(assignments, irAssignment)
 	}
 
-	return ast.Option{
+	return ir.Option{
 		Name:        opt.Name,
 		Comments:    opt.Comments,
 		Args:        opt.Arguments,
@@ -33,14 +33,14 @@ func (opt Option) AsIR(schemas ast.Schemas, root ast.Builder) (ast.Option, error
 }
 
 type Assignment struct {
-	Path    string               `yaml:"path"`
-	PathObj ast.Path             `yaml:"path_obj"`
-	Method  ast.AssignmentMethod `yaml:"method"`
-	Value   AssignmentValue      `yaml:"value"`
+	Path    string              `yaml:"path"`
+	PathObj ir.Path             `yaml:"path_obj"`
+	Method  ir.AssignmentMethod `yaml:"method"`
+	Value   AssignmentValue     `yaml:"value"`
 }
 
-func (assignment Assignment) AsIR(schemas ast.Schemas, root ast.Builder) (ast.Assignment, error) {
-	var path ast.Path
+func (assignment Assignment) AsIR(schemas ir.Schemas, root ir.Builder) (ir.Assignment, error) {
+	var path ir.Path
 	var err error
 
 	if assignment.PathObj != nil {
@@ -48,16 +48,16 @@ func (assignment Assignment) AsIR(schemas ast.Schemas, root ast.Builder) (ast.As
 	} else {
 		path, err = root.MakePath(schemas, assignment.Path)
 		if err != nil {
-			return ast.Assignment{}, err
+			return ir.Assignment{}, err
 		}
 	}
 
 	value, err := assignment.Value.AsIR(schemas, path)
 	if err != nil {
-		return ast.Assignment{}, err
+		return ir.Assignment{}, err
 	}
 
-	return ast.Assignment{
+	return ir.Assignment{
 		Path:   path,
 		Value:  value,
 		Method: assignment.Method,
@@ -65,14 +65,14 @@ func (assignment Assignment) AsIR(schemas ast.Schemas, root ast.Builder) (ast.As
 }
 
 type AssignmentValue struct {
-	Argument *ast.Argument `json:",omitempty"`
+	Argument *ir.Argument `json:",omitempty"`
 	Constant any
 	Envelope *AssignmentEnvelope `json:",omitempty"`
 }
 
-func (value AssignmentValue) AsIR(schemas ast.Schemas, assignmentPath ast.Path) (ast.AssignmentValue, error) {
+func (value AssignmentValue) AsIR(schemas ir.Schemas, assignmentPath ir.Path) (ir.AssignmentValue, error) {
 	if value.Argument != nil {
-		return ast.AssignmentValue{Argument: value.Argument}, nil
+		return ir.AssignmentValue{Argument: value.Argument}, nil
 	}
 	if value.Envelope != nil {
 		envelopeType := assignmentPath.Last().Type
@@ -85,30 +85,30 @@ func (value AssignmentValue) AsIR(schemas ast.Schemas, assignmentPath ast.Path) 
 
 		envelope, err := value.Envelope.AsIR(schemas, envelopeType)
 		if err != nil {
-			return ast.AssignmentValue{}, err
+			return ir.AssignmentValue{}, err
 		}
 
-		return ast.AssignmentValue{Envelope: &envelope}, nil
+		return ir.AssignmentValue{Envelope: &envelope}, nil
 	}
 
-	return ast.AssignmentValue{Constant: value.Constant}, nil
+	return ir.AssignmentValue{Constant: value.Constant}, nil
 }
 
 type AssignmentEnvelope struct {
 	Values []EnvelopeFieldValue
 }
 
-func (envelope AssignmentEnvelope) AsIR(schemas ast.Schemas, envelopeType ast.Type) (ast.AssignmentEnvelope, error) {
+func (envelope AssignmentEnvelope) AsIR(schemas ir.Schemas, envelopeType ir.Type) (ir.AssignmentEnvelope, error) {
 	var err error
-	values := make([]ast.EnvelopeFieldValue, len(envelope.Values))
+	values := make([]ir.EnvelopeFieldValue, len(envelope.Values))
 	for i, val := range envelope.Values {
 		values[i], err = val.AsIR(schemas, envelopeType)
 		if err != nil {
-			return ast.AssignmentEnvelope{}, err
+			return ir.AssignmentEnvelope{}, err
 		}
 	}
 
-	return ast.AssignmentEnvelope{
+	return ir.AssignmentEnvelope{
 		Type:   envelopeType,
 		Values: values,
 	}, nil
@@ -119,21 +119,21 @@ type EnvelopeFieldValue struct {
 	Value AssignmentValue // what to assign
 }
 
-func (envelopeField EnvelopeFieldValue) AsIR(schemas ast.Schemas, envelopeType ast.Type) (ast.EnvelopeFieldValue, error) {
-	resolvedEnvelope := schemas.ResolveToType(envelopeType)
+func (envelopeField EnvelopeFieldValue) AsIR(schemas ir.Schemas, envelopeType ir.Type) (ir.EnvelopeFieldValue, error) {
+	resolvedEnvelope := schemas.Resolve(envelopeType)
 	field, found := resolvedEnvelope.Struct.FieldByName(envelopeField.Field)
 	if !found {
-		return ast.EnvelopeFieldValue{}, fmt.Errorf("envelope field %s not found", envelopeField.Field)
+		return ir.EnvelopeFieldValue{}, fmt.Errorf("envelope field %s not found", envelopeField.Field)
 	}
 
-	path := ast.PathFromStructField(field)
+	path := ir.PathFromStructField(field)
 
 	value, err := envelopeField.Value.AsIR(schemas, path)
 	if err != nil {
-		return ast.EnvelopeFieldValue{}, err
+		return ir.EnvelopeFieldValue{}, err
 	}
 
-	return ast.EnvelopeFieldValue{
+	return ir.EnvelopeFieldValue{
 		Path:  path,
 		Value: value,
 	}, nil

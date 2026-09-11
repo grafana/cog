@@ -12,7 +12,7 @@ Note: existing fields will not be overwritten.
 add_fields:
   # Expected format: [package].[object]
   to: string
-  fields: []ast.StructField
+  fields: []ir.StructField
 ```
 
 ## `add_object`
@@ -108,6 +108,20 @@ ConstantToEnum turns `string` constants into an enum definition with a
 single member.
 This is useful to "future-proof" a schema where a type can have a single
 value for now but is expected to allow more in the future.
+
+Example:
+
+	```
+	ElementType: "thing"
+	```
+
+Will become:
+
+	```
+	ElementType enum {
+		thing = "thing"
+	}
+	```
 
 ### Usage
 
@@ -227,8 +241,8 @@ disjunction_with_constant_to_default: {}
 
 ## `duplicate_object`
 
-DuplicateObject duplicates the source object. The duplicate is created under
-a different name, possibly in a different package.
+DuplicateObject duplicates the source object under a different name,
+possibly in a different package.
 
 Note: if the source object isn't found, this pass does nothing.
 
@@ -254,6 +268,8 @@ entrypoint_identification: {}
 ## `fields_set_default`
 
 FieldsSetDefault sets the default value for the given fields.
+Invalid field references will be ignored and existing default values will be
+overridden.
 
 ### Usage
 
@@ -301,6 +317,35 @@ hint_object:
 NameAnonymousStruct rewrites the definition of a struct field typed as an
 anonymous struct to instead refer to a named type.
 
+Example:
+
+	```
+	Field = Panel.DataSource
+	As = DataSourceRef
+	```
+
+	```
+	Panel: {
+		DataSource: {
+			Type: string
+			name: string
+		}
+	}
+	```
+
+Will become:
+
+	```
+	Panel: {
+		DataSource: DataSourceRef
+	}
+
+	DataSourceRef: {
+		Type: string
+		name: string
+	}
+	```
+
 ### Usage
 
 ```yaml
@@ -347,6 +392,27 @@ rename_object:
 
 ReplaceReference replaces any usage of the `From` reference by the one given in `To`.
 
+Example:
+
+	```
+	From = { Package: common, Object: DataSourceRef }
+	To = { Package: common, Object: DataSourceDescriptor }
+	```
+
+	```
+	Panel: {
+		DataSource: common.DataSourceRef
+	}
+	```
+
+Will become:
+
+	```
+	Panel: {
+		DataSource: common.DataSourceDescriptor
+	}
+	```
+
 ### Usage
 
 ```yaml
@@ -383,7 +449,21 @@ retype_object:
 
 ## `sanitize_enum_member_names`
 
-N/A
+SanitizeEnumMemberNames cleans up enum member names that might cause issues
+for language jennies.
+Especially empty member names, or member names starting with a +/- operator.
+
+Example:
+
+	```
+	Position enum('': '', '+1': '+1', '-2': -2)
+	```
+
+Will become:
+
+	```
+	Position enum(None: '', Positive1: '+1', Negative2: '-2')
+	```
 
 ### Usage
 
@@ -419,6 +499,18 @@ schema_set_identifier:
 
 TrimEnumValues removes leading and trailing spaces from string values.
 It could happen when they add them by mistake in jsonschema/openapi when they define the enums
+
+Example:
+
+	```
+	Position enum('Foo': 'foo', 'Bar': ' bar', 'Baz': 'baz ')
+	```
+
+Will become:
+
+	```
+	Position enum('Foo': 'foo', 'Bar': 'bar', 'Baz': 'baz')
+	```
 
 ### Usage
 

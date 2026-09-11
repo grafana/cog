@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -61,7 +61,7 @@ func formatValue(val any) string {
 	return fmt.Sprintf("%#v", val)
 }
 
-func formatFieldPath(fieldPath ast.Path) string {
+func formatFieldPath(fieldPath ir.Path) string {
 	path := ""
 
 	for i, chunk := range fieldPath {
@@ -152,24 +152,24 @@ func isReservedPythonKeyword(input string) bool {
 * 					 Default and "empty" values management 					  *
 ******************************************************************************/
 
-func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule moduleImporter, defaultsOverrides *orderedmap.Map[string, any]) any {
+func defaultValueForType(schemas ir.Schemas, typeDef ir.Type, importModule moduleImporter, defaultsOverrides *orderedmap.Map[string, any]) any {
 	if !typeDef.IsRef() && typeDef.Default != nil {
 		return typeDef.Default
 	}
 
 	switch typeDef.Kind {
-	case ast.KindDisjunction:
+	case ir.KindDisjunction:
 		if typeDef.AsDisjunction().Branches.HasNullType() {
 			return nil
 		}
 
 		return defaultValueForType(schemas, typeDef.AsDisjunction().Branches[0], importModule, nil)
-	case ast.KindRef:
+	case ir.KindRef:
 		ref := typeDef.AsRef()
 		referredPkg := ref.ReferredPkg
 		referredPkg = importModule(referredPkg, "..models", referredPkg)
 
-		referredObj, found := schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
+		referredObj, found := schemas.GetObject(ref.ReferredPkg, ref.ReferredType)
 		if found && referredObj.Type.IsEnum() {
 			enumName := tools.UpperSnakeCase(referredObj.Type.AsEnum().Values[0].Name)
 			for _, enumValue := range referredObj.Type.AsEnum().Values {
@@ -227,42 +227,42 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule mod
 		}
 
 		return raw(fmt.Sprintf("%s(%s)", formattedRef, strings.Join(extraDefaults, ", ")))
-	case ast.KindEnum: // anonymous enum
+	case ir.KindEnum: // anonymous enum
 		return typeDef.AsEnum().Values[0].Value
-	case ast.KindMap:
+	case ir.KindMap:
 		return raw("{}")
-	case ast.KindArray:
+	case ir.KindArray:
 		return raw("[]")
-	case ast.KindScalar:
+	case ir.KindScalar:
 		return defaultValueForScalar(typeDef.AsScalar())
 	default:
 		return "unknown"
 	}
 }
 
-func defaultValueForScalar(scalar ast.ScalarType) any {
+func defaultValueForScalar(scalar ir.ScalarType) any {
 	// The scalar represents a constant
 	if scalar.Value != nil {
 		return scalar.Value
 	}
 
 	switch scalar.ScalarKind {
-	case ast.KindNull, ast.KindAny:
+	case ir.KindNull, ir.KindAny:
 		return nil
 
-	case ast.KindBytes, ast.KindString:
+	case ir.KindBytes, ir.KindString:
 		return ""
 
-	case ast.KindFloat32, ast.KindFloat64:
+	case ir.KindFloat32, ir.KindFloat64:
 		return 0.0
 
-	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
+	case ir.KindUint8, ir.KindUint16, ir.KindUint32, ir.KindUint64:
 		return 0
 
-	case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
+	case ir.KindInt8, ir.KindInt16, ir.KindInt32, ir.KindInt64:
 		return 0
 
-	case ast.KindBool:
+	case ir.KindBool:
 		return false
 
 	default:

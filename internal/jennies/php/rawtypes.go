@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -58,11 +58,11 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	return files, nil
 }
 
-func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Schema) (codejen.Files, error) {
+func (jenny RawTypes) generateSchema(context languages.Context, schema *ir.Schema) (codejen.Files, error) {
 	var err error
 
 	files := make(codejen.Files, 0, schema.Objects.Len())
-	schema.Objects.Iterate(func(_ string, object ast.Object) {
+	schema.Objects.Iterate(func(_ string, object ir.Object) {
 		// Constants are handled separately
 		if object.Type.IsConcreteScalar() {
 			return
@@ -80,7 +80,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return nil, err
 	}
 
-	constants := schema.Objects.Filter(func(_ string, object ast.Object) bool {
+	constants := schema.Objects.Filter(func(_ string, object ir.Object) bool {
 		return object.Type.IsConcreteScalar()
 	})
 	if constants.Len() != 0 {
@@ -89,10 +89,10 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	return files, nil
 }
 
-func (jenny RawTypes) generateConstants(schema *ast.Schema, objects *orderedmap.Map[string, ast.Object]) codejen.File {
+func (jenny RawTypes) generateConstants(schema *ir.Schema, objects *orderedmap.Map[string, ir.Object]) codejen.File {
 	constants := make([]string, 0, objects.Len())
 
-	objects.Iterate(func(_ string, object ast.Object) {
+	objects.Iterate(func(_ string, object ir.Object) {
 		name := formatConstantName(object.Name)
 		value := formatValue(object.Type.Scalar.Value)
 
@@ -122,7 +122,7 @@ final class Constants
 	return *codejen.NewFile(filename, []byte(content), jenny)
 }
 
-func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema, def ast.Object) (codejen.File, error) {
+func (jenny RawTypes) formatObject(context languages.Context, schema *ir.Schema, def ir.Object) (codejen.File, error) {
 	var buffer strings.Builder
 
 	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context)
@@ -144,16 +144,16 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 	buffer.WriteString(formatCommentsBlock(comments))
 
 	switch def.Type.Kind {
-	case ast.KindEnum:
+	case ir.KindEnum:
 		enum, err := jenny.typeFormatter.formatEnumDeclaration(jenny.tmpl, context, def)
 		if err != nil {
 			return codejen.File{}, err
 		}
 
 		buffer.WriteString(enum)
-	case ast.KindRef:
+	case ir.KindRef:
 		fmt.Fprintf(&buffer, "class %s extends %s {}", defName, jenny.typeFormatter.formatType(def.Type))
-	case ast.KindStruct:
+	case ir.KindStruct:
 		structDef, err := jenny.formatStructDef(context, schema, def)
 		if err != nil {
 			return codejen.File{}, err
@@ -178,7 +178,7 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 	return *codejen.NewFile(filename, []byte(output), jenny), nil
 }
 
-func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Schema, object ast.Object) (string, error) {
+func (jenny RawTypes) formatStructDef(context languages.Context, schema *ir.Schema, object ir.Object) (string, error) {
 	var buffer strings.Builder
 
 	variant := ""
@@ -266,12 +266,12 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 	return buffer.String(), nil
 }
 
-func (jenny RawTypes) convertDisjunctionFunc(disjunction ast.DisjunctionType) string {
+func (jenny RawTypes) convertDisjunctionFunc(disjunction ir.DisjunctionType) string {
 	decodingSwitch := "switch (true) {\n"
 	discriminators := tools.Keys(disjunction.DiscriminatorMapping)
 	sort.Strings(discriminators) // to ensure a deterministic output
 	for _, discriminator := range discriminators {
-		if discriminator == ast.DiscriminatorCatchAll {
+		if discriminator == ir.DiscriminatorCatchAll {
 			continue
 		}
 
@@ -281,7 +281,7 @@ func (jenny RawTypes) convertDisjunctionFunc(disjunction ast.DisjunctionType) st
 `, objectRef)
 	}
 
-	if defaultBranchType, ok := disjunction.DiscriminatorMapping[ast.DiscriminatorCatchAll]; ok {
+	if defaultBranchType, ok := disjunction.DiscriminatorMapping[ir.DiscriminatorCatchAll]; ok {
 		decodingSwitch += fmt.Sprintf(`    default:
         return %[1]sConverter::convert($input);
 `, defaultBranchType)
@@ -301,7 +301,7 @@ func (jenny RawTypes) convertDisjunctionFunc(disjunction ast.DisjunctionType) st
 })`, dataqueryRef, decodingSwitch)
 }
 
-func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Object) string {
+func (jenny RawTypes) generateConstructor(context languages.Context, def ir.Object) string {
 	var buffer strings.Builder
 	hinter := typehints{config: jenny.config, context: context}
 
@@ -366,9 +366,9 @@ func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Obj
 	return buffer.String()
 }
 
-func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object) (string, error) {
+func (jenny RawTypes) generateFromJSON(context languages.Context, def ir.Object) (string, error) {
 	jenny.tmpl = jenny.tmpl.Funcs(template.FuncMap{
-		"unmarshalForType": func(typeDef ast.Type, inputVar string) string {
+		"unmarshalForType": func(typeDef ir.Type, inputVar string) string {
 			return jenny.unmarshalForType(context, def, typeDef, inputVar)
 		},
 	})
@@ -427,7 +427,7 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 	return buffer.String(), nil
 }
 
-func (jenny RawTypes) unmarshalForType(context languages.Context, object ast.Object, def ast.Type, inputVar string) string {
+func (jenny RawTypes) unmarshalForType(context languages.Context, object ir.Object, def ir.Type, inputVar string) string {
 	if _, ok := context.ResolveToComposableSlot(def); ok {
 		return jenny.unmarshalComposableSlot(context, object, def, inputVar)
 	}
@@ -453,13 +453,13 @@ func (jenny RawTypes) unmarshalForType(context languages.Context, object ast.Obj
 	}
 }
 
-func (jenny RawTypes) unmarshalMap(context languages.Context, object ast.Object, mapDef ast.MapType, inputVar string) string {
-	if mapDef.IsMapOf(ast.KindScalar, ast.KindMap, ast.KindArray) {
+func (jenny RawTypes) unmarshalMap(context languages.Context, object ir.Object, mapDef ir.MapType, inputVar string) string {
+	if mapDef.IsMapOf(ir.KindScalar, ir.KindMap, ir.KindArray) {
 		return fmt.Sprintf("%s ?? null", inputVar)
 	}
 
-	mapType := ast.Type{
-		Kind:     ast.KindMap,
+	mapType := ir.Type{
+		Kind:     ir.KindMap,
 		Map:      &mapDef,
 		Nullable: false,
 	}
@@ -479,7 +479,7 @@ func (jenny RawTypes) unmarshalMap(context languages.Context, object ast.Object,
 	return fmt.Sprintf(`isset(%[1]s) ? %[2]s(%[1]s) : null`, inputVar, unmarshaller)
 }
 
-func (jenny RawTypes) unmarshalRefFunc(context languages.Context, refDef ast.Type) string {
+func (jenny RawTypes) unmarshalRefFunc(context languages.Context, refDef ir.Type) string {
 	referredObject, found := context.LocateObjectByRef(refDef.AsRef())
 	formattedRef := jenny.typeFormatter.formatRef(refDef, false)
 
@@ -508,7 +508,7 @@ func (jenny RawTypes) unmarshalRefFunc(context languages.Context, refDef ast.Typ
 	}
 }
 
-func (jenny RawTypes) unmarshalComposableSlot(context languages.Context, parentObject ast.Object, def ast.Type, inputVar string) string {
+func (jenny RawTypes) unmarshalComposableSlot(context languages.Context, parentObject ir.Object, def ir.Type, inputVar string) string {
 	slotType, _ := context.ResolveToComposableSlot(def)
 	variant := string(slotType.ComposableSlot.Variant)
 
@@ -529,28 +529,28 @@ func (jenny RawTypes) unmarshalComposableSlot(context languages.Context, parentO
 	return rendered
 }
 
-func (jenny RawTypes) unmarshalDisjunctionFunc(context languages.Context, disjunction ast.DisjunctionType) string {
+func (jenny RawTypes) unmarshalDisjunctionFunc(context languages.Context, disjunction ir.DisjunctionType) string {
 	// this potentially generates incorrect code, but there isn't much we can do without more information.
 	if disjunction.Discriminator == "" || disjunction.DiscriminatorMapping == nil {
 		decodingSwitch := "switch (true) {\n"
 
-		var ignoredBranches []ast.Type
+		var ignoredBranches []ir.Type
 		for _, branch := range disjunction.Branches {
 			if branch.IsScalar() {
-				testMap := map[ast.ScalarKind]string{
-					ast.KindBytes:   "is_string",
-					ast.KindString:  "is_string",
-					ast.KindFloat32: "is_float",
-					ast.KindFloat64: "is_float",
-					ast.KindUint8:   "is_int",
-					ast.KindUint16:  "is_int",
-					ast.KindUint32:  "is_int",
-					ast.KindUint64:  "is_int",
-					ast.KindInt8:    "is_int",
-					ast.KindInt16:   "is_int",
-					ast.KindInt32:   "is_int",
-					ast.KindInt64:   "is_int",
-					ast.KindBool:    "is_bool",
+				testMap := map[ir.ScalarKind]string{
+					ir.KindBytes:   "is_string",
+					ir.KindString:  "is_string",
+					ir.KindFloat32: "is_float",
+					ir.KindFloat64: "is_float",
+					ir.KindUint8:   "is_int",
+					ir.KindUint16:  "is_int",
+					ir.KindUint32:  "is_int",
+					ir.KindUint64:  "is_int",
+					ir.KindInt8:    "is_int",
+					ir.KindInt16:   "is_int",
+					ir.KindInt32:   "is_int",
+					ir.KindInt64:   "is_int",
+					ir.KindBool:    "is_bool",
 				}
 
 				testFunc := testMap[branch.Scalar.ScalarKind]
@@ -606,7 +606,7 @@ func (jenny RawTypes) unmarshalDisjunctionFunc(context languages.Context, disjun
 	discriminators := tools.Keys(disjunction.DiscriminatorMapping)
 	sort.Strings(discriminators) // to ensure a deterministic output
 	for _, discriminator := range discriminators {
-		if discriminator == ast.DiscriminatorCatchAll {
+		if discriminator == ir.DiscriminatorCatchAll {
 			continue
 		}
 
@@ -616,7 +616,7 @@ func (jenny RawTypes) unmarshalDisjunctionFunc(context languages.Context, disjun
 `, discriminator, objectRef)
 	}
 
-	if defaultBranchType, ok := disjunction.DiscriminatorMapping[ast.DiscriminatorCatchAll]; ok {
+	if defaultBranchType, ok := disjunction.DiscriminatorMapping[ir.DiscriminatorCatchAll]; ok {
 		decodingSwitch += fmt.Sprintf(`    default:
         return %[1]s::fromArray($input);
 `, defaultBranchType)
@@ -635,7 +635,7 @@ func (jenny RawTypes) unmarshalDisjunctionFunc(context languages.Context, disjun
 })`, decodingSwitch)
 }
 
-func (jenny RawTypes) generateJSONSerialize(def ast.Object) string {
+func (jenny RawTypes) generateJSONSerialize(def ir.Object) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("/**\n")

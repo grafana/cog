@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/languages"
 )
 
@@ -31,10 +31,10 @@ func newAttributesGenerator(context languages.Context, cfg Config, types *typeFo
 
 // Disjunction branches (that are struct) need to be generated with all their fields set to "Optional: true"
 // For that to happen, we need to identify them before the object codegen starts
-func (a *attributes) identifyDisjunctionBranches(schema *ast.Schema) {
+func (a *attributes) identifyDisjunctionBranches(schema *ir.Schema) {
 	a.refsInDisjunction = map[string]struct{}{}
 
-	schema.Objects.Iterate(func(_ string, obj ast.Object) {
+	schema.Objects.Iterate(func(_ string, obj ir.Object) {
 		if !obj.Type.IsStructGeneratedFromDisjunction() {
 			return
 		}
@@ -51,7 +51,7 @@ func (a *attributes) identifyDisjunctionBranches(schema *ast.Schema) {
 	})
 }
 
-func (a *attributes) generateForObject(obj ast.Object) string {
+func (a *attributes) generateForObject(obj ir.Object) string {
 	if !obj.Type.IsStruct() {
 		return ""
 	}
@@ -92,7 +92,7 @@ func (a *attributes) generateForObject(obj ast.Object) string {
 
 // Attributes generation
 
-func (a *attributes) formatStructAttributes(typeDef ast.Type, forceFieldsAsOptional bool) string {
+func (a *attributes) formatStructAttributes(typeDef ir.Type, forceFieldsAsOptional bool) string {
 	var buffer strings.Builder
 
 	a.packageMapper("github.com/hashicorp/terraform-plugin-framework/resource/schema")
@@ -121,26 +121,26 @@ func (a *attributes) formatStructAttributes(typeDef ast.Type, forceFieldsAsOptio
 	return buffer.String()
 }
 
-func (a *attributes) formatTypeAttribute(typeDef ast.Type, forceOptional bool, comments []string) string {
+func (a *attributes) formatTypeAttribute(typeDef ir.Type, forceOptional bool, comments []string) string {
 	switch typeDef.Kind {
-	case ast.KindScalar:
+	case ir.KindScalar:
 		return a.formatScalarAttribute(typeDef, forceOptional, comments)
-	case ast.KindStruct:
+	case ir.KindStruct:
 		return a.formatStructAttributes(typeDef, forceOptional)
-	case ast.KindArray:
+	case ir.KindArray:
 		return a.formatArrayAttributes(typeDef, comments)
-	case ast.KindMap:
+	case ir.KindMap:
 		return a.formatMapAttributes(typeDef, comments)
-	case ast.KindRef:
+	case ir.KindRef:
 		return a.formatReferenceAttribute(typeDef, comments)
-	case ast.KindEnum:
+	case ir.KindEnum:
 		return a.formatEnumAttribute(typeDef, comments)
 	default:
 		return ""
 	}
 }
 
-func (a *attributes) formatArrayAttributes(def ast.Type, comments []string) string {
+func (a *attributes) formatArrayAttributes(def ir.Type, comments []string) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("schema.ListAttribute{\n")
@@ -174,7 +174,7 @@ func (a *attributes) formatArrayAttributes(def ast.Type, comments []string) stri
 	return buffer.String()
 }
 
-func (a *attributes) formatMapAttributes(def ast.Type, comments []string) string {
+func (a *attributes) formatMapAttributes(def ir.Type, comments []string) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("schema.MapAttribute{\n")
@@ -199,7 +199,7 @@ func (a *attributes) formatMapAttributes(def ast.Type, comments []string) string
 	return buffer.String()
 }
 
-func (a *attributes) formatReferenceAttribute(def ast.Type, comments []string) string {
+func (a *attributes) formatReferenceAttribute(def ir.Type, comments []string) string {
 	obj, ok := a.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 	if !ok {
 		return "unknown"
@@ -211,30 +211,30 @@ func (a *attributes) formatReferenceAttribute(def ast.Type, comments []string) s
 	return a.formatTypeAttribute(obj.Type, false, comments)
 }
 
-func (a *attributes) formatEnumAttribute(def ast.Type, comments []string) string {
+func (a *attributes) formatEnumAttribute(def ir.Type, comments []string) string {
 	scalarDef := def.AsEnum().Values[0].Type
 	scalarDef.Scalar.Constraints = formatEnumValuesAsConstraints(def.AsEnum().Values)
 	scalarDef.Default = def.Default
 	return a.formatScalarAttribute(scalarDef, false, comments)
 }
 
-func (a *attributes) formatScalarAttribute(def ast.Type, forceOptional bool, comments []string) string {
-	var attrs = map[ast.ScalarKind]attributeFormatter{
-		ast.KindString:  {name: "StringAttribute", defImport: "stringdefault", defVal: "StaticString"},
-		ast.KindBytes:   {name: "StringAttribute", defImport: "stringdefault", defVal: "StaticString"},
-		ast.KindNull:    {name: "StringAttribute", defImport: "stringdefault", defVal: "StaticString"},
-		ast.KindBool:    {name: "BoolAttribute", defImport: "booldefault", defVal: "StaticBool"},
-		ast.KindInt32:   {name: "Int32Attribute", defImport: "int32default", defVal: "StaticInt32"},
-		ast.KindUint32:  {name: "Int32Attribute", defImport: "int32default", defVal: "StaticInt32"},
-		ast.KindInt64:   {name: "Int64Attribute", defImport: "int64default", defVal: "StaticInt64"},
-		ast.KindUint64:  {name: "Int64Attribute", defImport: "int64default", defVal: "StaticInt64"},
-		ast.KindFloat32: {name: "Float32Attribute", defImport: "float32default", defVal: "StaticFloat32"},
-		ast.KindFloat64: {name: "Float64Attribute", defImport: "float64default", defVal: "StaticFloat64"},
-		ast.KindAny:     {name: "StringAttribute", defImport: "stringdefault", defVal: "StaticString"}, // `any` should be represented as a string holding a JSON payload
-		ast.KindInt8:    {name: "NumberAttribute", defImport: "numberdefault", defVal: "StaticBigFloat"},
-		ast.KindUint8:   {name: "NumberAttribute", defImport: "numberdefault", defVal: "StaticBigFloat"},
-		ast.KindInt16:   {name: "NumberAttribute", defImport: "numberdefault", defVal: "StaticBigFloat"},
-		ast.KindUint16:  {name: "NumberAttribute", defImport: "numberdefault", defVal: "StaticBigFloat"},
+func (a *attributes) formatScalarAttribute(def ir.Type, forceOptional bool, comments []string) string {
+	var attrs = map[ir.ScalarKind]attributeFormatter{
+		ir.KindString:  {name: "StringAttribute", defImport: "stringdefault", defVal: "StaticString"},
+		ir.KindBytes:   {name: "StringAttribute", defImport: "stringdefault", defVal: "StaticString"},
+		ir.KindNull:    {name: "StringAttribute", defImport: "stringdefault", defVal: "StaticString"},
+		ir.KindBool:    {name: "BoolAttribute", defImport: "booldefault", defVal: "StaticBool"},
+		ir.KindInt32:   {name: "Int32Attribute", defImport: "int32default", defVal: "StaticInt32"},
+		ir.KindUint32:  {name: "Int32Attribute", defImport: "int32default", defVal: "StaticInt32"},
+		ir.KindInt64:   {name: "Int64Attribute", defImport: "int64default", defVal: "StaticInt64"},
+		ir.KindUint64:  {name: "Int64Attribute", defImport: "int64default", defVal: "StaticInt64"},
+		ir.KindFloat32: {name: "Float32Attribute", defImport: "float32default", defVal: "StaticFloat32"},
+		ir.KindFloat64: {name: "Float64Attribute", defImport: "float64default", defVal: "StaticFloat64"},
+		ir.KindAny:     {name: "StringAttribute", defImport: "stringdefault", defVal: "StaticString"}, // `any` should be represented as a string holding a JSON payload
+		ir.KindInt8:    {name: "NumberAttribute", defImport: "numberdefault", defVal: "StaticBigFloat"},
+		ir.KindUint8:   {name: "NumberAttribute", defImport: "numberdefault", defVal: "StaticBigFloat"},
+		ir.KindInt16:   {name: "NumberAttribute", defImport: "numberdefault", defVal: "StaticBigFloat"},
+		ir.KindUint16:  {name: "NumberAttribute", defImport: "numberdefault", defVal: "StaticBigFloat"},
 	}
 
 	attr, ok := attrs[def.AsScalar().ScalarKind]
@@ -262,12 +262,12 @@ func (a *attributes) formatScalarAttribute(def ast.Type, forceOptional bool, com
 		buffer.WriteString("\tComputed: true,\n")
 	}
 
-	if def.HasHint(ast.HintStringFormatDateTime) {
+	if def.HasHint(ir.HintStringFormatDateTime) {
 		a.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
 		buffer.WriteString("\tCustomType: timetypes.RFC3339Type{},\n")
 	}
 
-	if def.HasHint(ast.HintStringFormatDuration) {
+	if def.HasHint(ir.HintStringFormatDuration) {
 		a.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
 		buffer.WriteString("\tCustomType: timetypes.GoDurationType{},\n")
 	}
@@ -312,27 +312,27 @@ type defaultType string
 const MapDefault = "Map"
 const ListDefault = "List"
 
-func (a *attributes) parseArrayOrMapDefaults(def ast.Type, defVal any, t defaultType) string {
-	var scalarDef = map[ast.ScalarKind]defaultFormatter{
-		ast.KindString:  {name: "StringType", defFunc: "StringValue"},
-		ast.KindBytes:   {name: "StringType", defFunc: "StringValue"},
-		ast.KindNull:    {name: "StringType", defFunc: "StringValue"},
-		ast.KindBool:    {name: "BoolType", defFunc: "BoolValue"},
-		ast.KindInt32:   {name: "Int32Type", defFunc: "Int32Value"},
-		ast.KindUint32:  {name: "Int32Type", defFunc: "Int32Value"},
-		ast.KindInt64:   {name: "Int64Type", defFunc: "Int64Value"},
-		ast.KindUint64:  {name: "Int64Type", defFunc: "Int64Value"},
-		ast.KindFloat32: {name: "Float32Type", defFunc: "Float32Value"},
-		ast.KindFloat64: {name: "Float64Type", defFunc: "Float64Value"},
-		ast.KindInt8:    {name: "NumberType", defFunc: "NumberValue", extraDefFunc: "big.NewFloat"},
-		ast.KindUint8:   {name: "NumberType", defFunc: "NumberValue", extraDefFunc: "big.NewFloat"},
-		ast.KindInt16:   {name: "NumberType", defFunc: "NumberValue", extraDefFunc: "big.NewFloat"},
-		ast.KindUint16:  {name: "NumberType", defFunc: "NumberValue", extraDefFunc: "big.NewFloat"},
+func (a *attributes) parseArrayOrMapDefaults(def ir.Type, defVal any, t defaultType) string {
+	var scalarDef = map[ir.ScalarKind]defaultFormatter{
+		ir.KindString:  {name: "StringType", defFunc: "StringValue"},
+		ir.KindBytes:   {name: "StringType", defFunc: "StringValue"},
+		ir.KindNull:    {name: "StringType", defFunc: "StringValue"},
+		ir.KindBool:    {name: "BoolType", defFunc: "BoolValue"},
+		ir.KindInt32:   {name: "Int32Type", defFunc: "Int32Value"},
+		ir.KindUint32:  {name: "Int32Type", defFunc: "Int32Value"},
+		ir.KindInt64:   {name: "Int64Type", defFunc: "Int64Value"},
+		ir.KindUint64:  {name: "Int64Type", defFunc: "Int64Value"},
+		ir.KindFloat32: {name: "Float32Type", defFunc: "Float32Value"},
+		ir.KindFloat64: {name: "Float64Type", defFunc: "Float64Value"},
+		ir.KindInt8:    {name: "NumberType", defFunc: "NumberValue", extraDefFunc: "big.NewFloat"},
+		ir.KindUint8:   {name: "NumberType", defFunc: "NumberValue", extraDefFunc: "big.NewFloat"},
+		ir.KindInt16:   {name: "NumberType", defFunc: "NumberValue", extraDefFunc: "big.NewFloat"},
+		ir.KindUint16:  {name: "NumberType", defFunc: "NumberValue", extraDefFunc: "big.NewFloat"},
 	}
 
-	var enumDef = map[ast.ScalarKind]defaultFormatter{
-		ast.KindString: {name: "StringType", defFunc: "StringValue"},
-		ast.KindInt64:  {name: "StringType", defFunc: "StringValue"},
+	var enumDef = map[ir.ScalarKind]defaultFormatter{
+		ir.KindString: {name: "StringType", defFunc: "StringValue"},
+		ir.KindInt64:  {name: "StringType", defFunc: "StringValue"},
 	}
 
 	v := defVal.([]any)
@@ -350,7 +350,7 @@ func (a *attributes) parseArrayOrMapDefaults(def ast.Type, defVal any, t default
 	fmt.Fprintf(&buffer, "types.%s(\n", mustValue)
 
 	switch def.Kind {
-	case ast.KindScalar:
+	case ir.KindScalar:
 		if scalar, ok := scalarDef[def.AsScalar().ScalarKind]; ok {
 			fmt.Fprintf(&buffer, "types.%s, %s{\n", scalar.name, attrValue)
 			for _, val := range v {
@@ -363,7 +363,7 @@ func (a *attributes) parseArrayOrMapDefaults(def ast.Type, defVal any, t default
 			buffer.WriteString("},\n")
 		}
 
-	case ast.KindRef:
+	case ir.KindRef:
 		resolved := a.context.ResolveRefs(def.Ref.AsType())
 		if !resolved.IsEnum() {
 			return "unknown"
@@ -386,7 +386,7 @@ func (a *attributes) parseArrayOrMapDefaults(def ast.Type, defVal any, t default
 
 // Blocks generation
 
-func (a *attributes) formatStructBlocks(typeDef ast.Type) string {
+func (a *attributes) formatStructBlocks(typeDef ir.Type) string {
 	var buffer strings.Builder
 
 	a.packageMapper("github.com/hashicorp/terraform-plugin-framework/resource/schema")

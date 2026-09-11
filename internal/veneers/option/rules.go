@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/veneers"
 )
 
@@ -14,11 +14,11 @@ type Rule struct {
 	Action   *Action
 }
 
-func (rule Rule) Matches(builder ast.Builder, option ast.Option) bool {
+func (rule Rule) Matches(builder ir.Builder, option ir.Option) bool {
 	return rule.Selector.Matches(builder, option)
 }
 
-func (rule Rule) Apply(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
+func (rule Rule) Apply(ctx RuleCtx, builder ir.Builder, option ir.Option) ([]ir.Option, error) {
 	return rule.Action.run(ctx, builder, option)
 }
 
@@ -28,7 +28,7 @@ func (rule Rule) String() string {
 
 type RuleCtx struct {
 	Logger  *slog.Logger
-	Schemas ast.Schemas
+	Schemas ir.Schemas
 }
 
 type Action struct {

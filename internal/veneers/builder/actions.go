@@ -6,13 +6,13 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ir"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers"
 )
 
-func mapToSelected(mapFunc func(ctx RuleCtx, builder ast.Builder) (ast.Builder, error)) ActionRunner {
-	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+func mapToSelected(mapFunc func(ctx RuleCtx, builder ir.Builder) (ir.Builder, error)) ActionRunner {
+	return func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
 		for i, b := range builders {
 			newBuilder, err := mapFunc(ctx, b)
 			if err != nil {
@@ -26,7 +26,7 @@ func mapToSelected(mapFunc func(ctx RuleCtx, builder ast.Builder) (ast.Builder, 
 	}
 }
 
-func mergeBuilderInto(fromBuilder ast.Builder, intoBuilder ast.Builder, underPath ast.Path, excludeOptions []string, renameOptions map[string]string) (ast.Builder, error) {
+func mergeBuilderInto(fromBuilder ir.Builder, intoBuilder ir.Builder, underPath ir.Path, excludeOptions []string, renameOptions map[string]string) (ir.Builder, error) {
 	newBuilder := intoBuilder
 	if renameOptions == nil {
 		renameOptions = map[string]string{}
@@ -75,7 +75,7 @@ func mergeBuilderInto(fromBuilder ast.Builder, intoBuilder ast.Builder, underPat
 }
 
 func MergeIntoAction(sourceBuilderName string, underPath string, excludeOptions []string, renameOptions map[string]string) ActionRunner {
-	return mapToSelected(func(ctx RuleCtx, destinationBuilder ast.Builder) (ast.Builder, error) {
+	return mapToSelected(func(ctx RuleCtx, destinationBuilder ir.Builder) (ir.Builder, error) {
 		sourceBuilder, found := ctx.Builders.LocateByName(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
 		if !found {
 			// We couldn't find the source builder: let's return the selected builder untouched.
@@ -90,7 +90,7 @@ func MergeIntoAction(sourceBuilderName string, underPath string, excludeOptions 
 
 		newBuilder, err := mergeBuilderInto(sourceBuilder, destinationBuilder, newRoot, excludeOptions, renameOptions)
 		if err != nil {
-			return ast.Builder{}, fmt.Errorf("could not apply MergeInto builder veneer: %w", err)
+			return ir.Builder{}, fmt.Errorf("could not apply MergeInto builder veneer: %w", err)
 		}
 
 		newBuilder.AddToVeneerTrail(fmt.Sprintf("MergeInto[source=%s]", sourceBuilder.Name))
@@ -99,8 +99,8 @@ func MergeIntoAction(sourceBuilderName string, underPath string, excludeOptions 
 	})
 }
 
-func composeBuilderForType(schemas ast.Schemas, config CompositionConfig, typeDiscriminator string, sourceBuilder ast.Builder, composableBuilders ast.Builders) (ast.Builders, error) {
-	newBuilder := ast.Builder{
+func composeBuilderForType(schemas ir.Schemas, config CompositionConfig, typeDiscriminator string, sourceBuilder ir.Builder, composableBuilders ir.Builders) (ir.Builders, error) {
+	newBuilder := ir.Builder{
 		Package:     composableBuilders[0].Package,
 		For:         sourceBuilder.For,
 		Name:        sourceBuilder.For.Name,
@@ -116,7 +116,7 @@ func composeBuilderForType(schemas ast.Schemas, config CompositionConfig, typeDi
 		return nil, fmt.Errorf("could not find plugin discriminator field '%s' in builder", config.PluginDiscriminatorField)
 	}
 
-	typeAssignment := ast.ConstantAssignment(ast.PathFromStructField(typeField), typeDiscriminator)
+	typeAssignment := ir.ConstantAssignment(ir.PathFromStructField(typeField), typeDiscriminator)
 	newBuilder.Constructor.Assignments = append(newBuilder.Constructor.Assignments, typeAssignment)
 
 	// re-add options coming from the source builder
@@ -134,7 +134,7 @@ func composeBuilderForType(schemas ast.Schemas, config CompositionConfig, typeDi
 		newBuilder.Options = append(newBuilder.Options, panelOpt)
 	}
 
-	composedBuilders := make([]ast.Builder, 0, len(composableBuilders))
+	composedBuilders := make([]ir.Builder, 0, len(composableBuilders))
 	for _, composableBuilder := range composableBuilders {
 		underPath, exists := config.CompositionMap[composableBuilder.For.Name]
 		if !exists {
@@ -159,10 +159,10 @@ func composeBuilderForType(schemas ast.Schemas, config CompositionConfig, typeDi
 		}
 
 		if config.InitializeCompositionMap {
-			newBuilder.Constructor.Assignments = append(newBuilder.Constructor.Assignments, ast.Assignment{
+			newBuilder.Constructor.Assignments = append(newBuilder.Constructor.Assignments, ir.Assignment{
 				Path:   newRoot,
-				Method: ast.DirectAssignment,
-				Value: ast.AssignmentValue{
+				Method: ir.DirectAssignment,
+				Value: ir.AssignmentValue{
 					ConstructorFor: refType.Ref,
 				},
 			})
@@ -176,7 +176,7 @@ func composeBuilderForType(schemas ast.Schemas, config CompositionConfig, typeDi
 	}
 
 	if config.CompositionMap["__schema_entrypoint"] != "" {
-		schema, _ := schemas.Locate(composableBuilders[0].Package)
+		schema, _ := schemas.Get(composableBuilders[0].Package)
 		if schema.EntryPoint == "" {
 			return nil, fmt.Errorf("schema '%s' does not have an entrypoint", schema.Package)
 		}
@@ -186,19 +186,19 @@ func composeBuilderForType(schemas ast.Schemas, config CompositionConfig, typeDi
 			return nil, err
 		}
 
-		resolvedEntrypointType := schemas.ResolveToType(schema.EntryPointType)
+		resolvedEntrypointType := schemas.Resolve(schema.EntryPointType)
 
 		switch {
 		case resolvedEntrypointType.IsStructGeneratedFromDisjunction():
 			for _, field := range resolvedEntrypointType.Struct.Fields {
 				newRoot[len(newRoot)-1].TypeHint = &schema.EntryPointType
-				arg := ast.Argument{Name: field.Name, Type: field.Type}
+				arg := ir.Argument{Name: field.Name, Type: field.Type}
 
-				branchOpt := ast.Option{
+				branchOpt := ir.Option{
 					Name: field.Name,
-					Args: []ast.Argument{arg},
-					Assignments: []ast.Assignment{
-						ast.ArgumentAssignment(newRoot.AppendStructField(field), arg),
+					Args: []ir.Argument{arg},
+					Assignments: []ir.Assignment{
+						ir.ArgumentAssignment(newRoot.AppendStructField(field), arg),
 					},
 					VeneerTrail: []string{"ComposeBuilders[created]"},
 				}
@@ -208,13 +208,13 @@ func composeBuilderForType(schemas ast.Schemas, config CompositionConfig, typeDi
 		case resolvedEntrypointType.IsDisjunction():
 			for _, branch := range resolvedEntrypointType.Disjunction.Branches {
 				newRoot[len(newRoot)-1].TypeHint = &schema.EntryPointType
-				arg := ast.Argument{Name: ast.TypeName(branch), Type: branch}
+				arg := ir.Argument{Name: ir.TypeName(branch), Type: branch}
 
-				branchOpt := ast.Option{
-					Name: ast.TypeName(branch),
-					Args: []ast.Argument{arg},
-					Assignments: []ast.Assignment{
-						ast.ArgumentAssignment(newRoot, arg),
+				branchOpt := ir.Option{
+					Name: ir.TypeName(branch),
+					Args: []ir.Argument{arg},
+					Assignments: []ir.Assignment{
+						ir.ArgumentAssignment(newRoot, arg),
 					},
 					VeneerTrail: []string{"ComposeBuilders[created]"},
 				}
@@ -304,7 +304,7 @@ type CompositionConfig struct {
 }
 
 func ComposeBuildersAction(config CompositionConfig) ActionRunner {
-	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+	return func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
 		sourceBuilderPkg, sourceBuilderNameWithoutPkg, found := strings.Cut(config.SourceBuilderName, ".")
 		if !found {
 			return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: SourceBuilderName '%s' is incorrect: no package found", sourceBuilderPkg)
@@ -321,11 +321,11 @@ func ComposeBuildersAction(config CompositionConfig) ActionRunner {
 		// - aggregate the composable builders into a new, composed builder
 		// - add the new composed builders to newBuilders
 
-		newBuilders := make([]ast.Builder, 0, len(builders))
-		composableBuilders := make(map[string]ast.Builders)
+		newBuilders := make([]ir.Builder, 0, len(builders))
+		composableBuilders := make(map[string]ir.Builders)
 
 		for _, builder := range builders {
-			schema, found := ctx.Schemas.Locate(builder.For.SelfRef.ReferredPkg)
+			schema, found := ctx.Schemas.Get(builder.For.SelfRef.ReferredPkg)
 			if !found {
 				continue
 			}
@@ -353,7 +353,7 @@ func ComposeBuildersAction(config CompositionConfig) ActionRunner {
 }
 
 func RenameAction(newName string) ActionRunner {
-	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+	return func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
 		for i := range builders {
 			oldName := builders[i].Name
 			builders[i].Name = newName
@@ -365,7 +365,7 @@ func RenameAction(newName string) ActionRunner {
 }
 
 func VeneerTrailAsCommentsAction() ActionRunner {
-	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+	return func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
 		for i, builder := range builders {
 			veneerTrail := tools.Map(builder.VeneerTrail, func(veneer string) string {
 				return fmt.Sprintf("Modified by veneer '%s'", veneer)
@@ -378,8 +378,8 @@ func VeneerTrailAsCommentsAction() ActionRunner {
 	}
 }
 
-func PropertiesAction(properties []ast.StructField) ActionRunner {
-	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+func PropertiesAction(properties []ir.StructField) ActionRunner {
+	return func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
 		for i := range builders {
 			builders[i].Properties = append(builders[i].Properties, properties...)
 			builders[i].AddToVeneerTrail("Properties")
@@ -390,8 +390,8 @@ func PropertiesAction(properties []ast.StructField) ActionRunner {
 }
 
 func DuplicateAction(duplicateName string, excludeOptions []string) ActionRunner {
-	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
-		var newBuilders ast.Builders
+	return func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
+		var newBuilders ir.Builders
 
 		for _, builder := range builders {
 			duplicatedBuilder := builder.DeepCopy()
@@ -399,7 +399,7 @@ func DuplicateAction(duplicateName string, excludeOptions []string) ActionRunner
 			duplicatedBuilder.AddToVeneerTrail(fmt.Sprintf("Duplicate[%s.%s]", builder.Package, builder.Name))
 
 			if len(excludeOptions) != 0 {
-				duplicatedBuilder.Options = tools.Filter(duplicatedBuilder.Options, func(option ast.Option) bool {
+				duplicatedBuilder.Options = tools.Filter(duplicatedBuilder.Options, func(option ir.Option) bool {
 					return !tools.StringInListEqualFold(option.Name, excludeOptions)
 				})
 			}
@@ -417,7 +417,7 @@ type Initialization struct {
 }
 
 func InitializeAction(statements []Initialization) ActionRunner {
-	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+	return func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
 		for i := range builders {
 			veneerDebug := make([]string, 0, len(statements))
 			for _, statement := range statements {
@@ -426,7 +426,7 @@ func InitializeAction(statements []Initialization) ActionRunner {
 					return nil, fmt.Errorf("could not apply Initialize builder veneer: %w", err)
 				}
 
-				builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, ast.ConstantAssignment(path, statement.Value))
+				builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, ir.ConstantAssignment(path, statement.Value))
 				veneerDebug = append(veneerDebug, fmt.Sprintf("%s = %v", statement.PropertyPath, statement.Value))
 			}
 			builders[i].AddToVeneerTrail(fmt.Sprintf("Initialize[%s]", strings.Join(veneerDebug, ", ")))
@@ -437,7 +437,7 @@ func InitializeAction(statements []Initialization) ActionRunner {
 }
 
 func PromoteOptionsToConstructorAction(optionNames []string) ActionRunner {
-	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+	return func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
 		for i, builder := range builders {
 			if len(builder.Factories) != 0 {
 				return nil, fmt.Errorf("could not apply PromoteOptionsToConstructor builder veneer: constructor arguments can not be added to builders that have factories")
@@ -466,7 +466,7 @@ func PromoteOptionsToConstructorAction(optionNames []string) ActionRunner {
 }
 
 func AddOptionAction(newOption veneers.Option) ActionRunner {
-	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+	return func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
 		for i, builder := range builders {
 			newOpt, err := newOption.AsIR(ctx.Schemas, builder)
 			if err != nil {
@@ -481,8 +481,8 @@ func AddOptionAction(newOption veneers.Option) ActionRunner {
 	}
 }
 
-func AddFactoryAction(factory ast.BuilderFactory) ActionRunner {
-	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+func AddFactoryAction(factory ir.BuilderFactory) ActionRunner {
+	return func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
 		for i := range builders {
 			if factory.BuilderRef.ReferredType == "" {
 				factory.BuilderRef.ReferredPkg = builders[i].Package
@@ -506,7 +506,7 @@ func AddFactoryAction(factory ast.BuilderFactory) ActionRunner {
 }
 
 func DebugAction() ActionRunner {
-	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+	return func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
 		for _, builder := range builders {
 			marshaled, err := json.MarshalIndent(builder, "", "  ")
 			if err != nil {
@@ -522,7 +522,7 @@ func DebugAction() ActionRunner {
 }
 
 func GenericAction(selector *Selector) ActionRunner {
-	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+	return func(ctx RuleCtx, builders ir.Builders) (ir.Builders, error) {
 		for i := range builders {
 			if selector.Matches(ctx.Schemas, builders[i]) {
 				builders[i].IsGeneric = true
