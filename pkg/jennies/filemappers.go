@@ -14,6 +14,8 @@ import (
 // GeneratedCommentHeader produces a FileMapper that injects a comment header onto
 // a [codejen.File] indicating the jenny or jennies that constructed the
 // file.
+// If debug is enabled, the name of the jennies which created the files will
+// be included in the comment.
 func GeneratedCommentHeader(debug bool) codejen.FileMapper {
 	genHeader := `{{ .Leader }} Code generated - EDITING IS FUTILE. DO NOT EDIT.
 {{- with .Using }}
@@ -40,10 +42,6 @@ func GeneratedCommentHeader(debug bool) codejen.FileMapper {
 		case ".yml", ".yaml", ".py":
 			leader = "#"
 		default:
-			leader = ""
-		}
-
-		if leader == "" {
 			return f, nil
 		}
 

@@ -19,7 +19,6 @@ func initTemplates(config Config, apiRefCollector *apiref.APIReferenceCollector)
 		"golang",
 
 		// placeholder functions, will be overridden by jennies
-		template.Funcs(template.TypeResolvingHelpers(languages.Context{})),
 		template.Funcs(template.TypesHelpers(languages.Context{})),
 		template.Funcs(apiref.TemplateHelpers(apiRefCollector)),
 		template.Funcs(formattingTemplateFuncs(config)),

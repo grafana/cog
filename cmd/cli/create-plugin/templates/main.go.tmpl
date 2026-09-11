@@ -1,0 +1,11 @@
+package main
+
+import (
+	"github.com/grafana/cog/pkg/plugins"
+)
+
+func main() {
+	plugins.Run(plugins.LanguagePlugin(&Language{
+		logger: plugins.DefaultLogger,
+	}))
+}

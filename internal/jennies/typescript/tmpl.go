@@ -17,7 +17,6 @@ var templatesFS embed.FS
 func initTemplates(config Config, apiRefCollector *apiref.APIReferenceCollector) *template.Template {
 	tmpl, err := template.New(
 		"typescript",
-		template.Funcs(template.TypeResolvingHelpers(languages.Context{})),
 		template.Funcs(template.TypesHelpers(languages.Context{})),
 		template.Funcs(apiref.TemplateHelpers(apiRefCollector)),
 		template.Funcs(config.OverridesTemplateFuncs),

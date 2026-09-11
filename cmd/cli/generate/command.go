@@ -11,9 +11,10 @@ import (
 )
 
 type options struct {
-	Debug           bool
-	ConfigPath      string
-	ExtraParameters map[string]string
+	Debug             bool
+	ConfigPath        string
+	ExtraParameters   map[string]string
+	PluginDirectories []string
 }
 
 func Command() *cobra.Command {
@@ -47,6 +48,7 @@ func Command() *cobra.Command {
 	_ = cmd.MarkFlagFilename("config")
 	_ = cmd.MarkFlagRequired("config")
 
+	cmd.Flags().StringArrayVar(&opts.PluginDirectories, "plugin-directory", nil, "Directories to scan for plugin binaries. If empty, PATH is used.")
 	cmd.Flags().StringToStringVar(&opts.ExtraParameters, "parameters", nil, "Sets or overrides parameters used in the config file.")
 	cmd.Flags().CountVarP(&verbosity, "verbose", "v", "Verbose mode. Multiple -v options increase the verbosity (maximum: 3).")
 
@@ -58,6 +60,7 @@ func doGenerate(ctx context.Context, logger *slog.Logger, opts options) error {
 		codegen.Parameters(opts.ExtraParameters),
 		codegen.Logger(logger),
 		codegen.Debug(opts.Debug),
+		codegen.PluginDirectories(opts.PluginDirectories),
 	}
 
 	pipeline, err := codegen.PipelineFromFile(opts.ConfigPath, pipelineOpts...)

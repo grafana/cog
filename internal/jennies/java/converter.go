@@ -93,7 +93,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ir.
 	typeFormatter := createFormatter(context, jenny.config).withPackageMapper(packageMapper)
 
 	return jenny.tmpl.
-		Funcs(template.TypeResolvingHelpers(context)).
+		Funcs(template.TypesHelpers(context)).
 		Funcs(map[string]any{
 			"formatRawRef": func(pkg string, ref string) string {
 				return typeFormatter.formatReference(ir.NewRef(pkg, ref).AsRef())

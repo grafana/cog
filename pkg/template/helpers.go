@@ -7,7 +7,8 @@ import (
 	"github.com/grafana/cog/pkg/languages"
 )
 
-func TypeResolvingHelpers(context languages.Context) FuncMap {
+// TypesHelpers returns a series of template helpers to work with IR types.
+func TypesHelpers(context languages.Context) FuncMap {
 	return FuncMap{
 		"resolvesToScalar": func(typeDef ir.Type) bool {
 			return context.ResolveRefs(typeDef).IsScalar()
@@ -34,11 +35,13 @@ func TypeResolvingHelpers(context languages.Context) FuncMap {
 			_, found := context.ResolveToComposableSlot(typeDef)
 			return found
 		},
-	}
-}
-
-func TypesHelpers(context languages.Context) FuncMap {
-	return FuncMap{
+		"schemaHasObject": func(schema *ir.Schema, name string) bool {
+			return schema.HasObject(name)
+		},
+		"objectExists": func(pkg string, name string) bool {
+			_, ok := context.Schemas.GetObject(pkg, name)
+			return ok
+		},
 		"dumpJson": func(input any) string {
 			payload, err := json.Marshal(input)
 			if err != nil {
@@ -46,13 +49,6 @@ func TypesHelpers(context languages.Context) FuncMap {
 			}
 
 			return string(payload)
-		},
-		"schemaHasObject": func(schema *ir.Schema, name string) bool {
-			return schema.HasObject(name)
-		},
-		"objectExists": func(pkg string, name string) bool {
-			_, ok := context.Schemas.GetObject(pkg, name)
-			return ok
 		},
 	}
 }
