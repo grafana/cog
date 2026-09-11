@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/orderedmap"
+	"github.com/grafana/cog/pkg/imports"
 )
 
 func NewImportMap() *ModuleImportMap {
 	return NewModuleImportMap(
-		common.WithAliasSanitizer[ModuleImportMap](func(alias string) string {
+		imports.WithAliasSanitizer[ModuleImportMap](func(alias string) string {
 			return strings.ReplaceAll(alias, "/", "")
 		}),
-		common.WithFormatter(func(importMap ModuleImportMap) string {
+		imports.WithFormatter(func(importMap ModuleImportMap) string {
 			if importMap.Imports.Len() == 0 {
 				return ""
 			}
@@ -51,16 +51,16 @@ type ImportStmt struct {
 type ModuleImportMap struct {
 	// alias → ImportStmt
 	Imports *orderedmap.Map[string, ImportStmt]
-	config  common.ImportMapConfig[ModuleImportMap]
+	config  imports.ImportMapConfig[ModuleImportMap]
 }
 
-func NewModuleImportMap(opts ...common.ImportMapOption[ModuleImportMap]) *ModuleImportMap {
-	config := common.ImportMapConfig[ModuleImportMap]{
+func NewModuleImportMap(opts ...imports.ImportMapOption[ModuleImportMap]) *ModuleImportMap {
+	config := imports.ImportMapConfig[ModuleImportMap]{
 		Formatter: func(importMap ModuleImportMap) string {
 			return fmt.Sprintf("%#v\n", importMap.Imports)
 		},
-		AliasSanitizer:      common.NoopImportSanitizer,
-		ImportPathSanitizer: common.NoopImportSanitizer,
+		AliasSanitizer:      imports.NoopImportSanitizer,
+		ImportPathSanitizer: imports.NoopImportSanitizer,
 	}
 
 	for _, opt := range opts {

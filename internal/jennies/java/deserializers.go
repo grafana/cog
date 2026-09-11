@@ -5,17 +5,17 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/imports"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/template"
 )
 
 type Deserializers struct {
 	config        Config
 	tmpl          *template.Template
-	imports       *common.DirectImportMap
+	imports       *imports.DirectImportMap
 	typeFormatter *typeFormatter
 	packageMapper func(pkg string, class string) string
 }
@@ -27,7 +27,7 @@ func (jenny *Deserializers) JennyName() string {
 func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, error) {
 	jenny.typeFormatter = createFormatter(context, jenny.config)
 	jenny.tmpl = jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(template.TypeResolvingHelpers(context)).
 		Funcs(template.FuncMap{
 			"importPkg":  jenny.config.formatPackage,
 			"formatType": jenny.typeFormatter.formatFieldType,

@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/testutils"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/stretchr/testify/require"
@@ -47,7 +47,7 @@ func TestEquality_TypeScript_GeneratesEqualsFunctions(t *testing.T) {
 
 	jenny := RawTypes{
 		config: config,
-		tmpl:   initTemplates(config, common.NewAPIReferenceCollector()),
+		tmpl:   initTemplates(config, apiref.NewAPIReferenceCollector()),
 	}
 
 	schema := equalitySchema()
@@ -94,7 +94,7 @@ func TestEquality_TypeScript_SkipsNonStructTypes(t *testing.T) {
 
 	jenny := RawTypes{
 		config: config,
-		tmpl:   initTemplates(config, common.NewAPIReferenceCollector()),
+		tmpl:   initTemplates(config, apiref.NewAPIReferenceCollector()),
 	}
 
 	// A scalar constant (non-struct type) should not generate an equality function
@@ -124,7 +124,7 @@ func TestEquality_TypeScript_DisabledByDefault(t *testing.T) {
 
 	jenny := RawTypes{
 		config: config,
-		tmpl:   initTemplates(config, common.NewAPIReferenceCollector()),
+		tmpl:   initTemplates(config, apiref.NewAPIReferenceCollector()),
 	}
 
 	schema := equalitySchema()

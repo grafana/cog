@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 )
 
-func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
+func apiReferenceFormatter(config Config) apiref.APIReferenceFormatter {
 	builderName := func(builder ir.Builder) string {
 		return formatObjectName(builder.Name) + "Builder"
 	}
-	methodSignature := func(context languages.Context, method common.MethodReference) string {
-		args := tools.Map(method.Arguments, func(arg common.ArgumentReference) string {
+	methodSignature := func(context languages.Context, method apiref.MethodReference) string {
+		args := tools.Map(method.Arguments, func(arg apiref.ArgumentReference) string {
 			return fmt.Sprintf("%s %s", arg.Name, arg.Type)
 		})
 
@@ -37,8 +37,8 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 		return fmt.Sprintf("func (%[1]s *%[2]s) %[3]s(%[4]s)%[5]s", receiverName, objectName, methodName, strings.Join(args, ", "), returnType)
 	}
 
-	functionSignature := func(context languages.Context, function common.FunctionReference) string {
-		args := tools.Map(function.Arguments, func(arg common.ArgumentReference) string {
+	functionSignature := func(context languages.Context, function apiref.FunctionReference) string {
+		args := tools.Map(function.Arguments, func(arg apiref.ArgumentReference) string {
 			return fmt.Sprintf("%s %s", arg.Name, arg.Type)
 		})
 
@@ -50,12 +50,12 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 		return fmt.Sprintf("func %[1]s(%[2]s)%[3]s", formatFunctionName(function.Name), strings.Join(args, ", "), returnType)
 	}
 
-	return common.APIReferenceFormatter{
+	return apiref.APIReferenceFormatter{
 		KindName: func(kind ir.Kind) string {
 			return string(kind)
 		},
 
-		FunctionName: func(function common.FunctionReference) string {
+		FunctionName: func(function apiref.FunctionReference) string {
 			return formatFunctionName(function.Name)
 		},
 		FunctionSignature: functionSignature,
@@ -71,7 +71,7 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			return typesFormatter.formatTypeDeclaration(object)
 		},
 
-		MethodName: func(method common.MethodReference) string {
+		MethodName: func(method apiref.MethodReference) string {
 			return formatFunctionName(method.Name)
 		},
 		MethodSignature: methodSignature,
@@ -82,14 +82,14 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			typesFormatter := builderTypeFormatter(config, context, dummyImports, func(pkg string) string {
 				return pkg
 			})
-			args := tools.Map(builder.Constructor.Args, func(arg ir.Argument) common.ArgumentReference {
-				return common.ArgumentReference{
+			args := tools.Map(builder.Constructor.Args, func(arg ir.Argument) apiref.ArgumentReference {
+				return apiref.ArgumentReference{
 					Name: formatArgName(arg.Name),
 					Type: strings.TrimPrefix(typesFormatter.formatType(arg.Type), "*"),
 				}
 			})
 
-			return functionSignature(context, common.FunctionReference{
+			return functionSignature(context, apiref.FunctionReference{
 				Name:      "New" + builderName(builder),
 				Arguments: args,
 				Return:    "*" + builderName(builder),
@@ -103,14 +103,14 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			typesFormatter := builderTypeFormatter(config, context, dummyImports, func(pkg string) string {
 				return pkg
 			})
-			args := tools.Map(option.Args, func(arg ir.Argument) common.ArgumentReference {
-				return common.ArgumentReference{
+			args := tools.Map(option.Args, func(arg ir.Argument) apiref.ArgumentReference {
+				return apiref.ArgumentReference{
 					Name: formatArgName(arg.Name),
 					Type: strings.TrimPrefix(typesFormatter.formatType(arg.Type), "*"),
 				}
 			})
 
-			return methodSignature(context, common.MethodReference{
+			return methodSignature(context, apiref.MethodReference{
 				ReceiverBuilder: &builder,
 				Name:            option.Name,
 				Comments:        option.Comments,

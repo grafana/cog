@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/pkg/imports"
 )
 
-func NewImportMap(packageRoot string) *common.DirectImportMap {
-	return common.NewDirectImportMap(
-		common.WithAliasSanitizer[common.DirectImportMap](formatPackageName),
-		common.WithImportPathSanitizer[common.DirectImportMap](strings.ToLower),
-		common.WithFormatter(func(importMap common.DirectImportMap) string {
+func NewImportMap(packageRoot string) *imports.DirectImportMap {
+	return imports.NewDirectImportMap(
+		imports.WithAliasSanitizer[imports.DirectImportMap](formatPackageName),
+		imports.WithImportPathSanitizer[imports.DirectImportMap](strings.ToLower),
+		imports.WithFormatter(func(importMap imports.DirectImportMap) string {
 			if importMap.Imports.Len() == 0 {
 				return ""
 			}

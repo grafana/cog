@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/testutils"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
 	"github.com/grafana/cog/pkg/logs"
@@ -38,8 +38,8 @@ func TestEquality_Python_GeneratesEqMethods(t *testing.T) {
 	config := Config{GenerateEqual: true}
 	jenny := RawTypes{
 		config:          config,
-		tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
-		apiRefCollector: common.NewAPIReferenceCollector(),
+		tmpl:            initTemplates(config, apiref.NewAPIReferenceCollector()),
+		apiRefCollector: apiref.NewAPIReferenceCollector(),
 	}
 
 	schema := equalitySchema()
@@ -78,8 +78,8 @@ func TestEquality_Python_SkipsNonStructTypes(t *testing.T) {
 	config := Config{GenerateEqual: true}
 	jenny := RawTypes{
 		config:          config,
-		tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
-		apiRefCollector: common.NewAPIReferenceCollector(),
+		tmpl:            initTemplates(config, apiref.NewAPIReferenceCollector()),
+		apiRefCollector: apiref.NewAPIReferenceCollector(),
 	}
 
 	// A scalar constant (non-struct type) should not generate __eq__
@@ -105,8 +105,8 @@ func TestEquality_Python_DisabledByDefault(t *testing.T) {
 	config := Config{} // GenerateEqual defaults to false
 	jenny := RawTypes{
 		config:          config,
-		tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
-		apiRefCollector: common.NewAPIReferenceCollector(),
+		tmpl:            initTemplates(config, apiref.NewAPIReferenceCollector()),
+		apiRefCollector: apiref.NewAPIReferenceCollector(),
 	}
 
 	schema := equalitySchema()

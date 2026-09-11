@@ -4,22 +4,22 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/template"
 )
 
 //go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/converters/*.tmpl templates/builders/*.*
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector) *template.Template {
+func initTemplates(config Config, apiRefCollector *apiref.APIReferenceCollector) *template.Template {
 	tmpl, err := template.New(
 		"java",
-		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
-		template.Funcs(common.TypesTemplateHelpers(languages.Context{})),
-		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
+		template.Funcs(template.TypeResolvingHelpers(languages.Context{})),
+		template.Funcs(template.TypesHelpers(languages.Context{})),
+		template.Funcs(apiref.TemplateHelpers(apiRefCollector)),
 		template.Funcs(config.OverridesTemplateFuncs),
 		template.Funcs(functions()),
 		template.Funcs(formattingTemplateFuncs()),

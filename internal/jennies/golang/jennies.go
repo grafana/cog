@@ -9,8 +9,10 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/apiref"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/ir/transforms"
+	"github.com/grafana/cog/pkg/jennies"
 	"github.com/grafana/cog/pkg/languages"
 )
 
@@ -96,14 +98,14 @@ func (config Config) importPath(suffix string) string {
 type Language struct {
 	logger          *slog.Logger
 	config          Config
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 }
 
 func New(logger *slog.Logger, config Config) *Language {
 	return &Language{
 		logger:          logger,
 		config:          config,
-		apiRefCollector: common.NewAPIReferenceCollector(),
+		apiRefCollector: apiref.NewAPIReferenceCollector(),
 	}
 }
 
@@ -120,19 +122,19 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If(!config.SkipRuntime, Runtime{Config: config, Tmpl: tmpl}),
+		jennies.If(!config.SkipRuntime, Runtime{Config: config, Tmpl: tmpl}),
 
-		common.If(globalConfig.Types, RawTypes{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		jennies.If(globalConfig.Types, RawTypes{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 
-		common.If(!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config, Tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
-		common.If(!config.SkipRuntime && globalConfig.Builders && globalConfig.Converters, &Converter{
+		jennies.If(!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config, Tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		jennies.If(!config.SkipRuntime && globalConfig.Builders && globalConfig.Converters, &Converter{
 			Config:          config,
 			Tmpl:            tmpl,
 			NullableConfig:  language.NullableKinds(),
 			apiRefCollector: language.apiRefCollector,
 		}),
 
-		common.If(globalConfig.APIReference, common.APIReference{
+		jennies.If(globalConfig.APIReference, apiref.APIReference{
 			Collector: language.apiRefCollector,
 			Language:  LanguageRef,
 			Formatter: apiReferenceFormatter(config),
@@ -149,7 +151,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			TmplFuncs: formattingTemplateFuncs(config),
 		},
 	)
-	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+	jenny.AddPostprocessors(jennies.GeneratedCommentHeader(globalConfig.Debug))
 	if !config.SkipPostFormatting {
 		jenny.AddPostprocessors(FormatGoFiles)
 	}

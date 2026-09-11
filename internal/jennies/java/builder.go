@@ -5,20 +5,21 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/apiref"
+	"github.com/grafana/cog/pkg/imports"
 	"github.com/grafana/cog/pkg/ir"
 	"github.com/grafana/cog/pkg/languages"
+	"github.com/grafana/cog/pkg/template"
 )
 
 type Builder struct {
 	config        Config
 	tmpl          *template.Template
-	imports       *common.DirectImportMap
+	imports       *imports.DirectImportMap
 	typeFormatter *typeFormatter
 
-	apiRefCollector *common.APIReferenceCollector
+	apiRefCollector *apiref.APIReferenceCollector
 }
 
 func (jenny Builder) JennyName() string {
@@ -71,7 +72,7 @@ func (jenny Builder) genBuilder(context languages.Context, builder ir.Builder) (
 		DeprecationMessage:   builder.DeprecationMessage,
 	}
 
-	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
+	jenny.apiRefCollector.BuilderMethod(builder, apiref.MethodReference{
 		Name: "build",
 		Comments: []string{
 			"Builds the object.",
