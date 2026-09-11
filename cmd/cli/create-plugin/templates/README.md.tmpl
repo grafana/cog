@@ -3,12 +3,51 @@
 Language plugin for [cog](https://github.com/grafana/cog/), adding support for
 {{ .LanguageName }}
 
+## What's included
+
+```
+.
+├── go.mod
+├── language.go # Language implementation: your code starts here.
+├── main.go     # Entrypoint: runs the process as a cog plugin
+├── rawtypes.go # Jenny (ie: code generator) responsible for generating types. This is for you to implement.
+├── README.md   # ← you're here!
+├── templates/  # Directory used to store templates used by the jennies
+└── tmpl.go     # Template-related utilities
+```
+
+First, look into the `language.go` file as it basically is the entrypoint for
+{{ .LanguageName }} codegen.
+
+The methods required by `cog` are bootstrapped and defined in the order in which
+they'll be called.
+
+Note that the generation of the various outputs (types, builders, …) doesn't
+have to be implemented as a monolith in the `Generate()` method but can instead
+be split using `jennies`. An example of which is provided in the `rawtypes.go`
+file.
+
 ## Building the plugin
 
 ```
+go mod tidy
 go mod vendor
 go build -o cog-{{ .LanguageName }} .
 ```
 
 **Note:** make sure that the resulting binary is accessible via the `PATH` or
 use the `--plugin-directory` flag when calling `cog`.
+
+## Configuring cog
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json
+
+# …
+
+output:
+  # …
+
+  language_plugins:
+    {{ .LanguageName }}: { } # config
+```

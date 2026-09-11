@@ -55,14 +55,14 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ir.Object) string {
 
 	switch def.Type.Kind {
 	case ir.KindStruct:
-		buffer.WriteString(fmt.Sprintf("interface %s ", objectName))
+		fmt.Fprintf(&buffer, "interface %s ", objectName)
 		buffer.WriteString(formatter.formatStructFields(def.Type))
 		buffer.WriteString("\n")
 	case ir.KindEnum:
 		buffer.WriteString(formatter.enums.formatDeclaration(def))
 		buffer.WriteString("\n")
 	case ir.KindDisjunction, ir.KindMap, ir.KindArray, ir.KindRef:
-		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", objectName, formatter.formatType(def.Type)))
+		fmt.Fprintf(&buffer, "type %s = %s;\n", objectName, formatter.formatType(def.Type))
 	case ir.KindScalar:
 		scalarType := def.Type.AsScalar()
 		typeValue := formatValue(scalarType.Value)
@@ -72,16 +72,16 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ir.Object) string {
 				typeValue = formatter.formatScalarKind(scalarType.ScalarKind)
 			}
 
-			buffer.WriteString(fmt.Sprintf("type %s = %s;\n", objectName, typeValue))
+			fmt.Fprintf(&buffer, "type %s = %s;\n", objectName, typeValue)
 		} else {
-			buffer.WriteString(fmt.Sprintf("const %s = %s;\n", objectName, typeValue))
+			fmt.Fprintf(&buffer, "const %s = %s;\n", objectName, typeValue)
 		}
 	case ir.KindIntersection:
-		buffer.WriteString(fmt.Sprintf("interface %s ", objectName))
+		fmt.Fprintf(&buffer, "interface %s ", objectName)
 		buffer.WriteString(formatter.formatType(def.Type))
 		buffer.WriteString("\n")
 	case ir.KindComposableSlot:
-		buffer.WriteString(fmt.Sprintf("interface %s %s\n", objectName, formatter.variantInterface(string(def.Type.AsComposableSlot().Variant))))
+		fmt.Fprintf(&buffer, "interface %s %s\n", objectName, formatter.variantInterface(string(def.Type.AsComposableSlot().Variant)))
 	default:
 		return fmt.Sprintf("unhandled object of type: %s", def.Type.Kind)
 	}
@@ -176,7 +176,7 @@ func (formatter *typeFormatter) formatStructFields(structType ir.Type) string {
 
 	if structType.ImplementsVariant() {
 		variant := tools.UpperCamelCase(structType.ImplementedVariant())
-		buffer.WriteString(fmt.Sprintf("\t_implements%sVariant(): void;\n", variant))
+		fmt.Fprintf(&buffer, "\t_implements%sVariant(): void;\n", variant)
 	}
 
 	buffer.WriteString("}")
@@ -188,7 +188,7 @@ func (formatter *typeFormatter) formatField(def ir.StructField) string {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
-		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
+		fmt.Fprintf(&buffer, "// %s\n", commentLine)
 	}
 
 	required := ""
@@ -198,12 +198,7 @@ func (formatter *typeFormatter) formatField(def ir.StructField) string {
 
 	formattedType := formatter.doFormatType(def.Type, false)
 
-	buffer.WriteString(fmt.Sprintf(
-		"%s%s: %s;\n",
-		def.Name,
-		required,
-		formattedType,
-	))
+	fmt.Fprintf(&buffer, "%s%s: %s;\n", def.Name, required, formattedType)
 
 	return buffer.String()
 }
@@ -334,9 +329,9 @@ func (formatter *enumAsTypeFormatter) formatDeclaration(def ir.Object) string {
 	var buffer strings.Builder
 	objectName := formatObjectName(def.Name)
 
-	buffer.WriteString(fmt.Sprintf("enum %s {\n", objectName))
+	fmt.Fprintf(&buffer, "enum %s {\n", objectName)
 	for _, val := range def.Type.AsEnum().Values {
-		buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", formatEnumMemberName(val.Name), formatValue(val.Value)))
+		fmt.Fprintf(&buffer, "\t%s = %s,\n", formatEnumMemberName(val.Name), formatValue(val.Value))
 	}
 	buffer.WriteString("}")
 

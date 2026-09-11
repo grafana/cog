@@ -18,7 +18,6 @@ func initTemplates(config Config, apiRefCollector *apiref.APIReferenceCollector)
 	tmpl, err := template.New(
 		"python",
 
-		template.Funcs(template.TypeResolvingHelpers(languages.Context{})),
 		template.Funcs(template.TypesHelpers(languages.Context{})),
 		template.Funcs(apiref.TemplateHelpers(apiRefCollector)),
 		template.Funcs(config.OverridesTemplateFuncs),
