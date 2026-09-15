@@ -3,7 +3,9 @@ package remote
 import (
 	"fmt"
 	"log/slog"
+	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/pkg/ir"
@@ -22,14 +24,18 @@ type Language struct {
 	nullableConfig languages.NullableConfig
 }
 
-func New(logger *slog.Logger, name string, config map[string]any) (*Language, error) {
+func New(logger *slog.Logger, name string, pluginDirectories []string, config map[string]any) (*Language, error) {
+	pluginCmd, err := pluginCommand(name, pluginDirectories)
+	if err != nil {
+		return nil, err
+	}
+
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig: plugins.LanguagePluginHandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
 			"language": &plugins.LanguagePluginRunner{},
 		},
-		// this will look for "cog-{name}" in the PATH and run it
-		Cmd:         exec.Command("cog-" + name), //nolint
+		Cmd:         pluginCmd,
 		Logger:      logs.HCLLoggerFromSlog(logger),
 		SkipHostEnv: true,
 	})
@@ -65,6 +71,31 @@ func New(logger *slog.Logger, name string, config map[string]any) (*Language, er
 		plugin:         languagePlugin,
 		nullableConfig: nullableConfig,
 	}, nil
+}
+
+func pluginCommand(name string, pluginDirectories []string) (*exec.Cmd, error) {
+	binaryName := "cog-" + name
+
+	if len(pluginDirectories) == 0 {
+		// this will look for the binary in the PATH and run it
+		return exec.Command(binaryName), nil //nolint
+	}
+
+	for _, dir := range pluginDirectories {
+		file := filepath.Join(dir, binaryName)
+
+		_, err := os.Stat(file)
+		if os.IsNotExist(err) {
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		return exec.Command(file), nil //nolint
+	}
+
+	return nil, fmt.Errorf("could not locate '%s' binary", binaryName)
 }
 
 func (language *Language) Terminate() {
