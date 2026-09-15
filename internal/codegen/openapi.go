@@ -13,17 +13,17 @@ type OpenAPIInput struct {
 	InputBase `yaml:",inline"`
 
 	// Path to an OpenAPI file.
-	Path string `yaml:"path"`
+	Path string `yaml:"path,omitempty"`
 
 	// URL to an OpenAPI file.
-	URL string `yaml:"url"`
+	URL string `yaml:"url,omitempty"`
 
 	// Package name to use for the input schema. If empty, it will be guessed
 	// from the input file name.
-	Package string `yaml:"package"`
+	Package string `yaml:"package,omitempty"`
 
 	// NoValidate disables validation of the OpenAPI spec.
-	NoValidate bool `yaml:"no_validate"`
+	NoValidate bool `yaml:"no_validate,omitempty"`
 }
 
 func (input *OpenAPIInput) loadSchema(ctx context.Context) (*openapi3.T, error) {

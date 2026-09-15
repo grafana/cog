@@ -72,9 +72,9 @@ func PipelineFromFile(file string, opts ...PipelineOption) (*Pipeline, error) {
 type Pipeline struct {
 	Debug bool `yaml:"debug"`
 
-	UnitsFrom  []string   `yaml:"units_from"`
-	Inputs     []*Input   `yaml:"inputs"`
-	Transforms Transforms `yaml:"transformations"`
+	UnitsFrom  []string   `yaml:"units_from,omitempty"`
+	Inputs     []*Input   `yaml:"inputs,omitempty"`
+	Transforms Transforms `yaml:"transformations,omitempty"`
 	Output     Output     `yaml:"output"`
 
 	Parameters map[string]string `yaml:"parameters"`

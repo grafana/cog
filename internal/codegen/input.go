@@ -29,14 +29,14 @@ type InputBase struct {
 	// AllowedObjects is a list of object names that will be allowed when
 	// parsing the input schema.
 	// Note: if AllowedObjects is empty, no filter is applied.
-	AllowedObjects []string `yaml:"allowed_objects"`
+	AllowedObjects []string `yaml:"allowed_objects,omitempty"`
 
 	// Transforms holds a list of paths to files containing compiler passes
 	// to apply to the input.
-	Transforms []string `yaml:"transformations"`
+	Transforms []string `yaml:"transformations,omitempty"`
 
 	// Metadata to add to the schema, this can be used to set Kind and Variant
-	Metadata *ir.SchemaMeta `yaml:"metadata"`
+	Metadata *ir.SchemaMeta `yaml:"metadata,omitempty"`
 }
 
 func (input *InputBase) schemaMetadata() ir.SchemaMeta {
@@ -71,13 +71,13 @@ func (input *InputBase) filterSchema(schema *ir.Schema) (ir.Schemas, error) {
 }
 
 type Input struct {
-	JSONSchema *JSONSchemaInput `yaml:"jsonschema"`
-	OpenAPI    *OpenAPIInput    `yaml:"openapi"`
+	JSONSchema *JSONSchemaInput `yaml:"jsonschema,omitempty"`
+	OpenAPI    *OpenAPIInput    `yaml:"openapi,omitempty"`
 
-	KindRegistry      *KindRegistryInput `yaml:"kind_registry"`
-	KindsysCore       *CueInput          `yaml:"kindsys_core"`
-	KindsysComposable *CueInput          `yaml:"kindsys_composable"`
-	Cue               *CueInput          `yaml:"cue"`
+	KindRegistry      *KindRegistryInput `yaml:"kind_registry,omitempty"`
+	KindsysCore       *CueInput          `yaml:"kindsys_core,omitempty"`
+	KindsysComposable *CueInput          `yaml:"kindsys_composable,omitempty"`
+	Cue               *CueInput          `yaml:"cue,omitempty"`
 }
 
 func (input *Input) InterpolateParameters(interpolator ParametersInterpolator) error {
