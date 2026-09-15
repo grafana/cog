@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/grafana/cog/cmd/cli/config"
 	createplugin "github.com/grafana/cog/cmd/cli/create-plugin"
 	"github.com/grafana/cog/cmd/cli/generate"
 	"github.com/grafana/cog/cmd/cli/inspect"
@@ -20,6 +21,7 @@ func main() {
 	}
 
 	rootCmd.AddCommand(createplugin.Command(version))
+	rootCmd.AddCommand(config.Command())
 	rootCmd.AddCommand(generate.Command())
 	rootCmd.AddCommand(inspect.Command())
 

@@ -71,6 +71,7 @@ Language-specific builder transformations are NOT applied until a language is sp
 	cmd.Flags().StringToStringVar(&opts.ExtraParameters, "parameters", nil, "Sets or overrides parameters used in the config file.")
 	cmd.Flags().StringVar(&opts.Selector, "selector", "", "Selector allowing to narrow down the result of the inspection to selected objects. Format: package.[object] for types, package.[builder].[option] for builders.")
 	cmd.Flags().StringVar(&opts.Language, "language", "", "Language to use when applying language-specific schema and builder transformations. If left empty, only common transformations are applied.")
+	cmd.Flags().CountVarP(&verbosity, "verbose", "v", "Verbose mode. Multiple -v options increase the verbosity (maximum: 3).")
 
 	cmd.Flags().StringVar(&opts.ConfigPath, "config", "", "Codegen pipeline configuration file.")
 	_ = cmd.MarkFlagFilename("config")
