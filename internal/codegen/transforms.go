@@ -9,7 +9,7 @@ type Transforms struct {
 	// CommonPassesFiles holds a list of paths to files containing compiler
 	// passes to apply to all the schemas.
 	// Note: these compiler passes are applied *before* language-specific passes.
-	CommonPassesFiles []string `yaml:"schemas"`
+	CommonPassesFiles []string `yaml:"schemas,omitempty"`
 
 	// CommonPasses holds a list of compiler passes to apply to all the schemas.
 	// If this field is set, CommonPassesFiles is ignored.
@@ -23,10 +23,10 @@ type Transforms struct {
 	// VeneersPaths holds a list of paths to veneer files to apply to all the
 	// builders.
 	// The paths can refer to files or directories.
-	VeneersPaths []string `yaml:"builders"`
+	VeneersPaths []string `yaml:"builders,omitempty"`
 
 	// ConverterConfig is the configuration modify the converters output.
-	ConverterConfig string `yaml:"converters"`
+	ConverterConfig string `yaml:"converters,omitempty"`
 }
 
 func (transforms *Transforms) interpolateParameters(interpolator ParametersInterpolator) {

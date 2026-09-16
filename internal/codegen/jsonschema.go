@@ -14,14 +14,14 @@ type JSONSchemaInput struct {
 	InputBase `yaml:",inline"`
 
 	// Path to a JSONSchema file.
-	Path string `yaml:"path"`
+	Path string `yaml:"path,omitempty"`
 
 	// URL to a JSONSchema file.
-	URL string `yaml:"url"`
+	URL string `yaml:"url,omitempty"`
 
 	// Package name to use for the input schema. If empty, it will be guessed
 	// from the input file name.
-	Package string `yaml:"package"`
+	Package string `yaml:"package,omitempty"`
 }
 
 func (input *JSONSchemaInput) interpolateParameters(interpolator ParametersInterpolator) {

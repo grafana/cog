@@ -24,13 +24,13 @@ type CueInput struct {
 	InputBase `yaml:",inline"`
 
 	// Entrypoint refers to a directory containing CUE files.
-	Entrypoint string `yaml:"entrypoint"`
+	Entrypoint string `yaml:"entrypoint,omitempty"`
 
 	// URL to a cue file
-	URL string `yaml:"url"`
+	URL string `yaml:"url,omitempty"`
 
 	// Subpath is used when the schema is not in the root of the schema
-	Subpath string `yaml:"subpath"`
+	Subpath string `yaml:"subpath,omitempty"`
 
 	// Value represents the CUE value to use as an input. If specified, it
 	// supersedes the Entrypoint and URL options.
@@ -39,14 +39,14 @@ type CueInput struct {
 	// ForcedEnvelope decorates the parsed cue Value with an envelope whose
 	// name is given. This is useful for dataqueries for example, where the
 	// schema doesn't define any suitable top-level object.
-	ForcedEnvelope string `yaml:"forced_envelope"`
+	ForcedEnvelope string `yaml:"forced_envelope,omitempty"`
 
 	// Package name to use for the input schema. If empty, it will be guessed.
-	Package string `yaml:"package"`
+	Package string `yaml:"package,omitempty"`
 
 	// CueImports allows importing additional libraries.
 	// Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common
-	CueImports []string `yaml:"cue_imports"`
+	CueImports []string `yaml:"cue_imports,omitempty"`
 
 	// NameFunc allows users to specify an alternative naming strategy for
 	// objects and references. It is called with the value passed to the top

@@ -13,11 +13,11 @@ import (
 type KindRegistryInput struct {
 	InputBase `yaml:",inline"`
 
-	Path    string `yaml:"path"`
-	Version string `yaml:"version"`
+	Path    string `yaml:"path,omitempty"`
+	Version string `yaml:"version,omitempty"`
 
 	// Excluded lists the packages to be excluded.
-	Excluded []string `yaml:"excluded"`
+	Excluded []string `yaml:"excluded,omitempty"`
 }
 
 func (input *KindRegistryInput) interpolateParameters(interpolator ParametersInterpolator) {

@@ -35,7 +35,7 @@ type Config struct {
 
 	// OverridesTemplatesDirectories holds a list of directories containing templates
 	// defining blocks used to override parts of builders/types/....
-	OverridesTemplatesDirectories []string `yaml:"overrides_templates"`
+	OverridesTemplatesDirectories []string `yaml:"overrides_templates,omitempty"`
 	// OverridesTemplatesFS holds an embedded filesystem containing templates
 	OverridesTemplatesFS fs.FS `yaml:"-"`
 	// OverridesTemplateFuncs holds additional template functions to be injected into the override templates.
@@ -43,14 +43,14 @@ type Config struct {
 
 	// ExtraFilesTemplatesDirectories holds a list of directories containing
 	// templates describing files to be added to the generated output.
-	ExtraFilesTemplatesDirectories []string `yaml:"extra_files_templates"`
+	ExtraFilesTemplatesDirectories []string `yaml:"extra_files_templates,omitempty"`
 
 	// ExtraFilesTemplatesData holds additional data to be injected into the
 	// templates described in ExtraFilesTemplatesDirectories.
 	ExtraFilesTemplatesData map[string]string `yaml:"-"`
 
 	// PackagesImportMap associates package names to their import path.
-	PackagesImportMap map[string]string `yaml:"packages_import_map"`
+	PackagesImportMap map[string]string `yaml:"packages_import_map,omitempty"`
 
 	// EnumsAsUnionTypes generates enums as a union of values instead of using
 	// an actual `enum` declaration.

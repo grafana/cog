@@ -72,9 +72,9 @@ func PipelineFromFile(file string, opts ...PipelineOption) (*Pipeline, error) {
 type Pipeline struct {
 	Debug bool `yaml:"debug"`
 
-	UnitsFrom  []string   `yaml:"units_from"`
-	Inputs     []*Input   `yaml:"inputs"`
-	Transforms Transforms `yaml:"transformations"`
+	UnitsFrom  []string   `yaml:"units_from,omitempty"`
+	Inputs     []*Input   `yaml:"inputs,omitempty"`
+	Transforms Transforms `yaml:"transformations,omitempty"`
 	Output     Output     `yaml:"output"`
 
 	Parameters map[string]string `yaml:"parameters"`
@@ -235,8 +235,8 @@ func (pipeline *Pipeline) mergeUnit(unit *Unit) {
 	}
 }
 
-// loadUnits loads and merges the codegen units into the current pipeline.
-func (pipeline *Pipeline) loadUnits() error {
+// LoadUnits loads and merges the codegen units into the current pipeline.
+func (pipeline *Pipeline) LoadUnits() error {
 	// Just making sure that this function is idempotent.
 	if pipeline.unitsMerged {
 		return nil
@@ -271,7 +271,7 @@ func (pipeline *Pipeline) LoadSchemas(ctx context.Context) (ir.Schemas, error) {
 	var err error
 
 	// Merge additional units into the main pipeline
-	if err := pipeline.loadUnits(); err != nil {
+	if err := pipeline.LoadUnits(); err != nil {
 		return nil, err
 	}
 

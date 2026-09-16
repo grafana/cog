@@ -37,16 +37,16 @@ type Output struct {
 	//     	   └── workflows
 	//     	       └── typescript-ci.yaml
 	// ```
-	RepositoryTemplates string `yaml:"repository_templates"`
+	RepositoryTemplates string `yaml:"repository_templates,omitempty"`
 
 	// TemplatesData holds data that will be injected into package and
 	// repository templates when rendering them.
-	TemplatesData map[string]string `yaml:"templates_data"`
+	TemplatesData map[string]string `yaml:"templates_data,omitempty"`
 
 	// OutputOptions configures the output of the file
-	OutputOptions OutputOptions `yaml:"output_options"`
+	OutputOptions OutputOptions `yaml:"output_options,omitempty"`
 
-	LanguagePlugins map[string]OutputLanguagePlugin `yaml:"language_plugins"`
+	LanguagePlugins map[string]OutputLanguagePlugin `yaml:"language_plugins,omitempty"`
 }
 
 func (output *Output) interpolateParameters(interpolator ParametersInterpolator) {
@@ -67,14 +67,14 @@ func (output *Output) interpolateParameters(interpolator ParametersInterpolator)
 }
 
 type OutputLanguage struct {
-	Go         *golang.Config     `yaml:"go"`
-	Java       *java.Config       `yaml:"java"`
-	JSONSchema *jsonschema.Config `yaml:"jsonschema"`
-	OpenAPI    *openapi.Config    `yaml:"openapi"`
-	PHP        *php.Config        `yaml:"php"`
-	Python     *python.Config     `yaml:"python"`
-	Typescript *typescript.Config `yaml:"typescript"`
-	Terraform  *terraform.Config  `yaml:"terraform"`
+	Go         *golang.Config     `yaml:"go,omitempty"`
+	Java       *java.Config       `yaml:"java,omitempty"`
+	JSONSchema *jsonschema.Config `yaml:"jsonschema,omitempty"`
+	OpenAPI    *openapi.Config    `yaml:"openapi,omitempty"`
+	PHP        *php.Config        `yaml:"php,omitempty"`
+	Python     *python.Config     `yaml:"python,omitempty"`
+	Typescript *typescript.Config `yaml:"typescript,omitempty"`
+	Terraform  *terraform.Config  `yaml:"terraform,omitempty"`
 }
 
 func (outputLanguage *OutputLanguage) interpolateParameters(output *Output, interpolator ParametersInterpolator) {

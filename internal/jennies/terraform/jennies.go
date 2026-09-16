@@ -35,7 +35,7 @@ type Config struct {
 
 	// OverridesTemplatesDirectories holds a list of directories containing templates
 	// defining blocks used to override parts of builders/types/....
-	OverridesTemplatesDirectories []string `yaml:"overrides_templates"`
+	OverridesTemplatesDirectories []string `yaml:"overrides_templates,omitempty"`
 	// OverridesTemplatesFS holds an embedded filesystem containing templates.
 	OverridesTemplatesFS fs.FS `yaml:"-"`
 	// OverridesTemplateFuncs holds additional template functions to inject into override templates.
