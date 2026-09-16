@@ -70,7 +70,18 @@ func (input *InputBase) filterSchema(schema *ir.Schema) (ir.Schemas, error) {
 	return filterPass.Process(ir.Schemas{schema})
 }
 
+type Source struct {
+	Path string `yaml:"path"`
+	Ref  string `yaml:"ref"`
+}
+
+func (source Source) String() string {
+	return fmt.Sprintf("%s@%s", source.Path, source.Ref)
+}
+
 type Input struct {
+	Source *Source `yaml:"source"`
+
 	JSONSchema *JSONSchemaInput `yaml:"jsonschema,omitempty"`
 	OpenAPI    *OpenAPIInput    `yaml:"openapi,omitempty"`
 

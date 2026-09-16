@@ -62,6 +62,13 @@ func PipelineFromFile(file string, opts ...PipelineOption) (*Pipeline, error) {
 
 	pipeline.interpolator = createInterpolator(pipeline.Parameters)
 
+	for i, input := range pipeline.Inputs {
+		input.Source = &Source{
+			Path: file,
+			Ref:  fmt.Sprintf("$.inputs[%d]", i),
+		}
+	}
+
 	for _, opt := range opts {
 		opt(pipeline)
 	}
