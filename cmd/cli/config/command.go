@@ -23,6 +23,7 @@ func Command() *cobra.Command {
 	_ = cmd.MarkFlagFilename("config")
 	_ = cmd.MarkFlagRequired("config")
 
+	cmd.AddCommand(updateInputs(configOpts))
 	cmd.AddCommand(view(configOpts))
 
 	return cmd
