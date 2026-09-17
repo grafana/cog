@@ -197,7 +197,7 @@ func renderUpdatesAsMarkdown(updates []updateAction) {
 
 	for _, entry := range updates {
 		config := stripWorkingDir(entry.Path)
-		fmt.Printf("| %s | %s | %s | %s | %s |\n", config, entry.SchemaRef, entry.FromSchema, entry.FromVersion, entry.ToVersion)
+		fmt.Printf("| %s | %s | %s | `%s` | `%s` |\n", config, entry.SchemaRef, entry.FromSchema, entry.FromVersion, entry.ToVersion)
 	}
 }
 
