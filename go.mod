@@ -11,7 +11,7 @@ require (
 	github.com/grafana/codejen v0.0.4
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.8.0
-	github.com/huandu/xstrings v1.5.0
+	github.com/huandu/xstrings v1.6.0
 	github.com/invopop/jsonschema v0.14.0
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/spf13/cobra v1.10.2
