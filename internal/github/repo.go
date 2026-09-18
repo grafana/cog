@@ -56,6 +56,19 @@ func URLToRepoDescriptor(repoUrl string, ref string) *RepoDescriptor {
 	return &RepoDescriptor{Owner: owner, Name: repo, Ref: ref}
 }
 
+func LatestReleaseTag(ctx context.Context, repo RepoDescriptor) (string, error) {
+	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", repo.Owner, repo.Name)
+
+	var resp struct {
+		TagName string `json:"tag_name"`
+	}
+	if err := httputil.LoadJSON(ctx, apiURL, &resp); err != nil {
+		return "", err
+	}
+
+	return resp.TagName, nil
+}
+
 // FetchDirectory fetches all files with the given extension in a repository
 // directory via the GitHub Contents API.
 // Returns a map of filename → file content.

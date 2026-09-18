@@ -45,6 +45,13 @@ func unitFromFile(file string, parameters map[string]string) (*Unit, error) {
 	maps.Copy(unitParams, parameters)
 	unitParams["__config_dir"] = filepath.Dir(file)
 
+	for i, input := range unit.Inputs {
+		input.Source = &Source{
+			Path: file,
+			Ref:  fmt.Sprintf("$.inputs[%d]", i),
+		}
+	}
+
 	unit.interpolateParameters(createInterpolator(unitParams))
 
 	return unit, nil
