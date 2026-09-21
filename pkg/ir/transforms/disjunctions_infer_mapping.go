@@ -2,6 +2,7 @@ package transforms
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/grafana/cog/pkg/ir"
 )
@@ -122,7 +123,15 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ir.Schema, 
 		allTypes = append(allTypes, typeName)
 	}
 
+	// Sorted so that when more than one field would work, the same one is picked on
+	// every run. Ranging over the map directly makes the generated code vary.
+	candidateFieldNames := make([]string, 0, len(candidates[someType]))
 	for candidateFieldName := range candidates[someType] {
+		candidateFieldNames = append(candidateFieldNames, candidateFieldName)
+	}
+	sort.Strings(candidateFieldNames)
+
+	for _, candidateFieldName := range candidateFieldNames {
 		existsInAllBranches := true
 		for _, branchTypeName := range allTypes {
 			if _, ok := candidates[branchTypeName][candidateFieldName]; !ok {
@@ -131,13 +140,33 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ir.Schema, 
 			}
 		}
 
-		if existsInAllBranches {
+		// The field also has to hold a different value in every branch. Without this
+		// check a field like "version", which is "v1" in several branches, would be
+		// accepted and every branch but one would be unreachable.
+		if existsInAllBranches && valuesAreDistinct(candidates, allTypes, candidateFieldName) {
 			fieldName = candidateFieldName
 			break
 		}
 	}
 
 	return fieldName, fieldName != ""
+}
+
+// valuesAreDistinct reports whether fieldName holds a different value in each of the
+// given branches.
+func valuesAreDistinct(candidates map[string]map[string]any, typeNames []string, fieldName string) bool {
+	seen := make(map[any]struct{}, len(typeNames))
+	for _, typeName := range typeNames {
+		value, ok := candidates[typeName][fieldName]
+		if !ok {
+			return false
+		}
+		if _, duplicate := seen[value]; duplicate {
+			return false
+		}
+		seen[value] = struct{}{}
+	}
+	return true
 }
 
 func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ir.Schema, def *ir.DisjunctionType) (map[string]string, error) {
