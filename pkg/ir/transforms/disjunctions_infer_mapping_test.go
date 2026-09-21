@@ -3,9 +3,8 @@ package transforms
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/grafana/cog/pkg/ir"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDisjunctionInferMapping_WithNonDisjunctionObjects_HasNoImpact(t *testing.T) {
