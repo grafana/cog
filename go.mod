@@ -27,7 +27,7 @@ require (
 	github.com/buger/jsonparser v1.6.1 // indirect
 	github.com/cockroachdb/apd/v3 v3.2.3 // indirect
 	github.com/emicklei/proto v1.14.3 // indirect
-	github.com/go-openapi/jsonpointer v1.0.1 // indirect
+	github.com/go-openapi/jsonpointer v1.0.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
