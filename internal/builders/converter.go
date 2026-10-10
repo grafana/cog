@@ -222,7 +222,19 @@ func (generator *ConverterGenerator) convertListOfDisjunctionOptions(context lan
 func (generator *ConverterGenerator) convertOption(context languages.Context, converter Converter, option ir.Option) ConversionMapping {
 	assignments := tools.Filter(option.Assignments, func(assignment ir.Assignment) bool {
 		_, pathAlreadyGenerated := generator.generatedPaths[generator.assignmentKey(assignment)]
-		return !pathAlreadyGenerated
+		if pathAlreadyGenerated {
+			return false
+		}
+
+		// An option appending an enveloped value to a list (ie: `WithOverride(matcher, properties)`)
+		// writes to the same path as an option setting the whole list (ie: `Overrides(overrides)`).
+		// If the whole list is already converted, converting the appends as well would duplicate every item.
+		if assignment.Method == ir.AppendAssignment && assignment.Value.Envelope != nil {
+			_, listAlreadyGenerated := generator.generatedPaths[assignment.Path.String()]
+			return !listAlreadyGenerated
+		}
+
+		return true
 	})
 	if len(assignments) == 0 {
 		return ConversionMapping{}
