@@ -293,6 +293,7 @@ func (g *generator) structFields(v cue.Value) ([]ir.StructField, error) {
 
 		// inline object definition
 		if i.Selector().IsDefinition() {
+			fieldLabel = g.namingFunc(g.rootVal, i.Value().Path())
 			if err := g.declareObject(fieldLabel, i.Value()); err != nil {
 				return nil, err
 			}
