@@ -13,7 +13,7 @@ func SomeStructConverter(input SomeStruct) string {
     `sandbox.NewSomeStructBuilder()`,
     }
     var buffer strings.Builder
-        if input.Time != nil && input.Time.From != "" && input.Time.From != "now-6h" && input.Time.To != "" && input.Time.To != "now" {
+        if input.Time != nil && input.Time.From != "" && input.Time.To != "" {
         
     buffer.WriteString(`Time(`)
         arg0 :=fmt.Sprintf("%#v", input.Time.From)

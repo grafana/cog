@@ -10,7 +10,7 @@ final class SomeStructConverter
         $calls = [
             '(new \Grafana\Foundation\Sandbox\SomeStructBuilder())',
         ];
-            if ($input->time !== null && $input->time->from !== "" && $input->time->from !== "now-6h" && $input->time->to !== "" && $input->time->to !== "now") {
+            if ($input->time !== null && $input->time->from !== "" && $input->time->to !== "") {
     
         
     $buffer = 'time(';
