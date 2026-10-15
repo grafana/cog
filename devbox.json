@@ -3,7 +3,7 @@
   "packages": [
     "go@1.27",
     "php@8.5.11",
-    "php83Packages.composer@2.10.2",
+    "php83Packages.composer@2.10.3",
     "php83Packages.phpstan@2.1.1",
     "python@3.14",
     "golangci-lint@2.14.0",
