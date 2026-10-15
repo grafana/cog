@@ -470,7 +470,7 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ir.Type, erro
 	}
 
 	if path.String() != "" {
-		refPkg, err := g.refResolver.PackageForNode(v.Source(), g.schema.Package)
+		refPkg, err := g.refResolver.PackageForNode(v.Source())
 		if err != nil {
 			return ir.Type{}, errorWithCueRef(v, "%v", err.Error())
 		}

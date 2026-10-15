@@ -49,7 +49,7 @@ func newReferenceResolver(root cue.Value, config referenceResolverConfig) *refer
 }
 
 // FIXME: this is probably very brittle and not always correct :|
-func (resolver *referenceResolver) PackageForNode(source cueast.Node, defaultPackage string) (string, error) {
+func (resolver *referenceResolver) PackageForNode(source cueast.Node) (string, error) {
 	switch source.(type) { //nolint: gocritic
 	case *cueast.SelectorExpr:
 		selector := source.(*cueast.SelectorExpr)
@@ -61,17 +61,17 @@ func (resolver *referenceResolver) PackageForNode(source cueast.Node, defaultPac
 		field := source.(*cueast.Field)
 
 		if _, ok := field.Value.(*cueast.SelectorExpr); ok {
-			return resolver.PackageForNode(field.Value, defaultPackage)
+			return resolver.PackageForNode(field.Value)
 		}
 
 		ident := field.Value.(*cueast.Ident)
 
 		if ident.Scope == nil {
-			return defaultPackage, nil
+			return resolver.config.SchemaPackage, nil
 		}
 
 		if _, ok := ident.Scope.(*cueast.File); !ok {
-			return defaultPackage, nil
+			return resolver.config.SchemaPackage, nil
 		}
 
 		scope := ident.Scope.(*cueast.File)
@@ -80,11 +80,11 @@ func (resolver *referenceResolver) PackageForNode(source cueast.Node, defaultPac
 		}
 
 		if len(scope.Decls) == 0 {
-			return defaultPackage, nil
+			return resolver.config.SchemaPackage, nil
 		}
 
 		if _, ok := scope.Decls[0].(*cueast.Package); !ok {
-			return defaultPackage, nil
+			return resolver.config.SchemaPackage, nil
 		}
 
 		referredTypePkg := scope.Decls[0].(*cueast.Package).Name
@@ -93,20 +93,20 @@ func (resolver *referenceResolver) PackageForNode(source cueast.Node, defaultPac
 	case *cueast.Ident:
 		ident := source.(*cueast.Ident)
 		if ident.Scope == nil {
-			return defaultPackage, nil
+			return resolver.config.SchemaPackage, nil
 		}
 
 		if _, ok := ident.Scope.(*cueast.File); !ok {
-			return defaultPackage, nil
+			return resolver.config.SchemaPackage, nil
 		}
 
 		scope := ident.Scope.(*cueast.File)
 		if len(scope.Decls) == 0 {
-			return defaultPackage, nil
+			return resolver.config.SchemaPackage, nil
 		}
 
 		if _, ok := ident.Scope.(*cueast.File).Decls[0].(*cueast.Package); !ok {
-			return defaultPackage, nil
+			return resolver.config.SchemaPackage, nil
 		}
 
 		referredTypePkg := ident.Scope.(*cueast.File).Decls[0].(*cueast.Package).Name
@@ -114,23 +114,23 @@ func (resolver *referenceResolver) PackageForNode(source cueast.Node, defaultPac
 		return resolver.resolveImportAlias(referredTypePkg.Name), nil
 	case *cueast.Ellipsis:
 		if source.(*cueast.Ellipsis).Type == nil {
-			return defaultPackage, nil
+			return resolver.config.SchemaPackage, nil
 		}
 
 		if _, ok := source.(*cueast.Ellipsis).Type.(*cueast.SelectorExpr); ok {
-			return resolver.PackageForNode(source.(*cueast.Ellipsis).Type, defaultPackage)
+			return resolver.PackageForNode(source.(*cueast.Ellipsis).Type)
 		}
 
-		return resolver.packageForToken(source, defaultPackage), nil
+		return resolver.packageForToken(source), nil
 	default:
 		return "", fmt.Errorf("can't extract reference package")
 	}
 }
 
-func (resolver *referenceResolver) packageForToken(source cueast.Node, defaultPackage string) string {
+func (resolver *referenceResolver) packageForToken(source cueast.Node) string {
 	filename := source.Pos().Filename()
 	if filename == "" {
-		return defaultPackage
+		return resolver.config.SchemaPackage
 	}
 
 	for importPath, pkg := range resolver.librariesMap {
@@ -139,7 +139,7 @@ func (resolver *referenceResolver) packageForToken(source cueast.Node, defaultPa
 		}
 	}
 
-	return defaultPackage
+	return resolver.config.SchemaPackage
 }
 
 func (resolver *referenceResolver) resolveImportAlias(alias string) string {
