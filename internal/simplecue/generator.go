@@ -30,6 +30,10 @@ type Config struct {
 	// Package name used to generate code into.
 	Package string
 
+	// SourcePackage is the original package name used in the original schema
+	// source file. May be equal to Package, but can be different.
+	SourcePackage string
+
 	// ForceNamedEnvelope decorates the parsed cue Value with an envelope whose
 	// name is given. This is useful for dataqueries for example, where the
 	// schema doesn't define any suitable top-level object.
@@ -69,6 +73,7 @@ func GenerateAST(val cue.Value, c Config) (*ir.Schema, error) {
 		refResolver: newReferenceResolver(val, referenceResolverConfig{
 			Libraries:     c.Libraries,
 			SchemaPackage: c.Package,
+			SourcePackage: c.SourcePackage,
 		}),
 		rootVal:      val,
 		rootPath:     val.Path(),

@@ -9,17 +9,17 @@ import (
 )
 
 func kindsysCoreLoader(input CueInput) (ir.Schemas, error) {
-	schemaRootValue, libraries, err := input.schemaRootValue(context.Background())
+	parsed, libraries, err := input.parseRawCue(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	kindIdentifier, err := inferCoreKindIdentifier(schemaRootValue)
+	kindIdentifier, err := inferCoreKindIdentifier(parsed.Value)
 	if err != nil {
 		return nil, err
 	}
 
-	schema, err := simplecue.GenerateAST(schemaFromThemaLineage(schemaRootValue), simplecue.Config{
+	schema, err := simplecue.GenerateAST(schemaFromThemaLineage(parsed.Value), simplecue.Config{
 		Package: input.Package,
 		SchemaMetadata: ir.SchemaMeta{
 			Kind:       ir.SchemaKindCore,

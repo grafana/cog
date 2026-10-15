@@ -2,6 +2,7 @@ package simplecue
 
 import (
 	"fmt"
+	"path"
 	"strings"
 
 	"cuelang.org/go/cue"
@@ -10,6 +11,7 @@ import (
 
 type referenceResolverConfig struct {
 	SchemaPackage string
+	SourcePackage string
 	Libraries     []LibraryInclude
 }
 
@@ -29,6 +31,10 @@ func newReferenceResolver(root cue.Value, config referenceResolverConfig) *refer
 
 	resolver.importsAliasMap = resolver.buildImportsAliasMap(root)
 	resolver.librariesMap = resolver.buildLibrariesMap(config.Libraries)
+
+	if config.SourcePackage != config.SchemaPackage {
+		resolver.importsAliasMap[config.SourcePackage] = config.SchemaPackage
+	}
 
 	// map the package originally declared in the CUE file to the one configured by the user
 	if fileAst, ok := root.Source().(*cueast.File); ok {
@@ -69,7 +75,7 @@ func (resolver *referenceResolver) PackageForNode(source cueast.Node, defaultPac
 		}
 
 		scope := ident.Scope.(*cueast.File)
-		if scope.Filename == resolver.rootFileName {
+		if path.Dir(scope.Filename) == path.Dir(resolver.rootFileName) {
 			return resolver.config.SchemaPackage, nil
 		}
 
