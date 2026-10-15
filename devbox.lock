@@ -168,51 +168,41 @@
         }
       }
     },
-    "php83Packages.composer@2.10.2": {
-      "last_modified": "2026-09-02T09:35:26Z",
-      "resolved": "github:NixOS/nixpkgs/0e7b0ccc10ca9ac4498d5161da49c9664e9f6bff#php83Packages.composer",
+    "php83Packages.composer@2.10.3": {
+      "last_modified": "2026-10-10T12:58:50Z",
+      "resolved": "github:NixOS/nixpkgs/ca1659429c950a11a565b5764e37a1b704e17ec8#php83Packages.composer",
       "source": "devbox-search",
-      "version": "2.10.2",
+      "version": "2.10.3",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/rz2q4bxh4hkjp22g7j7f3hni2hglcmc5-composer-2.10.2",
+              "path": "/nix/store/qy4ag5ddph0my9mmb9dhabfkygcvs646-composer-2.10.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/rz2q4bxh4hkjp22g7j7f3hni2hglcmc5-composer-2.10.2"
+          "store_path": "/nix/store/qy4ag5ddph0my9mmb9dhabfkygcvs646-composer-2.10.3"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/k7rx9a80cd2kd9s4kpidw268v73zvh9y-composer-2.10.2",
+              "path": "/nix/store/58y10ba36kivxwwifazmhrzgsfgfq8xb-composer-2.10.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/k7rx9a80cd2kd9s4kpidw268v73zvh9y-composer-2.10.2"
-        },
-        "x86_64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/mqpp0rn8d3f8fgq5ys5arw98n2lckyil-composer-2.10.2",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/mqpp0rn8d3f8fgq5ys5arw98n2lckyil-composer-2.10.2"
+          "store_path": "/nix/store/58y10ba36kivxwwifazmhrzgsfgfq8xb-composer-2.10.3"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/bxxaf7g4f953y6j0ad3cfzwn9ylvrn58-composer-2.10.2",
+              "path": "/nix/store/34xnhildykgql2chpwljwq41hmwdsnlm-composer-2.10.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/bxxaf7g4f953y6j0ad3cfzwn9ylvrn58-composer-2.10.2"
+          "store_path": "/nix/store/34xnhildykgql2chpwljwq41hmwdsnlm-composer-2.10.3"
         }
       }
     },
