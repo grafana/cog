@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 
 	cog "github.com/grafana/cog/testdata/generated/cog"
@@ -314,6 +315,75 @@ func (resource Panel) Validate() error {
 		errs = append(errs, cog.MakeBuildErrors(
 			"title",
 			errors.New("must be >= 1"),
+		)...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+type PanelRef struct {
+	DashboardUID string `json:"dashboardUID"`
+}
+
+// NewPanelRef creates a new PanelRef object.
+func NewPanelRef() *PanelRef {
+	return &PanelRef{}
+}
+
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `PanelRef` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *PanelRef) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "dashboardUID"
+	if fields["dashboardUID"] != nil {
+		if string(fields["dashboardUID"]) != "null" {
+			if err := json.Unmarshal(fields["dashboardUID"], &resource.DashboardUID); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("dashboardUID", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("dashboardUID", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "dashboardUID")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("dashboardUID", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("PanelRef", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `PanelRef` objects.
+func (resource PanelRef) Equals(other PanelRef) bool {
+	if resource.DashboardUID != other.DashboardUID {
+		return false
+	}
+
+	return true
+}
+
+// Validate checks all the validation constraints that may be defined on `PanelRef` fields for violations and returns them.
+func (resource PanelRef) Validate() error {
+	var errs cog.BuildErrors
+	if !regexp.MustCompile("^[a-zA-Z0-9_-]+$").MatchString(resource.DashboardUID) {
+		errs = append(errs, cog.MakeBuildErrors(
+			"dashboardUID",
+			errors.New("must match regex "+"^[a-zA-Z0-9_-]+$"),
 		)...)
 	}
 

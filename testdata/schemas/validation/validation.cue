@@ -14,3 +14,7 @@ Dashboard: {
 #Panel: {
 	title: string & strings.MinRunes(1)
 }
+
+#PanelRef: {
+	dashboardUID: string & =~"^[a-zA-Z0-9_-]+$"
+}
