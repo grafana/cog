@@ -760,14 +760,24 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ir.TypeConstraint, 
 				})
 			}
 		case cue.RegexMatchOp:
+			scalar, err := cueConcreteToScalar(args[0])
+			if err != nil {
+				return nil, err
+			}
+
 			constraints = append(constraints, ir.TypeConstraint{
 				Op:   ir.RegexMatchOp,
-				Args: []any{args[0]},
+				Args: []any{scalar},
 			})
 		case cue.NotRegexMatchOp:
+			scalar, err := cueConcreteToScalar(args[0])
+			if err != nil {
+				return nil, err
+			}
+
 			constraints = append(constraints, ir.TypeConstraint{
 				Op:   ir.NotRegexMatchOp,
-				Args: []any{args[0]},
+				Args: []any{scalar},
 			})
 		default:
 			// TODO: support more OPs?
