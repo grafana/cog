@@ -43,41 +43,41 @@
         }
       }
     },
-    "golangci-lint@2.14.0": {
-      "last_modified": "2026-10-16T02:15:57Z",
-      "resolved": "github:NixOS/nixpkgs/f20cd90e28fe0403873f473b29e42662cd86e8c4#golangci-lint",
+    "golangci-lint@2.15.0": {
+      "last_modified": "2026-10-24T11:44:37Z",
+      "resolved": "github:NixOS/nixpkgs/d3b13ad75cc492690728f9307e443dec9ef9a20e#golangci-lint",
       "source": "devbox-search",
-      "version": "2.14.0",
+      "version": "2.15.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/w4i0gkancp3y31k83m4cicmb423sqmr7-golangci-lint-2.14.0",
+              "path": "/nix/store/fqs2vmc1byxf6c66yvl8d7hdhbf48grf-golangci-lint-2.15.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/w4i0gkancp3y31k83m4cicmb423sqmr7-golangci-lint-2.14.0"
+          "store_path": "/nix/store/fqs2vmc1byxf6c66yvl8d7hdhbf48grf-golangci-lint-2.15.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/5irzrcfi911y2vzf3vxp1gpn56chk6v7-golangci-lint-2.14.0",
+              "path": "/nix/store/zvplx6lc4dg5pxrmpkgl3ch1x37zpr6p-golangci-lint-2.15.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/5irzrcfi911y2vzf3vxp1gpn56chk6v7-golangci-lint-2.14.0"
+          "store_path": "/nix/store/zvplx6lc4dg5pxrmpkgl3ch1x37zpr6p-golangci-lint-2.15.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/wrapy98jqawf2nii5c1g1m668qks1y6k-golangci-lint-2.14.0",
+              "path": "/nix/store/igxlgznd0xbmn0qjdq4jl88ahcbs4bd2-golangci-lint-2.15.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/wrapy98jqawf2nii5c1g1m668qks1y6k-golangci-lint-2.14.0"
+          "store_path": "/nix/store/igxlgznd0xbmn0qjdq4jl88ahcbs4bd2-golangci-lint-2.15.0"
         }
       }
     },
@@ -254,42 +254,42 @@
         }
       }
     },
-    "php@8.5.11": {
-      "last_modified": "2026-10-08T19:21:32Z",
+    "php@8.5.12": {
+      "last_modified": "2026-10-24T11:44:37Z",
       "plugin_version": "0.0.4",
-      "resolved": "github:NixOS/nixpkgs/8edc0c72e3a38faf5434e40d1f19431125fe4b30#php85",
+      "resolved": "github:NixOS/nixpkgs/d3b13ad75cc492690728f9307e443dec9ef9a20e#php",
       "source": "devbox-search",
-      "version": "8.5.11",
+      "version": "8.5.12",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/2fjbz1ncs0w7inz316h9cz0ag30vmiw6-php-with-extensions-8.5.11",
+              "path": "/nix/store/6zrslij504rm1s420i2klhkxjss2qr0f-php-with-extensions-8.5.12",
               "default": true
             }
           ],
-          "store_path": "/nix/store/2fjbz1ncs0w7inz316h9cz0ag30vmiw6-php-with-extensions-8.5.11"
+          "store_path": "/nix/store/6zrslij504rm1s420i2klhkxjss2qr0f-php-with-extensions-8.5.12"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/z7xjbsiyg3afhgyvf9r5cmsyc1jdj9qd-php-with-extensions-8.5.11",
+              "path": "/nix/store/bcyisq530wmfrkxrkjmr817si49wqmwl-php-with-extensions-8.5.12",
               "default": true
             }
           ],
-          "store_path": "/nix/store/z7xjbsiyg3afhgyvf9r5cmsyc1jdj9qd-php-with-extensions-8.5.11"
+          "store_path": "/nix/store/bcyisq530wmfrkxrkjmr817si49wqmwl-php-with-extensions-8.5.12"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/zf5c34b1m0i5n1wjnl7p6mrllyfhjmhg-php-with-extensions-8.5.11",
+              "path": "/nix/store/x2b9xr7jbni827d82hy9mz67w1cy5rfs-php-with-extensions-8.5.12",
               "default": true
             }
           ],
-          "store_path": "/nix/store/zf5c34b1m0i5n1wjnl7p6mrllyfhjmhg-php-with-extensions-8.5.11"
+          "store_path": "/nix/store/x2b9xr7jbni827d82hy9mz67w1cy5rfs-php-with-extensions-8.5.12"
         }
       }
     },
