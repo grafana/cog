@@ -40,7 +40,7 @@ func (builder *DashboardBuilder) RecordError(path string, err error) *DashboardB
 }
 
 func (builder *DashboardBuilder) Panels(panels map[string]cog.Builder[Element]) *DashboardBuilder {
-        panelsResource := make(map[string]Element)
+        panelsResource := make(map[string]Element, len(panels))
         for key1, val1 := range panels {
                 panelsDepth1, err := val1.Build()
                 if err != nil {

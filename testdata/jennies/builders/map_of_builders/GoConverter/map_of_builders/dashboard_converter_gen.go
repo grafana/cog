@@ -30,6 +30,28 @@ func DashboardConverter(input Dashboard) string {
     buffer.Reset()
     
     }
+        if input.Facets != nil {
+        
+    buffer.WriteString(`Facets(`)
+        arg0 := "map[string][]cog.Builder[map_of_builders.FacetValue]{"
+        for key, arg1 := range input.Facets {
+            tmptmpfacetsarg1 := []string{}
+        for _, arg1Value := range arg1 {
+        tmparg1arg1Value := FacetValueConverter(arg1Value)
+        tmptmpfacetsarg1 = append(tmptmpfacetsarg1, tmparg1arg1Value)
+        }
+        tmpfacetsarg1 := "[]cog.Builder[map_of_builders.FacetValue]{" + strings.Join(tmptmpfacetsarg1, ",\n") + "}"
+            arg0 += "\t" + fmt.Sprintf("%#v", key) + ": " + tmpfacetsarg1 +","
+        }
+        arg0 += "}"
+        buffer.WriteString(arg0)
+        
+    buffer.WriteString(")")
+
+    calls = append(calls, buffer.String())
+    buffer.Reset()
+    
+    }
 
     return strings.Join(calls, ".\t\n")
 }

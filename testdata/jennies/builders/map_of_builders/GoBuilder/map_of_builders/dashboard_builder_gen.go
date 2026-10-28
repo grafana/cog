@@ -40,7 +40,7 @@ func (builder *DashboardBuilder) RecordError(path string, err error) *DashboardB
 }
 
 func (builder *DashboardBuilder) Panels(panels map[string]cog.Builder[Panel]) *DashboardBuilder {
-        panelsResource := make(map[string]Panel)
+        panelsResource := make(map[string]Panel, len(panels))
         for key1, val1 := range panels {
                 panelsDepth1, err := val1.Build()
                 if err != nil {
@@ -50,6 +50,26 @@ func (builder *DashboardBuilder) Panels(panels map[string]cog.Builder[Panel]) *D
                 panelsResource[key1] = panelsDepth1
         }
     builder.internal.Panels = panelsResource
+
+    return builder
+}
+
+func (builder *DashboardBuilder) Facets(facets map[string][]cog.Builder[FacetValue]) *DashboardBuilder {
+        facetsResource := make(map[string][]FacetValue, len(facets))
+        for key1, val1 := range facets {
+                facetsDepth1 := make([]FacetValue, 0, len(val1))
+        for _, r2 := range val1 {
+                facetsDepth2, err := r2.Build()
+                if err != nil {
+                    builder.errors = append(builder.errors, err.(cog.BuildErrors)...)
+                    return builder
+                }
+                facetsDepth1 = append(facetsDepth1, facetsDepth2)
+        }
+
+                facetsResource[key1] = facetsDepth1
+        }
+    builder.internal.Facets = facetsResource
 
     return builder
 }

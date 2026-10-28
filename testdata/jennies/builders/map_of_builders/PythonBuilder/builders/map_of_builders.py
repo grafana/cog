@@ -40,3 +40,33 @@ class Dashboard(cogbuilder.Builder[map_of_builders.Dashboard]):
     
         return self
     
+    def facets(self, facets: dict[str, list[cogbuilder.Builder[map_of_builders.FacetValue]]]) -> typing.Self:    
+        facets_resources = { key1: [r2.build() for r2 in val1] for (key1, val1) in facets.items() }
+        self._internal.facets = facets_resources
+    
+        return self
+    
+
+
+class FacetValue(cogbuilder.Builder[map_of_builders.FacetValue]):
+    _internal: map_of_builders.FacetValue
+
+    def __init__(self) -> None:
+        self._internal = map_of_builders.FacetValue()
+
+    def build(self) -> map_of_builders.FacetValue:
+        """
+        Builds the object.
+        """
+        return self._internal    
+    
+    def value(self, value: str) -> typing.Self:    
+        self._internal.value = value
+    
+        return self
+    
+    def count(self, count: int) -> typing.Self:    
+        self._internal.count = count
+    
+        return self
+    
