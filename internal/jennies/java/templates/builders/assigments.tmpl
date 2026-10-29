@@ -101,8 +101,11 @@
     {{- else if .InputType.IsMap }}
         for (var entry{{ .Depth }} : {{ .InputVar }}.entrySet()) {
             {{- if .InputType.Map.ValueType.IsArray }}
-                {{- template "unfold_builders" (dict "Depth" (add1 .Depth) "InputType" .InputType.Map.ValueType "OriginalInputVar" .OriginalInputVar "InputVar" (print "entry" .Depth) "AssignmentPath" $.AssignmentPath "ResultVar" (print .OriginalInputVar "Depth" .Depth)) }}
-                {{ .ResultVar }}.put(entry{{ .Depth }}.getKey(), entry{{ .Depth }}.getValue());
+                {{ .InputType.Map.ValueType | formatType }} {{ .OriginalInputVar }}Depth{{ .Depth }} = {{ .InputType.Map.ValueType | emptyValueForType }};
+                {{- $inputVar := print "value" .Depth }}
+                var {{ $inputVar }} = entry{{ .Depth }}.getValue();
+                {{- template "unfold_builders" (dict "Depth" (add1 .Depth) "InputType" .InputType.Map.ValueType "OriginalInputVar" .OriginalInputVar "InputVar" $inputVar "AssignmentPath" $.AssignmentPath "ResultVar" (print .OriginalInputVar "Depth" .Depth)) }}
+                {{ .ResultVar }}.put(entry{{ .Depth }}.getKey(), {{ .OriginalInputVar }}Depth{{ .Depth }});
             {{- else }}
                 {{ .InputType.Map.ValueType | formatType }} {{ .OriginalInputVar }}Depth{{ .Depth }} = entry{{ .Depth }}.getValue().build();
                 {{ .ResultVar }}.put(entry{{ .Depth }}.getKey(), {{ .OriginalInputVar }}Depth{{ .Depth }});
