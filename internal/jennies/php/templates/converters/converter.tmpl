@@ -6,6 +6,13 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
 
 {{- define "guard" }}
 {{- $operator := .Op -}}
+
+{{- if eq $operator "or" -}}
+    {{- $guardsCount := sub1 (len .Value) -}}
+    ({{- range $i, $guard := .Value -}}
+    {{- template "guard" $guard }}{{ if ne $i $guardsCount }} || {{ end -}}
+    {{- end }})
+{{- else -}}
 {{- $value := formatValue .Path.Last.Type .Value -}}
 {{- if .Path.Last.Type.IsRef -}}{{ $value = print (.Path.Last.Type | formatRawTypeNotNullable) "::fromValue(" (.Value | formatScalar) ")" }}{{- end -}}
 {{- if eq $operator "==" -}}{{ $operator = "===" }}{{- end -}}
@@ -27,6 +34,7 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
         {{- end -}}
         {{- $leftOperand }} {{ $operator}} {{ $value -}}
     {{- end -}}
+{{- end -}}
 {{- end }}
 
 {{- define "value_formatter" -}}

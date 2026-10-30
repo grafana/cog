@@ -524,6 +524,7 @@ func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context langu
 func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ir.Path, assignments []ir.Assignment) []MappingGuard {
 	// conditions safeguarding the conversion of the current option
 	guards := orderedmap.New[string, MappingGuard]()
+	defaultsGuards := orderedmap.New[string, MappingGuard]()
 
 	// TODO: define guards other than "not null" checks? (0, "", ...)
 	// TODO: builders + array of builders (and array of array of builders, ...)
@@ -572,19 +573,13 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ir.Path,
 		}
 
 		// For scalar values, add a guard against assignments equal to the default value for that path.
-		// Map and slice defaults are skipped: they can't be compared with != in Go (compile error
-		// for concrete map types, runtime panic for interface types).
-		if assignmentType.IsScalar() && assignmentType.Default != nil {
-			_, defaultIsMap := assignmentType.Default.(map[string]any)
-			_, defaultIsSlice := assignmentType.Default.([]any)
-			if !defaultIsMap && !defaultIsSlice {
-				guard := MappingGuard{
-					Path:  valuesRootPath.Append(assignment.Path),
-					Op:    ir.NotEqualOp,
-					Value: assignmentType.Default,
-				}
-				guards.Set(guard.String(), guard)
+		if hasComparableDefault(assignmentType) {
+			guard := MappingGuard{
+				Path:  valuesRootPath.Append(assignment.Path),
+				Op:    ir.NotEqualOp,
+				Value: assignmentType.Default,
 			}
+			defaultsGuards.Set(guard.String(), guard)
 		}
 
 		// TODO: is that correct/needed?
@@ -611,7 +606,32 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ir.Path,
 		}
 	}
 
+	if defaultsGuards.Len() == 1 {
+		guard := defaultsGuards.At(0)
+		guards.Set(guard.String(), guard)
+	} else if defaultsGuards.Len() > 1 {
+		guard := MappingGuard{
+			Op:    ir.OrOp,
+			Value: defaultsGuards.Values(),
+		}
+		guards.Set(guard.String(), guard)
+	}
+
 	return guards.Values()
+}
+
+// hasComparableDefault tells whether a guard against the default value of the given type can be generated.
+// Map and slice defaults are skipped: they can't be compared with != in Go (compile error
+// for concrete map types, runtime panic for interface types).
+func hasComparableDefault(typeDef ir.Type) bool {
+	if !typeDef.IsScalar() || typeDef.Default == nil {
+		return false
+	}
+
+	_, defaultIsMap := typeDef.Default.(map[string]any)
+	_, defaultIsSlice := typeDef.Default.([]any)
+
+	return !defaultIsMap && !defaultIsSlice
 }
 
 func (generator *ConverterGenerator) pathNotNullGuards(rootPath ir.Path, path ir.Path) []MappingGuard {
