@@ -524,12 +524,7 @@ func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context langu
 func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ir.Path, assignments []ir.Assignment) []MappingGuard {
 	// conditions safeguarding the conversion of the current option
 	guards := orderedmap.New[string, MappingGuard]()
-
-	// Guards are combined with a logical AND. Guarding against default values is
-	// only correct when at most one assignment has a default: with several of them,
-	// the option would be skipped as soon as *any* of its values equals its default,
-	// losing the other values (ie: `Time("now-3h", "now")` would never be converted).
-	guardDefaults := countAssignmentsWithComparableDefault(assignments) <= 1
+	defaultsGuards := orderedmap.New[string, MappingGuard]()
 
 	// TODO: define guards other than "not null" checks? (0, "", ...)
 	// TODO: builders + array of builders (and array of array of builders, ...)
@@ -578,13 +573,13 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ir.Path,
 		}
 
 		// For scalar values, add a guard against assignments equal to the default value for that path.
-		if guardDefaults && hasComparableDefault(assignmentType) {
+		if hasComparableDefault(assignmentType) {
 			guard := MappingGuard{
 				Path:  valuesRootPath.Append(assignment.Path),
 				Op:    ir.NotEqualOp,
 				Value: assignmentType.Default,
 			}
-			guards.Set(guard.String(), guard)
+			defaultsGuards.Set(guard.String(), guard)
 		}
 
 		// TODO: is that correct/needed?
@@ -611,6 +606,17 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ir.Path,
 		}
 	}
 
+	if defaultsGuards.Len() == 1 {
+		guard := defaultsGuards.At(0)
+		guards.Set(guard.String(), guard)
+	} else if defaultsGuards.Len() > 1 {
+		guard := MappingGuard{
+			Op:    ir.OrOp,
+			Value: defaultsGuards.Values(),
+		}
+		guards.Set(guard.String(), guard)
+	}
+
 	return guards.Values()
 }
 
@@ -626,21 +632,6 @@ func hasComparableDefault(typeDef ir.Type) bool {
 	_, defaultIsSlice := typeDef.Default.([]any)
 
 	return !defaultIsMap && !defaultIsSlice
-}
-
-func countAssignmentsWithComparableDefault(assignments []ir.Assignment) int {
-	count := 0
-	for _, assignment := range assignments {
-		if assignment.Method == ir.IndexAssignment || assignment.Value.Constant != nil {
-			continue
-		}
-
-		if hasComparableDefault(assignment.Path.Last().Type) {
-			count++
-		}
-	}
-
-	return count
 }
 
 func (generator *ConverterGenerator) pathNotNullGuards(rootPath ir.Path, path ir.Path) []MappingGuard {

@@ -68,6 +68,7 @@ const (
 	MinItemsOp         Op = "minItems"
 	MaxItemsOp         Op = "maxItems"
 	UniqueItemsOp      Op = "uniqueItems"
+	OrOp               Op = "or"
 )
 
 type TypeConstraint struct {
