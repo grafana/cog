@@ -835,6 +835,18 @@ func (g *generator) declareNumber(v cue.Value, defVal any, hints ir.JenniesHints
 		return ir.Type{}, errorWithCueRef(v, "could not infer number type from expression '%s'", numberTypeWithConstraintsAsString)
 	}
 
+	// The simplified syntax above names a type whenever bounds happen to fit
+	// one, and drops the bound it absorbed: `int & <=2147483647` is
+	// formatted as `int32`. For integers, take the width from the declared
+	// type and the bounds from the raw syntax of the evaluated value instead.
+	constraintsSyntax := v.Syntax()
+	if isIntegerKind(numberType) && !v.IsConcrete() {
+		if declared, ok := declaredIntegerKind(v, numberType); ok {
+			numberType = declared
+			constraintsSyntax = v.Eval().Syntax(cue.Raw())
+		}
+	}
+
 	typeDef := ir.NewScalar(numberType, ir.Default(defVal), ir.Hints(hints))
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
@@ -852,7 +864,7 @@ func (g *generator) declareNumber(v cue.Value, defVal any, hints ir.JenniesHints
 	// sent on the wrong path.
 
 	// extract constraints
-	constraints, err := g.declareNumberConstraints(v)
+	constraints, err := g.declareNumberConstraints(constraintsSyntax, numberType)
 	if err != nil {
 		return ir.Type{}, err
 	}
@@ -862,10 +874,11 @@ func (g *generator) declareNumber(v cue.Value, defVal any, hints ir.JenniesHints
 	return typeDef, nil
 }
 
+// declareNumberConstraints extracts the bounds of a number from its syntax.
+// Bounds that only restate the limits of the number type are omitted.
+//
 // having written this makes my soul hurt.
-func (g *generator) declareNumberConstraints(v cue.Value) ([]ir.TypeConstraint, error) {
-	node := v.Syntax()
-
+func (g *generator) declareNumberConstraints(node cueast.Node, numberType ir.ScalarKind) ([]ir.TypeConstraint, error) {
 	var constraints []ir.TypeConstraint
 
 	var walk func(cueast.Expr)
@@ -892,6 +905,10 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ir.TypeConstraint, 
 			case token.GTR, token.GEQ, token.LSS, token.LEQ, token.EQL, token.NEQ:
 				raw, ok := extractNumber(x.X)
 				if !ok {
+					return
+				}
+
+				if impliedByIntegerKind(numberType, x.Op, raw) {
 					return
 				}
 
