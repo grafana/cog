@@ -27,5 +27,18 @@ export class DashboardBuilder implements cog.Builder<mapOfBuilders.Dashboard> {
         this.internal.panels = panelsResource;
         return this;
     }
+
+    facets(facets: Record<string, cog.Builder<mapOfBuilders.FacetValue>[]>): this {
+        const facetsResource = (function() {
+            let results1: Record<string, mapOfBuilders.FacetValue[]> = {};
+            for (const key1 in facets) {
+                const val1 = facets[key1];
+                results1[key1] = val1.map(builder2 => builder2.build());
+            }
+            return results1;
+        }());
+        this.internal.facets = facetsResource;
+        return this;
+    }
 }
 

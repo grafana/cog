@@ -71,7 +71,7 @@
     {{- if .InputType.IsArray }}
         for _, r{{ .Depth }} := range {{ .InputVar}} {
             {{- if .InputType.Array.ValueType.IsArray }}
-                {{ .OriginalInputVar }}Depth{{ .Depth }} := make({{ .InputType.Array.ValueType | formatTypeNoBuilder }}, 0)
+                {{ .OriginalInputVar }}Depth{{ .Depth }} := make({{ .InputType.Array.ValueType | formatTypeNoBuilder }}, 0, len(r{{ .Depth }}))
 
                 {{- template "unfold_builders" (dict "Depth" (add1 .Depth) "InputType" .InputType.Array.ValueType "OriginalInputVar" .OriginalInputVar "InputVar" (print "r" .Depth) "AssignmentPath" $.AssignmentPath "ResultVar" (print .OriginalInputVar "Depth" .Depth)) }}
 
@@ -86,9 +86,10 @@
             {{- end }}
         }
     {{- else if .InputType.IsMap }}
-        {{ .ResultVar }} := make({{ .InputType | formatTypeNoBuilder }})
+        {{ .ResultVar }} := make({{ .InputType | formatTypeNoBuilder }}, len({{ .InputVar }}))
         for key{{ .Depth }}, val{{ .Depth }} := range {{ .InputVar}} {
             {{- if .InputType.Map.ValueType.IsArray }}
+                {{ .OriginalInputVar }}Depth{{ .Depth }} := make({{ .InputType.Map.ValueType | formatTypeNoBuilder }}, 0, len(val{{ .Depth }}))
                 {{- template "unfold_builders" (dict "Depth" (add1 .Depth) "InputType" .InputType.Map.ValueType "OriginalInputVar" .OriginalInputVar "InputVar" (print "val" .Depth) "AssignmentPath" $.AssignmentPath "ResultVar" (print .OriginalInputVar "Depth" .Depth)) }}
 
                 {{ .ResultVar }}[key{{ .Depth }}] = {{ .OriginalInputVar }}Depth{{ .Depth }}

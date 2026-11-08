@@ -71,7 +71,7 @@ func (builder *DashboardBuilder) Links(links []cog.Builder[DashboardLink]) *Dash
 func (builder *DashboardBuilder) LinksOfLinks(linksOfLinks [][]cog.Builder[DashboardLink]) *DashboardBuilder {
         linksOfLinksResources := make([][]DashboardLink, 0, len(linksOfLinks))
         for _, r1 := range linksOfLinks {
-                linksOfLinksDepth1 := make([]DashboardLink, 0)
+                linksOfLinksDepth1 := make([]DashboardLink, 0, len(r1))
         for _, r2 := range r1 {
                 linksOfLinksDepth2, err := r2.Build()
                 if err != nil {

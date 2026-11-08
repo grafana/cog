@@ -9,6 +9,11 @@ package {{ .Converter.Package | formatPackageName }}
 {{- define "guard" }}
     {{- if and (eq .Op "!=") (eq .Value nil) -}}
         {{ .Path | formatPath }} != nil
+    {{- else if eq .Op "or" -}}
+        {{- $guardsCount := sub1 (len .Value) -}}
+        ({{- range $i, $guard := .Value -}}
+        {{- template "guard" $guard }}{{ if ne $i $guardsCount }} || {{ end -}}
+        {{- end }})
     {{- else -}}
         {{- $leftOperand := print (.Path.Last.Type | maybeDereference) (.Path | formatPath) -}}
         {{- $operator := .Op -}}

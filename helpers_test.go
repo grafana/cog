@@ -224,6 +224,77 @@ MapOfStringToAny: [string]: _
 		req.Len(files, 1, "expected a single file")
 		testutils.TrimSpacesDiffComparator(t, []byte(expectedMapAnyOpenAPI), files[0].Data, "test.json")
 	})
+
+	t.Run("generating openAPI from cue integer bounds", func(t *testing.T) {
+		req := require.New(t)
+
+		// The upper bounds fit an int32 or a uint: they must be kept as
+		// bounds rather than turned into a narrower type.
+		boundsSchema := `
+Container: {
+    intWithMaxInt32: int & >0 & <=2147483647
+    int64WithMaxInt32: int64 & >0 & <=2147483647
+    intWithSmallRange: int & >0 & <100
+}
+`
+
+		expectedBoundsOpenAPI := `{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "sandbox",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Container": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "intWithMaxInt32",
+          "int64WithMaxInt32",
+          "intWithSmallRange"
+        ],
+        "properties": {
+          "intWithMaxInt32": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 2147483647
+          },
+          "int64WithMaxInt32": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 2147483647
+          },
+          "intWithSmallRange": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 100,
+            "exclusiveMaximum": true
+          }
+        }
+      }
+    }
+  }
+}`
+
+		cueValue := cuecontext.New().CompileString(boundsSchema)
+		req.NoError(cueValue.Err())
+
+		files, err := TypesFromSchema().
+			CUEValue("sandbox", cueValue).
+			GenerateOpenAPI(OpenAPIGenerationConfig{}).
+			Run(context.Background())
+		req.NoError(err)
+
+		req.Len(files, 1, "expected a single file")
+		testutils.TrimSpacesDiffComparator(t, []byte(expectedBoundsOpenAPI), files[0].Data, "test.json")
+	})
 }
 
 func TestTypesFromSchema_SchemaTransformations(t *testing.T) {

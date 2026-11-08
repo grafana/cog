@@ -170,6 +170,34 @@ ValueMap: {
 	req.Equal(testutils.ObjectsMap(objects...), schemaAst.Objects)
 }
 
+func TestGenerateAST_withRegexConstraint(t *testing.T) {
+	req := require.New(t)
+	schema := `
+PanelRef: {
+	dashboardUID: string & =~ "^[a-zA-Z0-9_-]+$"
+}
+`
+
+	cueVal := cuecontext.New().CompileString(schema)
+
+	schemaAst, err := GenerateAST(cueVal, Config{Package: "grafanatest"})
+	req.NoError(err)
+	require.NotNil(t, schemaAst)
+
+	strType := ir.String()
+	strType.Scalar.Constraints = []ir.TypeConstraint{
+		{Op: ir.RegexMatchOp, Args: []any{"^[a-zA-Z0-9_-]+$"}},
+	}
+
+	objects := []ir.Object{
+		ir.NewObject("grafanatest", "PanelRef", ir.NewStruct(
+			ir.NewStructField("dashboardUID", strType, ir.Required()),
+		)),
+	}
+
+	req.Equal(testutils.ObjectsMap(objects...), schemaAst.Objects)
+}
+
 func txtarTestToCueInstance(tc *testutils.Test[string]) cue.Value {
 	tc.Helper()
 

@@ -1,0 +1,351 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "PositiveInt32": {
+      "Name": "PositiveInt32",
+      "Type": {
+        "Kind": "scalar",
+        "Nullable": false,
+        "Scalar": {
+          "ScalarKind": "int32",
+          "Constraints": [
+            {
+              "Op": "\u003e",
+              "Args": [
+                0
+              ]
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "PositiveInt32"
+      }
+    },
+    "container": {
+      "Name": "container",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "intWithMaxInt32",
+              "Comments": [
+                "Bounds keep the declared width, and are all kept as constraints."
+              ],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e",
+                      "Args": [
+                        0
+                      ]
+                    },
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        2147483647
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "int64WithMaxInt32",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e",
+                      "Args": [
+                        0
+                      ]
+                    },
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        2147483647
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "intWithSmallRange",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e",
+                      "Args": [
+                        0
+                      ]
+                    },
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        100
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "intWithInclusiveRange",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        0
+                      ]
+                    },
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        2147483647
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "intWithDefault",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": 30,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e",
+                      "Args": [
+                        0
+                      ]
+                    },
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        2147483647
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "int64WithDefault",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": 30,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        1
+                      ]
+                    },
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        2147483647
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "int32Positive",
+              "Comments": [
+                "Declared fixed-width types keep their width, without restating its limits."
+              ],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int32",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e",
+                      "Args": [
+                        0
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "int32Range",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int32",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e",
+                      "Args": [
+                        0
+                      ]
+                    },
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        100
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "uint32WithDefault",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": 9,
+                "Scalar": {
+                  "ScalarKind": "uint32",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e",
+                      "Args": [
+                        0
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "int32Ref",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "PositiveInt32"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "int32RefWithBound",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int32",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e",
+                      "Args": [
+                        0
+                      ]
+                    },
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        1000
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "int8OrInt16",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "int8"
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "int16"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "uintWithMax",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        100
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
+      }
+    }
+  }
+}

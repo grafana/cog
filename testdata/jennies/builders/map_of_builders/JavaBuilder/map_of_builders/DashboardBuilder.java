@@ -2,6 +2,8 @@ package map_of_builders;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.LinkedList;
 
 public class DashboardBuilder implements cog.Builder<Dashboard> {
     protected final Dashboard internal;
@@ -16,6 +18,21 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
                 panelsResources.put(entry1.getKey(), panelsDepth1);           
         }
         this.internal.panels = panelsResources;
+        return this;
+    }
+    
+    public DashboardBuilder facets(Map<String, List<cog.Builder<FacetValue>>> facets) {
+        Map<String, List<FacetValue>> facetsResources = new HashMap<>();
+        for (var entry1 : facets.entrySet()) {
+                List<FacetValue> facetsDepth1 = new LinkedList<>();
+                var value1 = entry1.getValue();
+        for (cog.Builder<FacetValue> r2 : value1) {
+                FacetValue facetsDepth2 = r2.build();
+                facetsDepth1.add(facetsDepth2); 
+        }
+                facetsResources.put(entry1.getKey(), facetsDepth1);           
+        }
+        this.internal.facets = facetsResources;
         return this;
     }
     public Dashboard build() {

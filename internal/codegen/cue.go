@@ -61,7 +61,7 @@ type CueInput struct {
 	InlineExternalReference bool `yaml:"-"`
 }
 
-func (input *CueInput) schemaRootValue(ctx context.Context) (cue.Value, []simplecue.LibraryInclude, error) {
+func (input *CueInput) parseRawCue(ctx context.Context) (cogcue.ParseResult, []simplecue.LibraryInclude, error) {
 	cueInput := cogcue.Input{
 		Entrypoint: input.Entrypoint,
 		URL:        input.URL,
@@ -72,7 +72,7 @@ func (input *CueInput) schemaRootValue(ctx context.Context) (cue.Value, []simple
 
 	result, err := cogcue.Parse(ctx, cueInput)
 	if err != nil {
-		return cue.Value{}, nil, err
+		return cogcue.ParseResult{}, nil, err
 	}
 
 	libraries := tools.Map(result.Libraries, func(l cogcue.LibraryInclude) simplecue.LibraryInclude {
@@ -83,7 +83,7 @@ func (input *CueInput) schemaRootValue(ctx context.Context) (cue.Value, []simple
 		input.Package = result.Package
 	}
 
-	return result.Value, libraries, nil
+	return result, libraries, nil
 }
 
 func (input *CueInput) interpolateParameters(interpolator ParametersInterpolator) {
@@ -95,13 +95,14 @@ func (input *CueInput) interpolateParameters(interpolator ParametersInterpolator
 }
 
 func cueLoader(input CueInput) (ir.Schemas, error) {
-	schemaRootValue, libraries, err := input.schemaRootValue(context.Background())
+	parsed, libraries, err := input.parseRawCue(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	schema, err := simplecue.GenerateAST(schemaRootValue, simplecue.Config{
+	schema, err := simplecue.GenerateAST(parsed.Value, simplecue.Config{
 		Package:                 input.Package,
+		SourcePackage:           parsed.Package,
 		ForceNamedEnvelope:      input.ForcedEnvelope,
 		SchemaMetadata:          input.schemaMetadata(),
 		Libraries:               libraries,

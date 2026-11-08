@@ -8,4 +8,11 @@ Dashboard: {
 	panels: {
 		[string]: Panel
 	}
+
+	facets: [string]: [...#FacetValue]
+}
+
+#FacetValue: {
+	value: string
+	count: int64
 }

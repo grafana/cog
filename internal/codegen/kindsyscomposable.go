@@ -11,17 +11,17 @@ import (
 )
 
 func kindsysComposableLoader(input CueInput) (ir.Schemas, error) {
-	schemaRootValue, libraries, err := input.schemaRootValue(context.Background())
+	parsed, libraries, err := input.parseRawCue(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	variant, err := schemaVariant(schemaRootValue)
+	variant, err := schemaVariant(parsed.Value)
 	if err != nil {
 		return nil, err
 	}
 
-	kindIdentifier, err := inferComposableKindIdentifier(schemaRootValue)
+	kindIdentifier, err := inferComposableKindIdentifier(parsed.Value)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func kindsysComposableLoader(input CueInput) (ir.Schemas, error) {
 		forceNamedEnvelope = string(variant)
 	}
 
-	schema, err := simplecue.GenerateAST(schemaFromThemaLineage(schemaRootValue), simplecue.Config{
+	schema, err := simplecue.GenerateAST(schemaFromThemaLineage(parsed.Value), simplecue.Config{
 		Package:            input.Package,
 		ForceNamedEnvelope: forceNamedEnvelope,
 		SchemaMetadata: ir.SchemaMeta{

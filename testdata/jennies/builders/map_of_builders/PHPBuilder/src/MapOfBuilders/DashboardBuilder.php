@@ -37,4 +37,23 @@ class DashboardBuilder implements \Grafana\Foundation\Cog\Builder
         return $this;
     }
 
+    /**
+     * @param array<string, array<\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\MapOfBuilders\FacetValue>>> $facets
+     */
+    public function facets(array $facets): static
+    {
+            $facetsResources = [];
+            foreach ($facets as $key1 => $val1) {
+                    $facetsDepth1 = [];
+            foreach ($val1 as $r2) {
+                    $facetsDepth1[] = $r2->build();
+            }
+    
+                    $facetsResources[$key1] = $facetsDepth1;
+            }
+        $this->internal->facets = $facetsResources;
+    
+        return $this;
+    }
+
 }

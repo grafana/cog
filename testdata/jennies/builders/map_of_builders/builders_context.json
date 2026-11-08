@@ -2,9 +2,7 @@
   "Schemas": [
     {
       "Package": "map_of_builders",
-      "Metadata": {
-        "Kind": "core"
-      },
+      "Metadata": {},
       "EntryPointType": {
         "Kind": "",
         "Nullable": false
@@ -67,6 +65,37 @@
                     }
                   },
                   "Required": true
+                },
+                {
+                  "Name": "facets",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "array",
+                        "Nullable": false,
+                        "Array": {
+                          "ValueType": {
+                            "Kind": "ref",
+                            "Nullable": false,
+                            "Ref": {
+                              "ReferredPkg": "map_of_builders",
+                              "ReferredType": "FacetValue"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
                 }
               ]
             }
@@ -74,6 +103,43 @@
           "SelfRef": {
             "ReferredPkg": "map_of_builders",
             "ReferredType": "Dashboard"
+          }
+        },
+        "FacetValue": {
+          "Name": "FacetValue",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "value",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "count",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "map_of_builders",
+            "ReferredType": "FacetValue"
           }
         }
       }
@@ -130,6 +196,7 @@
               "Path": [
                 {
                   "Identifier": "title",
+                  "Index": null,
                   "Type": {
                     "Kind": "scalar",
                     "Nullable": false,
@@ -156,7 +223,8 @@
             }
           ]
         }
-      ]
+      ],
+      "AssignmentsPreferredRoot": null
     },
     {
       "For": {
@@ -185,6 +253,37 @@
                       "Ref": {
                         "ReferredPkg": "map_of_builders",
                         "ReferredType": "Panel"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "facets",
+                "Type": {
+                  "Kind": "map",
+                  "Nullable": false,
+                  "Map": {
+                    "IndexType": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "ValueType": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "ref",
+                          "Nullable": false,
+                          "Ref": {
+                            "ReferredPkg": "map_of_builders",
+                            "ReferredType": "FacetValue"
+                          }
+                        }
                       }
                     }
                   }
@@ -236,6 +335,7 @@
               "Path": [
                 {
                   "Identifier": "panels",
+                  "Index": null,
                   "Type": {
                     "Kind": "map",
                     "Nullable": false,
@@ -289,8 +389,255 @@
               "Method": "direct"
             }
           ]
+        },
+        {
+          "Name": "facets",
+          "Args": [
+            {
+              "Name": "facets",
+              "Type": {
+                "Kind": "map",
+                "Nullable": false,
+                "Map": {
+                  "IndexType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "map_of_builders",
+                          "ReferredType": "FacetValue"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "facets",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "array",
+                        "Nullable": false,
+                        "Array": {
+                          "ValueType": {
+                            "Kind": "ref",
+                            "Nullable": false,
+                            "Ref": {
+                              "ReferredPkg": "map_of_builders",
+                              "ReferredType": "FacetValue"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "facets",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "array",
+                        "Nullable": false,
+                        "Array": {
+                          "ValueType": {
+                            "Kind": "ref",
+                            "Nullable": false,
+                            "Ref": {
+                              "ReferredPkg": "map_of_builders",
+                              "ReferredType": "FacetValue"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
         }
-      ]
+      ],
+      "AssignmentsPreferredRoot": null
+    },
+    {
+      "For": {
+        "Name": "FacetValue",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "value",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "count",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "int64"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "map_of_builders",
+          "ReferredType": "FacetValue"
+        }
+      },
+      "Package": "map_of_builders",
+      "Name": "FacetValue",
+      "Constructor": {},
+      "Options": [
+        {
+          "Name": "value",
+          "Args": [
+            {
+              "Name": "value",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "value",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "value",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        },
+        {
+          "Name": "count",
+          "Args": [
+            {
+              "Name": "count",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "count",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "count",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        }
+      ],
+      "AssignmentsPreferredRoot": null
     }
-  ]
+  ],
+  "ConverterConfig": {
+    "RuntimeConfig": []
+  }
 }
