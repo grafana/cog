@@ -158,41 +158,41 @@
         }
       }
     },
-    "php83Packages.composer@2.10.3": {
-      "last_modified": "2026-10-24T03:22:33Z",
-      "resolved": "github:NixOS/nixpkgs/674a2028661e550a97400c1cc992b9cca9a668a1#php83Packages.composer",
+    "php83Packages.composer@2.11.1": {
+      "last_modified": "2026-11-06T15:06:19Z",
+      "resolved": "github:NixOS/nixpkgs/4fe25e12eb9f4c744966dd3de5a05246cf098601#php83Packages.composer",
       "source": "devbox-search",
-      "version": "2.10.3",
+      "version": "2.11.1",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/i3bhk94dx6n55fgwymy3pb4xsdaw7shp-composer-2.10.3",
+              "path": "/nix/store/jhjx8ihjrijkdhi0xjr79chz74w9pij5-composer-2.11.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/i3bhk94dx6n55fgwymy3pb4xsdaw7shp-composer-2.10.3"
+          "store_path": "/nix/store/jhjx8ihjrijkdhi0xjr79chz74w9pij5-composer-2.11.1"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/mvvx4c8plyzv0nnqmq4hhaf6b0ymkw18-composer-2.10.3",
+              "path": "/nix/store/gsl0v2v6q0wczd8bch0hv24bjm96r36i-composer-2.11.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/mvvx4c8plyzv0nnqmq4hhaf6b0ymkw18-composer-2.10.3"
+          "store_path": "/nix/store/gsl0v2v6q0wczd8bch0hv24bjm96r36i-composer-2.11.1"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/dwn776jfi5f4xdzm48q061v71b7jvixh-composer-2.10.3",
+              "path": "/nix/store/qw27jiviq3kivmagwxh40jl4zp522p35-composer-2.11.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/dwn776jfi5f4xdzm48q061v71b7jvixh-composer-2.10.3"
+          "store_path": "/nix/store/qw27jiviq3kivmagwxh40jl4zp522p35-composer-2.11.1"
         }
       }
     },
