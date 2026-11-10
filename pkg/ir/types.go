@@ -895,11 +895,19 @@ func (t MapType) DeepCopy() MapType {
 
 type StructType struct {
 	Fields []StructField
+	// AdditionalProperties is the type of the values of keys that are not declared in Fields.
+	// If it is nil, the struct accepts no other keys.
+	AdditionalProperties *Type `json:",omitempty"`
 }
 
 func (structType StructType) DeepCopy() StructType {
 	newT := StructType{
 		Fields: make([]StructField, 0, len(structType.Fields)),
+	}
+
+	if structType.AdditionalProperties != nil {
+		additional := structType.AdditionalProperties.DeepCopy()
+		newT.AdditionalProperties = &additional
 	}
 
 	for _, field := range structType.Fields {

@@ -396,6 +396,15 @@ func (g *generator) declareNode(v cue.Value) (ir.Type, error) {
 		def.Hints = hints
 		def.Default = defVal
 
+		// { field: type, [string]: type }
+		if anyString := evaluated.LookupPath(cue.MakePath(cue.AnyString)); anyString.Exists() {
+			additional, err := g.declareNode(anyString)
+			if err != nil {
+				return ir.Type{}, err
+			}
+			def.Struct.AdditionalProperties = &additional
+		}
+
 		return def, nil
 	default:
 		return ir.Type{}, errorWithCueRef(v, "unexpected node with kind '%s'", v.IncompleteKind().String())

@@ -63,10 +63,10 @@ func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context 
 }
 
 func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ir.Object) bool {
-	// the only case for which we need a custom marshaller is for structs
-	// that are generated from a disjunction by the `DisjunctionToType` compiler pass.
+	// we need a custom marshaller for structs that are generated from a disjunction
+	// by the `DisjunctionToType` compiler pass, and for structs with additional properties.
 
-	return obj.Type.IsDisjunctionOfAnyKind()
+	return obj.Type.IsDisjunctionOfAnyKind() || hasAdditionalProperties(obj)
 }
 
 func (jenny JSONMarshalling) renderCustomMarshal(obj ir.Object) (string, error) {
@@ -106,6 +106,12 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ir.Object) (string, error) 
 		})
 	}
 
+	if hasAdditionalProperties(obj) {
+		return jenny.tmpl.Render("types/struct_with_additional_properties.json_marshal.tmpl", map[string]any{
+			"def": obj,
+		})
+	}
+
 	return "", fmt.Errorf("could not determine how to render custom marshal")
 }
 
@@ -125,6 +131,10 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 
 	// is it a struct generated from a disjunction?
 	if obj.Type.IsDisjunctionOfAnyKind() {
+		return true
+	}
+
+	if hasAdditionalProperties(obj) {
 		return true
 	}
 
@@ -178,6 +188,12 @@ func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, ob
 
 	if obj.Type.IsStruct() && obj.Type.HasHint(ir.HintUndiscriminatedDisjunctionOfRefs) {
 		return jenny.tmpl.Render("types/disjunction_of_refs_without_discriminator.json_unmarshal.tmpl", map[string]any{
+			"def": obj,
+		})
+	}
+
+	if hasAdditionalProperties(obj) {
+		return jenny.tmpl.Render("types/struct_with_additional_properties.json_unmarshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
@@ -241,4 +257,8 @@ func (resource *%[1]s) UnmarshalJSON(raw []byte) error {
 	return nil
 }
 `, formatObjectName(obj.Name), buffer.String()), nil
+}
+
+func hasAdditionalProperties(obj ir.Object) bool {
+	return obj.Type.IsStruct() && obj.Type.AsStruct().AdditionalProperties != nil
 }

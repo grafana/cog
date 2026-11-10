@@ -197,6 +197,12 @@ func (formatter *typeFormatter) formatStructBody(def ir.StructType) string {
 		}
 	}
 
+	if def.AdditionalProperties != nil {
+		fmt.Fprintf(&buffer, "\n    // AdditionalProperties holds the keys that are not declared fields.\n    AdditionalProperties map[string]%s `json:\"-\"`",
+			formatter.doFormatType(*def.AdditionalProperties, false),
+		)
+	}
+
 	buffer.WriteString("\n}")
 
 	return buffer.String()

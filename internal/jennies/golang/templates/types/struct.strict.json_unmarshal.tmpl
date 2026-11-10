@@ -38,10 +38,24 @@ func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte
 	}
 	{{- end }}
 
+	{{- if .def.Type.Struct.AdditionalProperties }}
+	for field, value := range fields {
+		var item {{ formatType .def.Type.Struct.AdditionalProperties }}
+		if err := json.Unmarshal(value, &item); err != nil {
+			errs = append(errs, cog.MakeBuildErrors(field, err)...)
+			continue
+		}
+		if resource.AdditionalProperties == nil {
+			resource.AdditionalProperties = make(map[string]{{ formatType .def.Type.Struct.AdditionalProperties }})
+		}
+		resource.AdditionalProperties[field] = item
+	}
+	{{- else }}
 	{{ $fmt := importStdPkg "fmt" -}}
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("{{ .def.Name|formatObjectName }}", fmt.Errorf("unexpected field '%s'", field))...)
 	}
+	{{- end }}
 
 	return errs
 }

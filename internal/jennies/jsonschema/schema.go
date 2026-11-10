@@ -270,6 +270,13 @@ func (jenny Schema) formatStruct(typeDef ir.Type) Definition {
 			definition.Set("additionalProperties", map[string]any{})
 		}
 	}
+	if additional := typeDef.AsStruct().AdditionalProperties; additional != nil {
+		if jenny.OpenAPI3Compatible && additional.IsAny() {
+			definition.Set("additionalProperties", true)
+		} else {
+			definition.Set("additionalProperties", jenny.formatType(*additional))
+		}
+	}
 
 	properties := orderedmap.New[string, any]()
 	var required []string

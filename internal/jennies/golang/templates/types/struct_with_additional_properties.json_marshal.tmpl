@@ -1,0 +1,26 @@
+{{- $json := importStdPkg "encoding/json" -}}
+// MarshalJSON implements a custom JSON marshalling logic to encode `{{ .def.Name|formatObjectName }}` as JSON.
+func (resource {{ .def.Name|formatObjectName }}) MarshalJSON() ([]byte, error) {
+	type alias {{ .def.Name|formatObjectName }}
+	raw, err := json.Marshal(alias(resource))
+	if err != nil || len(resource.AdditionalProperties) == 0 {
+		return raw, err
+	}
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return nil, err
+	}
+	for key, value := range resource.AdditionalProperties {
+		if _, ok := fields[key]; ok {
+			continue
+		}
+		encoded, err := json.Marshal(value)
+		if err != nil {
+			return nil, err
+		}
+		fields[key] = encoded
+	}
+
+	return json.Marshal(fields)
+}
