@@ -158,41 +158,41 @@
         }
       }
     },
-    "php83Packages.composer@2.10.3": {
-      "last_modified": "2026-10-24T03:22:33Z",
-      "resolved": "github:NixOS/nixpkgs/674a2028661e550a97400c1cc992b9cca9a668a1#php83Packages.composer",
+    "php83Packages.composer@2.11.1": {
+      "last_modified": "2026-11-12T14:50:34Z",
+      "resolved": "github:NixOS/nixpkgs/2074cc672349f14240fb7ea90d509e0b643e9dd4#php83Packages.composer",
       "source": "devbox-search",
-      "version": "2.10.3",
+      "version": "2.11.1",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/i3bhk94dx6n55fgwymy3pb4xsdaw7shp-composer-2.10.3",
+              "path": "/nix/store/56lrg9p2ja66152l25alj6ka14xxkd81-composer-2.11.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/i3bhk94dx6n55fgwymy3pb4xsdaw7shp-composer-2.10.3"
+          "store_path": "/nix/store/56lrg9p2ja66152l25alj6ka14xxkd81-composer-2.11.1"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/mvvx4c8plyzv0nnqmq4hhaf6b0ymkw18-composer-2.10.3",
+              "path": "/nix/store/v5ajqcgcbyhinr5c7f17prd9jz3xik9r-composer-2.11.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/mvvx4c8plyzv0nnqmq4hhaf6b0ymkw18-composer-2.10.3"
+          "store_path": "/nix/store/v5ajqcgcbyhinr5c7f17prd9jz3xik9r-composer-2.11.1"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/dwn776jfi5f4xdzm48q061v71b7jvixh-composer-2.10.3",
+              "path": "/nix/store/6cx91jkjfvz75s3crinv3sy6z77ah3bs-composer-2.11.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/dwn776jfi5f4xdzm48q061v71b7jvixh-composer-2.10.3"
+          "store_path": "/nix/store/6cx91jkjfvz75s3crinv3sy6z77ah3bs-composer-2.11.1"
         }
       }
     },
